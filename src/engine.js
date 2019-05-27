@@ -88,6 +88,9 @@ async function main() {
     await drawImage(path.resolve(dataFolder, overlay.coin_icon.img),
         overlay.coin_icon.x,
         overlay.coin_icon.y);
+    await drawImage(path.resolve(dataFolder, "flags", `${user.region}.png`),
+        overlay.flag.x,
+        overlay.flag.y);
     drawText(overlay.username.font_family,
         overlay.username.font_size,
         overlay.username.font_style,
@@ -95,6 +98,13 @@ async function main() {
         user.name,
         overlay.username.x,
         overlay.username.y);
+    drawText(overlay.coin_count.font_family,
+        overlay.coin_count.font_size,
+        overlay.coin_count.font_style,
+        overlay.coin_count.font_color,
+        user.coins,
+        overlay.coin_count.x,
+        overlay.coin_count.y);
     for (var game of user.games) {
         await drawGameCover(game);
     }
