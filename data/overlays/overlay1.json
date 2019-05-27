@@ -1,0 +1,42 @@
+{
+    "name": "Modern",
+    "author": "dhtdht020",
+    "overlay_img": "img/overlay1.png",
+    "max_covers": 8,
+    "cover_start_x": 80,
+    "cover_start_y": 110,
+    "cover_increment_x": 80,
+    "cover_increment_y": 0,
+    "username": {
+        "font_family": "rodin",
+        "font_size": 48,
+        "font_style": "normal",
+        "font_color": "#FFFFFF",
+        "x": 48,
+        "y": 14
+    },
+    "flag": {
+        "x": 15,
+        "y": 10
+    },
+    "coin_icon": {
+        "x": 0,
+        "y": 0
+    },
+    "coin_count": {
+        "font_family": "rodin",
+        "font_size": 48,
+        "font_style": "normal",
+        "x": 0,
+        "y": 0,
+        "padded": true,
+        "max": 99999
+    },
+    "friend_code": {
+        "font_family": "rodin",
+        "font_size": 48,
+        "font_style": "normal",
+        "x": 0,
+        "y": 0
+    }
+}
