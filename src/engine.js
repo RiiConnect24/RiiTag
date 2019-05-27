@@ -48,7 +48,7 @@ async function drawImage(source, x=0, y=0) {
     var img = new Image();
     return new Promise(function(resolve, reject) {
         img.onload = function() {
-            resolve();
+            resolve(img);
         }
         img.onerror = function(err) {
             reject(err);
@@ -61,14 +61,21 @@ async function drawImage(source, x=0, y=0) {
     });
 }
 
+async function cacheGameCover(game, region="US") {
+    var can = new Canvas.Canvas(176, 248);
+    var con = can.getContext("2d");
+    var img = new Image()
+}
+
 async function drawGameCover(game, region="US") {
     await drawImage(`https://art.gametdb.com/wii/cover3D/${region}/${game}.png`, covCurX, covCurY);
+    console.log(game);
     covCurX += covIncX;
     covCurY += covIncY;
 }
 
-function savePNG() {
-    canvas.createPNGStream().pipe(fs.createWriteStream(outpath));
+function savePNG(out) {
+    canvas.createPNGStream().pipe(fs.createWriteStream(out));
 }
 
 var user = loadUser("user1.json");
@@ -78,6 +85,9 @@ var overlay = loadOverlay(user.overlay);
 async function main() {
     await drawImage(path.resolve(dataFolder, user.bg));
     await drawImage(path.resolve(dataFolder, overlay.overlay_img));
+    await drawImage(path.resolve(dataFolder, overlay.coin_icon.img),
+        overlay.coin_icon.x,
+        overlay.coin_icon.y);
     drawText(overlay.username.font_family,
         overlay.username.font_size,
         overlay.username.font_style,
@@ -85,7 +95,10 @@ async function main() {
         user.name,
         overlay.username.x,
         overlay.username.y);
-    savePNG();
+    for (var game of user.games) {
+        await drawGameCover(game);
+    }
+    savePNG(outpath);
 }
 
 main();
