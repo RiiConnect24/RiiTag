@@ -1,0 +1,22 @@
+{
+  "name": "rc24-tag",
+  "version": "0.0.1",
+  "description": "Tag generation for RC24",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bennyman123abc/rc24-tag.git"
+  },
+  "keywords": [
+    "rc24"
+  ],
+  "author": "bendevnull",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/bennyman123abc/rc24-tag/issues"
+  },
+  "homepage": "https://github.com/bennyman123abc/rc24-tag#readme"
+}
