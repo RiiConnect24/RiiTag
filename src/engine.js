@@ -9,8 +9,8 @@ const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
 const games = ["RSPE01", "RPOEC8", "RB7E54", "RSNE69"]; // debug variable
 
-const canvas = new Canvas.Canvas(1200, 450);
-const ctx = canvas.getContext("2d");
+var canvas;
+var ctx;
 
 var covStartX;
 var covStartY;
@@ -19,6 +19,13 @@ var covIncY;
 
 var covCurX;
 var covCurY;
+
+loadFonts().then(function() {
+    console.log("Finished");
+    canvas = new Canvas.Canvas(1200, 450);
+    ctx = canvas.getContext("2d");
+    main();
+});
 
 function loadOverlay(file) {
     var overlay = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "overlays", file)));
@@ -39,6 +46,7 @@ function loadUser(file) {
 }
 
 function drawText(font, size, style, color, text, x, y) {
+    console.log(`${style} ${size}px ${font}`);
     ctx.font = `${style} ${size}px ${font}`;
     ctx.fillStyle = color;
     ctx.fillText(text, size + x, size + y);
@@ -58,7 +66,7 @@ async function getImage(source) {
 }
 
 async function drawImage(source, x=0, y=0) {
-    console.log(source);
+    // console.log(source);
     getImage(source).then(function(img) {
         ctx.drawImage(img, x, y);
     }).catch(function(err) {
@@ -91,22 +99,36 @@ async function drawGameCover(game, region="US") {
 async function savePNG(out, c) {
     return new Promise(function(resolve) {
         c.createPNGStream().pipe(fs.createWriteStream(out)).on("close", function() {
-            console.log("File written");
+            // console.log("File written");
             resolve();
         });
     });
 }
 
-function loadFont(file) {
+async function loadFont(file) {
     var font = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "fonts", file)));
     
+    return new Promise(function(resolve) {
+        for (var style of font.styles) {
+            Canvas.registerFont(path.resolve(dataFolder, "fontfiles", style.file),
+                {
+                    family: font.family,
+                    weight: style.weight,
+                    style: style.style
+                }
+            );
+            console.log("Loaded font");
+            resolve();
+        }
+    });
 }
 
-function loadFonts() {
-
+async function loadFonts() {
+    for (var font of fs.readdirSync(path.resolve(dataFolder, "fonts"))) {
+        await loadFont(font);
+    }
 }
 
-loadFonts();
 var user = loadUser("user1.json");
 var overlay = loadOverlay(user.overlay);
 
@@ -150,5 +172,3 @@ async function main() {
     }
     savePNG(outpath, canvas);
 }
-
-main();
