@@ -4,7 +4,7 @@
     "coins": 1483,
     "friend_code": "0000 0000 0000 0000",
     "region": "us",
-    "overlay": "overlay1.json",
-    "bg": "img/1200x450/mario15.png",
+    "overlay": "overlay4.json",
+    "bg": "img/1200x450/warioware4.png",
     "sort": "most_played"
 }

@@ -1,13 +1,13 @@
 {
-    "name": "Modern",
-    "author": "dhtdht020",
+    "name": "Inverse Modern",
+    "author": "dhtdht020 and bendevnull",
     "width": 1200,
     "height": 450,
     "overlay_img": "img/overlay1.png",
     "max_covers": 8,
-    "cover_start_x": 80,
+    "cover_start_x": 944,
     "cover_start_y": 110,
-    "cover_increment_x": 120,
+    "cover_increment_x": -120,
     "cover_increment_y": 0,
     "username": {
         "font_family": "RodinNTLG",

@@ -34,7 +34,7 @@
         "x": 860,
         "y": 2,
         "padded": true,
-        "max": 99999
+        "max": 999
     },
     "friend_code": {
         "font_family": "rodin",
