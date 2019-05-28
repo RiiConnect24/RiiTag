@@ -30,7 +30,7 @@
         "font_family": "rodin",
         "font_size": 45,
         "font_style": "normal",
-        "font_color": "#FFFFFF",
+        "font_color": "#000000",
         "x": 860,
         "y": 2,
         "padded": true,
