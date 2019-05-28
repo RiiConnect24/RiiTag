@@ -1,10 +1,10 @@
 {
     "name": "Modern",
     "author": "dhtdht020",
-    "overlay_img": "img/overlay1.png",
-    "max_covers": 8,
     "width": 1200,
     "height": 450,
+    "overlay_img": "img/overlay1.png",
+    "max_covers": 8,
     "cover_start_x": 80,
     "cover_start_y": 110,
     "cover_increment_x": 120,

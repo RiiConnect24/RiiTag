@@ -3,7 +3,7 @@
     "author": "Larsenv",
     "width": 1050,
     "height": 60,
-    "overlay_img": "",
+    "overlay_img": "img/overlay3.png",
     "max_covers": 0,
     "cover_start_x": 0,
     "cover_start_y": 0,
@@ -28,11 +28,11 @@
     },
     "coin_count": {
         "font_family": "rodin",
-        "font_size": 48,
+        "font_size": 45,
         "font_style": "normal",
         "font_color": "#FFFFFF",
-        "x": 850,
-        "y": 0,
+        "x": 860,
+        "y": 2,
         "padded": true,
         "max": 99999
     },
