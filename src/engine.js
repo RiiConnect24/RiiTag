@@ -9,9 +9,6 @@ const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
 const games = ["RSPE01", "RPOEC8", "RB7E54", "RSNE69"]; // debug variable
 
-const canvas = new Canvas.Canvas(1200, 450);
-const ctx = canvas.getContext("2d");
-
 var covStartX;
 var covStartY;
 var covIncX;
@@ -19,6 +16,9 @@ var covIncY;
 
 var covCurX;
 var covCurY;
+
+var width;
+var height;
 
 function loadOverlay(file) {
     var overlay = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "overlays", file)));
@@ -31,6 +31,9 @@ function loadOverlay(file) {
     covCurX = covStartX;
     covCurY = covStartY;
 
+    width = overlay.width;
+    height = overlay.height;
+    
     return overlay;
 }
 
@@ -109,6 +112,9 @@ function loadFonts() {
 loadFonts();
 var user = loadUser("user1.json");
 var overlay = loadOverlay(user.overlay);
+
+const canvas = new Canvas.Canvas(width, height);
+const ctx = canvas.getContext("2d");
 
 // console.log(overlay);
 async function main() {
