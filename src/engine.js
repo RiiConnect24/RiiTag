@@ -44,7 +44,7 @@ function drawText(font, size, style, color, text, x, y) {
     ctx.fillText(text, size + x, size + y);
 }
 
-async function drawImage(source, x=0, y=0) {
+async function getImage(source) {
     var img = new Image();
     return new Promise(function(resolve, reject) {
         img.onload = function() {
@@ -54,35 +54,65 @@ async function drawImage(source, x=0, y=0) {
             reject(err);
         }
         img.src = source;
-    }).then(function() {
+    });
+}
+
+async function drawImage(source, x=0, y=0) {
+    console.log(source);
+    getImage(source).then(function(img) {
         ctx.drawImage(img, x, y);
     }).catch(function(err) {
         console.error(err);
     });
 }
 
-async function cacheGameCover(game, region="US") {
+async function cacheGameCover(game, region) {
+    if (!fs.existsSync(path.resolve(dataFolder, "cache"))) {
+        fs.mkdirSync(path.resolve(dataFolder, "cache"));
+    }
+    if (fs.existsSync(path.resolve(dataFolder, "cache", `${game}.png`))) {
+        return;
+    }
     var can = new Canvas.Canvas(176, 248);
     var con = can.getContext("2d");
-    var img = new Image()
+    var img = await getImage(`https://art.gametdb.com/wii/cover3D/${region}/${game}.png`);
+    con.drawImage(img, 0, 0, 176, 248);
+    await savePNG(path.resolve(dataFolder, "cache", `${game}.png`), can);
 }
 
 async function drawGameCover(game, region="US") {
-    await drawImage(`https://art.gametdb.com/wii/cover3D/${region}/${game}.png`, covCurX, covCurY);
+    await cacheGameCover(game, region);
+    await drawImage(path.resolve(dataFolder, "cache", `${game}.png`), covCurX, covCurY);
     console.log(game);
     covCurX += covIncX;
     covCurY += covIncY;
 }
 
-function savePNG(out) {
-    canvas.createPNGStream().pipe(fs.createWriteStream(out));
+async function savePNG(out, c) {
+    return new Promise(function(resolve) {
+        c.createPNGStream().pipe(fs.createWriteStream(out)).on("close", function() {
+            console.log("File written");
+            resolve();
+        });
+    });
 }
 
+function loadFont(file) {
+    var font = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "fonts", file)));
+    
+}
+
+function loadFonts() {
+
+}
+
+loadFonts();
 var user = loadUser("user1.json");
 var overlay = loadOverlay(user.overlay);
 
 // console.log(overlay);
 async function main() {
+    var i = 0;
     await drawImage(path.resolve(dataFolder, user.bg));
     await drawImage(path.resolve(dataFolder, overlay.overlay_img));
     await drawImage(path.resolve(dataFolder, overlay.coin_icon.img),
@@ -105,10 +135,20 @@ async function main() {
         user.coins,
         overlay.coin_count.x,
         overlay.coin_count.y);
+    drawText(overlay.friend_code.font_family,
+        overlay.friend_code.font_size,
+        overlay.friend_code.font_style,
+        overlay.friend_code.font_color,
+        user.friend_code,
+        overlay.friend_code.x,
+        overlay.friend_code.y);
     for (var game of user.games) {
-        await drawGameCover(game);
+        if (i < overlay.max_covers) {    
+            await drawGameCover(game);
+            i++;
+        }
     }
-    savePNG(outpath);
+    savePNG(outpath, canvas);
 }
 
 main();

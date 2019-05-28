@@ -1,9 +1,10 @@
 {
-    "name": "Larsenv",
-    "games": [],
+    "name": "bendevnull",
+    "games": ["RSPE01", "RPOEC8", "RB7E54", "RSNE69", "GMSE01", "R64E01", "GMBE8P", "RMCE01", "HAPE"],
     "coins": 1483,
     "friend_code": "0000 0000 0000 0000",
     "region": "us",
     "overlay": "overlay1.json",
-    "bg": "img/1200x450/wii1.png"
+    "bg": "img/1200x450/mario15.png",
+    "sort": "most_played"
 }

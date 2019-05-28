@@ -38,7 +38,8 @@
         "font_family": "rodin",
         "font_size": 48,
         "font_style": "normal",
-        "x": 0,
-        "y": 0
+        "font_color": "#FFFFFF",
+        "x": 672,
+        "y": 380
     }
 }
