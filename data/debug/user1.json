@@ -1,9 +1,9 @@
 {
-    "name": "bendevnull",
-    "games": ["RSPE01", "RPOEC8", "RB7E54", "RSNE69", "GMSE01"],
-    "coins": 0,
+    "name": "Larsenv",
+    "games": [],
+    "coins": 1483,
     "friend_code": "0000 0000 0000 0000",
-    "region": "aq",
+    "region": "us",
     "overlay": "overlay1.json",
-    "bg": "img/bg1.png"
+    "bg": "img/1200x450/wii1.png"
 }
