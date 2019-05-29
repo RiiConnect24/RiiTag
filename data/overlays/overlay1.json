@@ -31,8 +31,8 @@
         "font_size": 48,
         "font_style": "bold",
         "font_color": "#1d1d1d",
-        "x": 902,
-        "y": 16,
+        "x": 903,
+        "y": 18,
         "padded": true,
         "max": 9999999
     },

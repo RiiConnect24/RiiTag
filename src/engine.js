@@ -74,6 +74,20 @@ async function drawImage(source, x=0, y=0) {
     });
 }
 
+function getGameRegion(game) {
+    var chars = game.split();
+    var rc = chars[3];
+    if (rc == "E") {
+        return "US";
+    } else if (rc == "P") {
+        return "EN";
+    } else if (rc == "J") {
+        return "JA";
+    } else {
+        return "US";
+    }
+}
+
 async function cacheGameCover(game, region) {
     if (!fs.existsSync(path.resolve(dataFolder, "cache"))) {
         fs.mkdirSync(path.resolve(dataFolder, "cache"));
@@ -88,11 +102,8 @@ async function cacheGameCover(game, region) {
     await savePNG(path.resolve(dataFolder, "cache", `${game}.png`), can);
 }
 
-async function drawGameCover(game, region="US") {
-    if (user.sort.toLowerCase() == "none") {
-        return;
-    }
-    await cacheGameCover(game, region);
+async function drawGameCover(game) {
+    await cacheGameCover(game, getGameRegion(game));
     await drawImage(path.resolve(dataFolder, "cache", `${game}.png`), covCurX, covCurY);
     console.log(game);
     covCurX += covIncX;
@@ -167,10 +178,13 @@ async function main() {
         user.friend_code,
         overlay.friend_code.x,
         overlay.friend_code.y);
-    for (var game of user.games) {
-        if (i < overlay.max_covers) {    
-            await drawGameCover(game);
-            i++;
+
+    if (user.sort.toLowerCase() != "none") {
+        for (var game of user.games) {
+            if (i < overlay.max_covers) {    
+                await drawGameCover(game);
+                i++;
+            }
         }
     }
     savePNG(outpath, canvas);
