@@ -1,10 +1,10 @@
 {
     "name": "bendevnull",
-    "games": ["RSPE01", "RPOEC8", "RB7E54", "RSNE69", "GMSE01", "R64E01", "GMBE8P", "RMCE01", "HAPE"],
-    "coins": 1483,
-    "friend_code": "0000 0000 0000 0000",
+    "games": ["RSPE01", "GMSE01", "R64E01", "GMBE8P", "RMCE01"],
+    "coins": 9999999,
+    "friend_code": "7457 8523 6283 1041",
     "region": "us",
-    "overlay": "overlay4.json",
-    "bg": "img/1200x450/warioware4.png",
-    "sort": "most_played"
+    "overlay": "overlay1.json",
+    "bg": "img/1200x450/mario13.png",
+    "sort": "none"
 }

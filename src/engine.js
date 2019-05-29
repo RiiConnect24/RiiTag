@@ -89,6 +89,9 @@ async function cacheGameCover(game, region) {
 }
 
 async function drawGameCover(game, region="US") {
+    if (user.sort.toLowerCase() == "none") {
+        return;
+    }
     await cacheGameCover(game, region);
     await drawImage(path.resolve(dataFolder, "cache", `${game}.png`), covCurX, covCurY);
     console.log(game);

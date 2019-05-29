@@ -13,7 +13,7 @@
         "font_family": "RodinNTLG",
         "font_size": 48,
         "font_style": "normal",
-        "font_color": "#FFFFFF",
+        "font_color": "#ffffff",
         "x": 48,
         "y": 14
     },
@@ -27,21 +27,21 @@
         "y": 10
     },
     "coin_count": {
-        "font_family": "NintendoU",
+        "font_family": "RodinNTLG",
         "font_size": 48,
-        "font_style": "normal",
-        "font_color": "#000000",
-        "x": 900,
+        "font_style": "bold",
+        "font_color": "#1d1d1d",
+        "x": 902,
         "y": 16,
         "padded": true,
-        "max": 99999
+        "max": 9999999
     },
     "friend_code": {
         "font_family": "RodinNTLG",
-        "font_size": 48,
+        "font_size": 36,
         "font_style": "normal",
-        "font_color": "#FFFFFF",
-        "x": -25,
-        "y": 380
+        "font_color": "#ffffff",
+        "x": -13,
+        "y": 387
     }
 }
