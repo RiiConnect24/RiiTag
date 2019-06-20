@@ -16,9 +16,12 @@ var covStartX;
 var covStartY;
 var covIncX;
 var covIncY;
+var covShrink;
 
 var covCurX;
 var covCurY;
+var covShrinkCurWidth;
+var covShrinkCurHeight;
 
 loadFonts().then(function() {
     console.log("Finished");
@@ -34,9 +37,12 @@ function loadOverlay(file) {
     covStartY = overlay.cover_start_y;
     covIncX = overlay.cover_increment_x;
     covIncY = overlay.cover_increment_y;
+    covShrink = overlay.cover_increment_shrink;
 
     covCurX = covStartX;
     covCurY = covStartY;
+    covShrinkCurWidth = overlay.cover_width;
+    covShrinkCurHeight = overlay.cover_height;
 
     return overlay;
 }
@@ -74,6 +80,15 @@ async function drawImage(source, x=0, y=0) {
     });
 }
 
+async function drawImageShrink(source, x=0, y=0, shrinkx=0, shrinky=0) {
+    // console.log(source);
+    getImage(source).then(function(img) {
+        ctx.drawImage(img, x, y, shrinkx, shrinky);
+    }).catch(function(err) {
+        console.error(err);
+    });
+}
+
 function getGameRegion(game) {
     var chars = game.split();
     var rc = chars[3];
@@ -104,7 +119,18 @@ async function cacheGameCover(game, region) {
 
 async function drawGameCover(game) {
     await cacheGameCover(game, getGameRegion(game));
-    await drawImage(path.resolve(dataFolder, "cache", `${game}.png`), covCurX, covCurY);
+    covShrinkCurWidth -= covShrink;
+    covShrinkCurHeight -= Math.round(covShrink * 1.409);
+    console.log(covShrinkCurWidth);
+    console.log(covShrinkCurHeight);
+    if (covShrink == 0)
+    {
+        await drawImage(path.resolve(dataFolder, "cache", `${game}.png`), covCurX, covCurY);
+    }
+    else if (covShrink > 0)
+    {
+        await drawImageShrink(path.resolve(dataFolder, "cache", `${game}.png`), covCurX, covCurY, covShrinkCurWidth, covShrinkCurHeight);
+    }
     console.log(game);
     covCurX += covIncX;
     covCurY += covIncY;
