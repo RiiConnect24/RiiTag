@@ -8,35 +8,21 @@ const dataFolder = path.resolve(__dirname, "..", "data");
 const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
 class Tag {
-    canvas;
-    ctx;
-
-    overlay;
-    user;
-
-    covStartX;
-    covStartY;
-    covIncX;
-    covIncY;
-
-    covCurX;
-    covCurY;
-
-    banner;
 
     constructor(user) {
         this.user = this.loadUser(user);
         this.overlay = this.loadOverlay(this.user.overlay);
 
         this.loadFonts().then(function() {
-            this.canvas = new Canvas.Canvas(overlay.width, overlay.height);
-            this.ctx = this.canvas.getContext("2d");
-            this.makeBanner();
+            
+            
         });
+
+        this.makeBanner();
     }
 
-    loadUser(file) {
-        return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "debug", file)));
+    loadUser(json_string) {
+        return JSON.parse(json_string);
     }
 
     drawText(font, size, style, color, text, x, y) {
@@ -60,9 +46,10 @@ class Tag {
     }
 
     async drawImage(source, x=0, y=0) {
+        var obj = this;
         // console.log(source);
         this.getImage(source).then(function(img) {
-            ctx.drawImage(img, x, y);
+            obj.ctx.drawImage(img, x, y);
         }).catch(function(err) {
             console.error(err);
         });
@@ -97,11 +84,11 @@ class Tag {
     }
 
     async drawGameCover(game) {
-        await this.cacheGameCover(game, getGameRegion(game));
-        await this.drawImage(path.resolve(dataFolder, "cache", `${game}.png`), covCurX, covCurY);
+        await this.cacheGameCover(game, this.getGameRegion(game));
+        await this.drawImage(path.resolve(dataFolder, "cache", `${game}.png`), this.covCurX, this.covCurY);
         console.log(game);
-        covCurX += covIncX;
-        covCurY += covIncY;
+        this.covCurX += this.covIncX;
+        this.covCurY += this.covIncY;
     }
 
     async savePNG(out, c) {
@@ -133,7 +120,7 @@ class Tag {
 
     async loadFonts() {
         for (var font of fs.readdirSync(path.resolve(dataFolder, "fonts"))) {
-            await loadFont(font);
+            await this.loadFont(font);
         }
     }
 
@@ -145,13 +132,19 @@ class Tag {
         this.covIncX = overlay.cover_increment_x;
         this.covIncY = overlay.cover_increment_y;
     
-        this.covCurX = covStartX;
-        this.covCurY = covStartY;
+        this.covCurX = this.covStartX;
+        this.covCurY = this.covStartY;
     
         return overlay;
     }
 
     async makeBanner() {
+        await this.loadFonts();
+        var i = 0;
+
+        this.canvas = new Canvas.Canvas(this.overlay.width, this.overlay.height);
+        this.ctx = this.canvas.getContext("2d");
+
         // background
         await this.drawImage(path.resolve(dataFolder, this.user.bg));
 
@@ -169,6 +162,41 @@ class Tag {
             this.user.coins,
             this.overlay.coin_count.x,
             this.overlay.coin_count.y);
+
+        // flag icon
+        await this.drawImage(path.resolve(dataFolder, "flags", `${this.user.region}.png`),
+            this.overlay.flag.x,
+            this.overlay.flag.y);
+
+        // username text
+        this.drawText(this.overlay.username.font_family,
+            this.overlay.username.font_size,
+            this.overlay.username.font_style,
+            this.overlay.username.font_color,
+            this.user.name,
+            this.overlay.username.x,
+            this.overlay.username.y)
+
+        // friend code text
+        this.drawText(this.overlay.friend_code.font_family,
+            this.overlay.friend_code.font_size,
+            this.overlay.friend_code.font_style,
+            this.overlay.friend_code.font_color,
+            this.user.friend_code,
+            this.overlay.friend_code.x,
+            this.overlay.friend_code.y);
+
+        // game covers
+        if (this.user.sort.toLowerCase() != "none") {
+            for (var game of this.user.games) {
+                if (i < this.overlay.max_covers) {
+                    await this.drawGameCover(game);
+                    i++;
+                }
+            }
+        }
+
+        this.savePNG(outpath, this.canvas);
     }
 }
 
