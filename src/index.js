@@ -8,15 +8,9 @@ const dataFolder = path.resolve(__dirname, "..", "data");
 const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
 class Tag {
-
     constructor(user) {
         this.user = this.loadUser(user);
         this.overlay = this.loadOverlay(this.user.overlay);
-
-        this.loadFonts().then(function() {
-            
-            
-        });
 
         this.makeBanner();
     }

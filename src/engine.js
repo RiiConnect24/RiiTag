@@ -3,10 +3,7 @@ const Canvas = require("canvas"),
     fs = require("fs"),
     path = require("path"),
     dataFolder = path.resolve(__dirname, "..", "data"),
-    outpath = path.resolve(__dirname, "banner.png"),
-    mysql = require('mysql');
-
-const games = ["RSPE01", "RPOEC8", "RB7E54", "RSNE69"]; // debug variable
+    outpath = path.resolve(__dirname, "banner.png");
 
 var canvas,
     ctx,
