@@ -2,13 +2,16 @@ const Canvas = require("canvas");
 const Image = Canvas.Image;
 
 const fs = require("fs");
+const events = require("events");
 
 const path = require("path");
 const dataFolder = path.resolve(__dirname, "..", "data");
 const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
-class Tag {
+class Tag extends events.EventEmitter{
     constructor(user) {
+        super();
+
         this.user = this.loadUser(user);
         this.overlay = this.loadOverlay(this.user.overlay);
 
@@ -190,7 +193,9 @@ class Tag {
             }
         }
 
-        this.savePNG(outpath, this.canvas);
+        // this.savePNG(outpath, this.canvas);
+        this.pngStream = this.canvas.createPNGStream();
+        this.emit("done");
     }
 }
 
