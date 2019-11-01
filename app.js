@@ -63,13 +63,13 @@ app.route("/edit")
             jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.user.id + ".json")).toString();
             // jstring = JSON.stringify(req.user);
             console.log(jstring);
+            res.render("edit.pug", {jstring: jstring,
+                                    backgrounds: getBackgroundList(),
+                                    jdata: JSON.parse(jstring),
+                                    overlays: getOverlayList()});
         } catch(e) {
             res.redirect("/create");
         }
-        res.render("edit.pug", {jstring: jstring,
-                                backgrounds: getBackgroundList(),
-                                jdata: JSON.parse(jstring),
-                                overlays: getOverlayList()});
     })
     .post(checkAuth, function(req, res) {
         // fs.writeFileSync(path.resolve(dataFolder, "users", req.user.id + ".json"), req.body.jstring);
@@ -78,6 +78,8 @@ app.route("/edit")
         // jdata.bg = `/img/1200x450/${req.body.background}`;
         editUser(req.user.id, "bg", req.body.background);
         editUser(req.user.id, "overlay", req.body.overlay);
+        editUser(req.user.id, "name", req.body.name);
+        editUser(req.user.id, "games", req.body.games.split(";"))
         res.redirect(`/${req.user.id}`);
     });
 

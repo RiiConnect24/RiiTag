@@ -1,11 +1,14 @@
 {
     "name": "bendevnull",
     "id": "194822900577075200",
-    "games": [],
+    "games": [
+        "RMCE01",
+        "GMSE01"
+    ],
     "coins": 0,
     "friend_code": "0000 0000 0000 0000",
     "region": "rc24",
     "overlay": "overlay5.json",
-    "bg": "img/1200x450/mario17.png",
+    "bg": "img/1200x450/bigbrainacademy2.png",
     "sort": ""
 }

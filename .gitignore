@@ -2,3 +2,4 @@ node_modules/
 src/*.png
 data/cache/
 .DS_Store
+data/users/

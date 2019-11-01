@@ -79,7 +79,7 @@ class Tag extends events.EventEmitter{
         try {
             img = await this.getImage(`https://art.gametdb.com/wii/cover3D/${region}/${game}.png`);
             con.drawImage(img, 0, 0, 176, 248);
-            await savePNG(path.resolve(dataFolder, "cache", `${game}.png`), can);
+            await this.savePNG(path.resolve(dataFolder, "cache", `${game}.png`), can);
         } catch(e) {
             console.error(e);
             fs.copyFileSync(path.resolve(dataFolder, "img", "nocover.png"), path.resolve(dataFolder, "cache", `${game}.png`))

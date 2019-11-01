@@ -7,10 +7,21 @@ block content
         br
         select(name="background")
             each bg in backgrounds
-                option(value=`img/1200x450/${bg}`)= bg
+                if jdata.bg == `img/1200x450/${bg}`
+                    option(value=`img/1200x450/${bg}` selected=true)= bg
+                else
+                    option(value=`img/1200x450/${bg}` selected=false)= bg
         br
         select(name="overlay")
             each overlay in overlays
                 if overlay.enabled
-                    option(value=`overlay${overlay.id}.json`)= overlay.name
+                    if jdata.overlay == `overlay${overlay.id}.json`
+                        option(value=`overlay${overlay.id}.json` selected=true)= overlay.name
+                    else
+                        option(value=`overlay${overlay.id}.json` selected=false)= overlay.name
+        br
+        input(type="text" name="name" value=jdata.name)
+        br
+        input(type="text" name="games" value=jdata.games.join(";"))
+        br
         input(type="submit", value="Submit")
