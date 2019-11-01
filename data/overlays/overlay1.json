@@ -1,6 +1,7 @@
 {
     "name": "Modern",
     "author": "dhtdht020",
+    "id": 1,
     "width": 1200,
     "height": 450,
     "overlay_img": "img/overlay1.png",
@@ -43,5 +44,6 @@
         "font_color": "#ffffff",
         "x": -13,
         "y": 387
-    }
+    },
+    "enabled": true
 }

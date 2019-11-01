@@ -1,6 +1,7 @@
 {
     "name": "Modern Light",
     "author": "dhtdht020",
+    "id": 5,
     "width": 1200,
     "height": 450,
     "overlay_img": "img/overlay5.png",
@@ -43,5 +44,6 @@
         "font_color": "#000000",
         "x": -13,
         "y": 387
-    }
+    },
+    "enabled": true
 }

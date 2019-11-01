@@ -6,7 +6,7 @@ const events = require("events");
 
 const path = require("path");
 const dataFolder = path.resolve(__dirname, "..", "data");
-const outpath = path.resolve(__dirname, "banner.png"); // debug variable
+// const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
 class Tag extends events.EventEmitter{
     constructor(user) {
@@ -75,9 +75,15 @@ class Tag extends events.EventEmitter{
         }
         var can = new Canvas.Canvas(176, 248);
         var con = can.getContext("2d");
-        var img = await getImage(`https://art.gametdb.com/wii/cover3D/${region}/${game}.png`);
-        con.drawImage(img, 0, 0, 176, 248);
-        await savePNG(path.resolve(dataFolder, "cache", `${game}.png`), can);
+        var img;
+        try {
+            img = await this.getImage(`https://art.gametdb.com/wii/cover3D/${region}/${game}.png`);
+            con.drawImage(img, 0, 0, 176, 248);
+            await savePNG(path.resolve(dataFolder, "cache", `${game}.png`), can);
+        } catch(e) {
+            console.error(e);
+            fs.copyFileSync(path.resolve(dataFolder, "img", "nocover.png"), path.resolve(dataFolder, "cache", `${game}.png`))
+        }
     }
 
     async drawGameCover(game) {

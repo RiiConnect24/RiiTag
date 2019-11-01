@@ -1,6 +1,7 @@
 {
     "name": "Parallel",
     "author": "ItzRare",
+    "id": 2,
     "overlay": "overlay2.png",
     "max_covers": 8,
     "cover_start_x": 80,
@@ -36,5 +37,6 @@
         "font_style": "normal",
         "x": 0,
         "y": 0
-    }
+    },
+    "enabled": false
 }

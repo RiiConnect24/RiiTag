@@ -1,6 +1,7 @@
 {
     "name": "Modern 3D",
     "author": "dhtdht020",
+    "id": 6,
     "width": 1200,
     "height": 450,
     "overlay_img": "img/overlay1.png",
@@ -46,5 +47,6 @@
         "font_color": "#ffffff",
         "x": -13,
         "y": 387
-    }
+    },
+    "enabled": true
 }

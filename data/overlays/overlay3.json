@@ -1,6 +1,7 @@
 {
     "name": "Small",
     "author": "Larsenv",
+    "id": 3,
     "width": 1050,
     "height": 60,
     "overlay_img": "img/overlay3.png",
@@ -43,5 +44,6 @@
         "font_color": "#FFFFFF",
         "x": -25,
         "y": 380
-    }
+    },
+    "enabled": true
 }

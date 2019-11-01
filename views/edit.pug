@@ -1,0 +1,16 @@
+extends head
+
+block content
+    form(method="POST" action="/edit")
+        //- textarea(type="text", name="jstring", value=jstring)
+        textarea(name="jstring", cols="80", rows="30")= jstring
+        br
+        select(name="background")
+            each bg in backgrounds
+                option(value=`img/1200x450/${bg}`)= bg
+        br
+        select(name="overlay")
+            each overlay in overlays
+                if overlay.enabled
+                    option(value=`overlay${overlay.id}.json`)= overlay.name
+        input(type="submit", value="Submit")

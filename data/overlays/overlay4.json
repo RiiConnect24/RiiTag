@@ -1,6 +1,7 @@
 {
     "name": "Inverse Modern",
     "author": "dhtdht020 and bendevnull",
+    "id": 4,
     "width": 1200,
     "height": 450,
     "overlay_img": "img/overlay1.png",
@@ -43,5 +44,6 @@
         "font_color": "#FFFFFF",
         "x": -25,
         "y": 380
-    }
+    },
+    "enabled": false
 }
