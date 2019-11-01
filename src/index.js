@@ -53,7 +53,7 @@ class Tag extends events.EventEmitter{
     }
 
     getGameRegion(game) {
-        var chars = game.split();
+        var chars = game.split("");
         var rc = chars[3];
         if (rc == "E") {
             return "US";
