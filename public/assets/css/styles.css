@@ -1,0 +1,88 @@
+.form-control.form-control-lg {
+  text-align: center;
+  font-size: 190%;
+  font-weight: bold;
+}
+
+.dropdown-menu {
+  height: auto;
+  max-height: 200px;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: #212529 !important;
+}
+
+.form-control {
+  border-color: #343a40;
+  background-color: #343a40;
+  color: white;
+}
+
+.form-control:focus {
+  background-color: #1d2124;
+  color: white;
+  border-color: #1d2124;
+}
+
+.dropdown-menu {
+  background-color: #343a40;
+  color: white;
+}
+
+.dropdown-item {
+  color: white;
+}
+
+.dropdown-item-text {
+  color: white;
+}
+
+.dropdown-item:hover {
+  background-color: #212529;
+  color: white;
+}
+
+.dropdown-divider {
+  border-top: #171a1d;
+}
+
+select {
+  display: block;
+  width: 100%;
+  height: calc(1.5em + .75rem + 2px);
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: white;
+  background-color: #343a40;
+  background-clip: padding-box;
+  border: 1px solid #343a40;
+  border-radius: .25rem;
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+select:focus {
+  color: white;
+  background-color: #1d2124;
+  border-color: #1d2124;
+  outline: 0;
+  box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
+}
+
+p {
+  color: white;
+}
+
+.card {
+  background-color: #343a40;
+  color: white;
+}
+
+img:hover {
+  /*transition: ease-in-out 0.02s;*/
+  box-shadow: 0 0 16px #18B6ED;
+}
+

@@ -1,9 +1,10 @@
 extends head
 
 block content
+    script(src="edit.js") 
     form(method="POST" action="/edit")
         //- textarea(type="text", name="jstring", value=jstring)
-        textarea(name="jstring", cols="80", rows="30")= jstring
+        textarea(name="jstring", cols="80", rows="30", readonly)= jstring
         br
         select(name="background")
             each bg in backgrounds
@@ -25,3 +26,6 @@ block content
         input(type="text" name="games" value=jdata.games.join(";"))
         br
         input(type="submit", value="Submit")
+        br
+        input#keybox(type="password" value=userKey readonly)
+        input#keybutton(type="button" onclick="showPassword(\"keybox\", \"keybutton\")" value="Show Key")

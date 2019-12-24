@@ -1,6 +1,71 @@
 extends head
 
+mixin background
+  each bg in backgrounds
+    if user.bg == `img/1200x450/${bg}`
+      
+
 block content
-    img(src=`/${id}/tag.png` width=1200/2 height=450/2)
-    br
-    a(href="/edit") Edit
+  nav.navbar.navbar-light.navbar-expand-md.bg-dark
+    .container-fluid
+      a.navbar-brand.text-light(href='#') RiiTag
+      button.navbar-toggler(data-toggle='collapse' data-target='#navcol-1')
+        span.sr-only Toggle navigation
+        span.navbar-toggler-icon
+      #navcol-1.collapse.navbar-collapse
+        ul.nav.navbar-nav
+          li.nav-item(role='presentation')
+            a.nav-link.text-white-50(href='/') Home
+  div(style='margin-top: 20px;')
+    .container
+      .row
+        .col-md-12
+          h1.text-white #{user.name}
+      .row
+        .col-md-6
+          h5.text-white Their Tag:
+          a(href=`/${id}/tag.png`) 
+            img(src=`/${id}/tag.png` style='width: 100%;')
+          //- span.text-white Last Modified: 3 minutes ago, 4:02PM
+          //- .btn-group(role='group' style='width: 100%;')
+          //-   button.btn.btn-dark(type='button') Edit Tag
+          //-   button.btn.btn-secondary(type='button') Embed in web page
+          //- h5.text-white(style='margin-top: 10px;') Their Games:
+        .col-md-6
+          h5.text-white Information:
+          .card(style='margin-bottom: 10px;')
+            .card-header
+              h5.mb-0 Current Settings
+            .card-body
+              span.text-white
+                strong Display Name: 
+                | #{user.name}
+                br
+                strong Background: 
+                | #{user.bg.replace("img/1200x450/", "")}
+                br
+                strong Region: 
+                | #{user.region.toUpperCase()}
+                br
+                strong Friend Code: 
+                | #{user.friend_code}
+                br
+                each overlay in overlays
+                  if user.overlay == `overlay${overlay.id}.json`
+                    strong Overlay: 
+                    | #{overlay.name}
+                br
+          .card
+            .card-header
+              h5.mb-0 Stats
+            .card-body
+              span.text-white
+                | #{user.name} has 
+                if user.coins == 1
+                  strong 1 coin
+                else
+                  strong #{user.coins} coins
+                | .
+                br
+  script(src='assets/js/jquery.min.js')
+  script(src='assets/bootstrap/js/bootstrap.min.js')

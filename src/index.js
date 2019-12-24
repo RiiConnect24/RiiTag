@@ -23,7 +23,7 @@ class Tag extends events.EventEmitter{
     }
 
     drawText(font, size, style, color, text, x, y) {
-        console.log(`${style} ${size}px ${font}`);
+        // console.log(`${style} ${size}px ${font}`);
         this.ctx.font = `${style} ${size}px ${font}`;
         this.ctx.fillStyle = color;
         this.ctx.fillText(text, size + x, size + y);
@@ -89,7 +89,7 @@ class Tag extends events.EventEmitter{
     async drawGameCover(game) {
         await this.cacheGameCover(game, this.getGameRegion(game));
         await this.drawImage(path.resolve(dataFolder, "cache", `${game}.png`), this.covCurX, this.covCurY);
-        console.log(game);
+        // console.log(game);
         this.covCurX += this.covIncX;
         this.covCurY += this.covIncY;
     }
@@ -115,7 +115,7 @@ class Tag extends events.EventEmitter{
                         style: style.style
                     }
                 );
-                console.log("Loaded font");
+                // console.log("Loaded font");
                 resolve();
             }
         });
