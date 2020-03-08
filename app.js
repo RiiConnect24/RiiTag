@@ -12,8 +12,14 @@ const xml = require("xml");
 const DatabaseDriver = require("./dbdriver");
 
 const db = new DatabaseDriver(path.join(__dirname, "data", "users", "users.db"));
+const Sentry = require('@sentry/node');
 const express = require("express");
 const app = express();
+
+Sentry.init({ dsn: config.sentryURL });
+
+app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.errorHandler());
 
 app.set("view-engine", "pug");
 
@@ -27,7 +33,7 @@ passport.deserializeUser(function(obj, done) {
 var scopes = ['identify'];
 
 passport.use(new DiscordStrategy({
-    clientID: "583346143736627213",
+    clientID: "684886188603080716",
     clientSecret: config.clientSecret,
     callbackURL: config.callbackURL
 }, function(accessToken, refreshToken, profile, done) {
@@ -44,8 +50,9 @@ app.use(bodyParser.json());
 app.use(express.static("public/"));
 
 app.get("/", function(req, res) {
-    res.send("Welcome to the RiiTag site! It's a little blech rn. The web designers will fix that! :D");
+    res.render("index.pug");
 });
+
 
 app.get("/demo", async function(req, res) {
     var banner = await new Banner(json_string);
@@ -57,7 +64,7 @@ app.get("/demo", async function(req, res) {
 app.get('/login', passport.authenticate('discord', { scope: scopes }), function(req, res) {});
 
 app.get('/callback',
-    passport.authenticate('discord', { failureRedirect: '/' }), function(req, res) { res.redirect(`/${req.user.id}`) } // auth success
+    passport.authenticate('discord', { failureRedirect: '/' }), function(req, res) { res.redirect("/create") } // auth success
 );
 
 app.route("/edit")
@@ -87,7 +94,9 @@ app.route("/edit")
         // jdata.bg = `/img/1200x450/${req.body.background}`;
         editUser(req.user.id, "bg", req.body.background);
         editUser(req.user.id, "overlay", req.body.overlay);
+        editUser(req.user.id, "region", req.body.flag);
         editUser(req.user.id, "name", req.body.name);
+        editUser(req.user.id, "friend_code", req.body.wiinumber);
         editUser(req.user.id, "games", req.body.games.split(";"))
         res.redirect(`/${req.user.id}`);
     });
@@ -97,10 +106,50 @@ app.get("/create", checkAuth, function(req, res) {
     res.redirect(`/${req.user.id}`);
 });
 
+app.get("/img/flags/:flag.png", function(req, res) {
+    try {
+        var file = path.resolve(dataFolder, "flags", req.params.flag + ".png");
+        var s = fs.createReadStream(file);
+        s.on('open', function() {
+            res.set('Content-Type', 'image/png');
+            s.pipe(res);
+        });
+    } catch(e) {
+        res.render("notfound.pug", {err: e});
+    }
+});
+
+app.get("/img/:size/:background.png", function(req, res) {
+    try {
+        var file = path.resolve(dataFolder, "img", req.params.size, req.params.background + ".png");
+        var s = fs.createReadStream(file);
+        s.on('open', function() {
+            res.set('Content-Type', 'image/png');
+            s.pipe(res);
+        });
+    } catch(e) {
+        res.render("notfound.pug", {err: e});
+    }
+});
+
 app.get("/:id/tag.png", function(req, res) {
     try {
         var jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.params.id + ".json"));
-        var banner = new Banner(jstring);
+        var banner = new Banner(jstring, true);
+        banner.once("done", function() {
+            banner.pngStream.pipe(res);
+        });
+    } catch(e) {
+        console.log(e);
+        // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
+        res.render("notfound.pug", {err: e});
+    }
+});
+
+app.get("/:id/tag.max.png", function(req, res) {
+    try {
+        var jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.params.id + ".json"));
+        var banner = new Banner(jstring, false);
         banner.once("done", function() {
             banner.pngStream.pipe(res);
         });
@@ -142,7 +191,7 @@ app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
     var tag = {
         Tag: {
             _attr: {
-                URL: "http://admin.node1.bendevnull.xyz/wii?game={ID6}&key={key}",
+                URL: "http://tag.rc24.xyz/wii?game={ID6}&key={KEY}",
                 Key: userKey
             }
         }

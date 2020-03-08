@@ -22,40 +22,62 @@ block content
         .col-md-12
           h1.text-white #{user.name}
       .row
-        .col-md-6
-          h5.text-white Their Tag:
-          a(href=`/${id}/tag.png`) 
-            img(src=`/${id}/tag.png` style='width: 100%;')
-          //- span.text-white Last Modified: 3 minutes ago, 4:02PM
-          //- .btn-group(role='group' style='width: 100%;')
-          //-   button.btn.btn-dark(type='button') Edit Tag
-          //-   button.btn.btn-secondary(type='button') Embed in web page
-          //- h5.text-white(style='margin-top: 10px;') Their Games:
-        .col-md-6
-          h5.text-white Information:
-          .card(style='margin-bottom: 10px;')
-            .card-header
-              h5.mb-0 Current Settings
-            .card-body
-              span.text-white
-                strong Display Name: 
-                | #{user.name}
-                br
-                strong Background: 
-                | #{user.bg.replace("img/1200x450/", "")}
-                br
-                strong Region: 
-                | #{user.region.toUpperCase()}
-                br
-                strong Friend Code: 
-                | #{user.friend_code}
-                br
-                each overlay in overlays
-                  if user.overlay == `overlay${overlay.id}.json`
-                    strong Overlay: 
-                    | #{overlay.name}
-                br
-          .card
+       .col-md-6
+         h5.text-white Their Tag:
+         a(href=`/${id}/tag.max.png`) 
+           img(src=`/${id}/tag.max.png` style='width: 100%;')
+         //- span.text-white Last Modified: 3 minutes ago, 4:02PM
+         //- .btn-group(role='group' style='width: 100%;')
+         //-   button.btn.btn-dark(type='button') Edit Tag
+         //-   button.btn.btn-secondary(type='button') Embed in web page
+         //- h5.text-white(style='margin-top: 10px;') Their Games:
+       .col-md-6
+         h5.text-white Information:
+         .card(style='margin-bottom: 10px;')
+          .card-header
+            h5.mb-0 Current Settings
+          .card-body
+            span.text-white
+              strong Display Name: 
+              | #{user.name}
+              br
+              strong Background: 
+              | #{user.bg.replace("img/1200x450/", "")}
+              br
+              strong Flag: 
+              | #{user.region}
+              br
+              strong Wii Number: 
+              | #{user.friend_code}
+              br
+              each overlay in overlays
+                if user.overlay == `overlay${overlay.id}.json`
+                  strong Overlay: 
+                  | #{overlay.name}
+              br
+              a(href="/edit" type="button" class="btn btn-primary") Edit Your Tag
+      .row
+       .col-md-6
+         .card
+           .card-header
+             h5.mb-0 Embed
+           .card-body
+             span.text-white
+               strong HTML:
+               br
+               textarea(readonly rows="4" cols="48") <a href="https://tag.rc24.xyz/#{id}"><img src="https://tag.rc24.xyz/#{id}/tag.png" alt="RiiTag" /></a>
+               br
+               strong BBCode:
+               br
+               textarea(readonly rows="4" cols="48") [CENTER][URL='https://tag.rc24.xyz/#{id}'][IMG]https://tag.rc24.xyz/#{id}/tag.png[/IMG][/URL][/CENTER]
+               br
+               strong URL:
+               br
+               textarea(readonly rows="1" cols="48") https://tag.rc24.xyz/#{id}/tag.png
+               br
+               | You can replace <tt>tag.png</tt> with <tt>tag.max.png</tt> in the URL to get the largest tag size.
+       .col-md-6
+         .card
             .card-header
               h5.mb-0 Stats
             .card-body

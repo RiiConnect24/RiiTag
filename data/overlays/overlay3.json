@@ -11,7 +11,7 @@
     "cover_increment_x": 0,
     "cover_increment_y": 0,
     "username": {
-        "font_family": "rodin",
+        "font_family": "RodinNTLG",
         "font_size": 48,
         "font_style": "normal",
         "font_color": "#FFFFFF",
@@ -28,7 +28,7 @@
         "y": -5
     },
     "coin_count": {
-        "font_family": "rodin",
+        "font_family": "RodinNTLG",
         "font_size": 45,
         "font_style": "normal",
         "font_color": "#000000",
@@ -38,7 +38,7 @@
         "max": 999
     },
     "friend_code": {
-        "font_family": "rodin",
+        "font_family": "RodinNTLG",
         "font_size": 48,
         "font_style": "normal",
         "font_color": "#FFFFFF",

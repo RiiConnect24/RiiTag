@@ -3,7 +3,8 @@ const Canvas = require("canvas"),
     fs = require("fs"),
     path = require("path"),
     dataFolder = path.resolve(__dirname, "..", "data"),
-    outpath = path.resolve(__dirname, "banner.png");
+    outpath = path.resolve(__dirname, "banner.max.png");
+    outpath_small = path.resolve(__dirname, "banner.png");
 
 var canvas,
     ctx,
@@ -52,7 +53,7 @@ function loadOverlay(file)
  */
 function loadUser(key) 
 {
-    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "debug", file)));
+    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "debug", key)));
 }
 
 /**
@@ -84,10 +85,10 @@ async function getImage(source)
         img.onload = () => {
             resolve(img);
         }
-        img.onerror = (err) => {
-            reject(err);
-        }
         img.src = source;
+        img.onerror = (err) => {
+            img.src = "https://raw.githubusercontent.com/bennyman123abc/rc24-tag/master/data/img/nocover.png";
+        }
     });
 }
 
@@ -96,7 +97,7 @@ async function getImage(source)
  * @argument {string} source The image source URL.
  * @argument {int} x The X to draw to.
  * @argument {int} y The Y to draw to.
- */
+*/
 async function drawImage(source, x=0, y=0) {
     // console.log(source);
 
@@ -132,21 +133,18 @@ async function drawImageShrink(source, x=0, y=0, shrinkx=0, shrinky=0) {
  * @returns {string} The converted region string.
  */
 function getGameRegion(game) {
-    var chars = game.split(),
-        rc = chars[3];
-
-    switch (rc) {
+    switch (game[3]) {
         case "E":
             return "US";
 
         case "P":
             return "EN";
 
-        case "JA":
+        case "J":
             return "JA";
 
-        case "US":
-            return "US";
+        case "K":
+            return "KO";
     }
 }
 
@@ -163,7 +161,7 @@ async function cacheGameCover(game, region) {
         fs.mkdirSync(path.resolve(dataFolder, `cache/${region}`));
 
     if (fs.existsSync(path.resolve(dataFolder, `cache/${region}`, `${game}.png`)))
-        return;
+        return;    
 
     var can = new Canvas.Canvas(176, 248);
     var con = can.getContext("2d");
@@ -260,7 +258,7 @@ async function main() {
     drawText(overlay.friend_code.font_family, overlay.friend_code.font_size, overlay.friend_code.font_style, overlay.friend_code.font_color, user.friend_code, overlay.friend_code.x, overlay.friend_code.y);
 
     if (user.sort.toLowerCase() != "none") {
-        for (var game of user.games) {
+        for (var game of user.games.reverse().slice(overlay.max_covers * -1)) {
             if (i < overlay.max_covers) {    
                 await drawGameCover(game);
                 i++;
@@ -269,4 +267,9 @@ async function main() {
     }
 
     savePNG(outpath, canvas);
+
+    canvas = new Canvas.Canvas(400, 150);
+    ctx = canvas.getContext("2d");
+    await drawImageShrink(outpath, 0, 0, 800, 300);
+    savePNG(outpath_small, canvas);
 }

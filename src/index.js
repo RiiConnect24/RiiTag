@@ -9,9 +9,10 @@ const dataFolder = path.resolve(__dirname, "..", "data");
 // const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
 class Tag extends events.EventEmitter{
-    constructor(user) {
+    constructor(user, size) {
         super();
 
+        this.size = size;
         this.user = this.loadUser(user);
         this.overlay = this.loadOverlay(this.user.overlay);
 
@@ -50,6 +51,12 @@ class Tag extends events.EventEmitter{
         }).catch(function(err) {
             console.error(err);
         });
+    }
+
+    async drawImageShrink(source, x=0, y=0, shrinkx=0, shrinky=0) {
+        var obj = this;
+        console.log(source);
+        obj.ctx.drawImage(source, x, y, shrinkx, shrinky);
     }
 
     getGameRegion(game) {
@@ -191,7 +198,7 @@ class Tag extends events.EventEmitter{
 
         // game covers
         if (this.user.sort.toLowerCase() != "none") {
-            for (var game of this.user.games) {
+            for (var game of this.user.games.reverse().slice(this.overlay.max_covers * -1)) {
                 if (i < this.overlay.max_covers) {
                     await this.drawGameCover(game);
                     i++;
@@ -199,8 +206,15 @@ class Tag extends events.EventEmitter{
             }
         }
 
-        // this.savePNG(outpath, this.canvas);
         this.pngStream = this.canvas.createPNGStream();
+
+        if (this.size) {
+            this.canvas2 = new Canvas.Canvas(this.overlay.width / 3, this.overlay.height / 3);
+            this.ctx = this.canvas2.getContext("2d");
+            await this.drawImageShrink(this.canvas, 0, 0, this.overlay.width / 3, this.overlay.height / 3);
+            this.pngStream = this.canvas2.createPNGStream();
+        }
+
         this.emit("done");
     }
 }

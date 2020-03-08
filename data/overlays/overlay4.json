@@ -1,49 +1,49 @@
 {
-    "name": "Inverse Modern",
-    "author": "dhtdht020 and bendevnull",
-    "id": 4,
-    "width": 1200,
-    "height": 450,
-    "overlay_img": "img/overlay1.png",
-    "max_covers": 8,
-    "cover_start_x": 944,
-    "cover_start_y": 110,
-    "cover_increment_x": -120,
-    "cover_increment_y": 0,
-    "username": {
-        "font_family": "RodinNTLG",
-        "font_size": 48,
-        "font_style": "normal",
-        "font_color": "#FFFFFF",
-        "x": 48,
-        "y": 14
-    },
-    "flag": {
-        "x": 15,
-        "y": 10
-    },
-    "coin_icon": {
-        "img": "img/coin.png",
-        "x": 864,
-        "y": 10
-    },
-    "coin_count": {
-        "font_family": "NintendoU",
-        "font_size": 48,
-        "font_style": "normal",
-        "font_color": "#000000",
-        "x": 900,
-        "y": 16,
-        "padded": true,
-        "max": 99999
-    },
-    "friend_code": {
-        "font_family": "RodinNTLG",
-        "font_size": 48,
-        "font_style": "normal",
-        "font_color": "#FFFFFF",
-        "x": -25,
-        "y": 380
-    },
-    "enabled": false
+  "name": "Bottom Bar Dark",
+  "author": "dhtdht020",
+  "id": 5,
+  "width": 1200,
+  "height": 450,
+  "overlay_img": "img/overlay4.png",
+  "max_covers": 8,
+  "cover_start_x": 80,
+  "cover_start_y": 10,
+  "cover_increment_x": 120,
+  "cover_increment_y": 0,
+  "username": {
+    "font_family": "RodinNTLG",
+    "font_size": 72,
+    "font_style": "normal",
+    "font_color": "#ffffff",
+    "x": -36,
+    "y": 293
+  },
+  "flag": {
+    "x": 820,
+    "y": 280
+  },
+  "coin_icon": {
+    "img": "img/coin.png",
+    "x": 890,
+    "y": 280
+  },
+  "coin_count": {
+    "font_family": "RodinNTLG",
+    "font_size": 48,
+    "font_style": "bold",
+    "font_color": "#1d1d1d",
+    "x": 910,
+    "y": 287,
+    "padded": true,
+    "max": 99999
+  },
+  "friend_code": {
+    "font_family": "RodinNTLG",
+    "font_size": 48,
+    "font_style": "normal",
+    "font_color": "#FFFFFF",
+    "x": -13,
+    "y": 373
+  },
+  "enabled": true
 }
