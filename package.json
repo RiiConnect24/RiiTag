@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/bennyman123abc/rc24-tag#readme",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "canvas": "^2.5.0",
     "express-session": "^1.17.0",
     "passport": "^0.4.0",
