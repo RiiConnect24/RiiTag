@@ -63,11 +63,7 @@ class Tag extends events.EventEmitter{
     getGameRegion(game) {
         var chars = game.split("");
         var rc = chars[3];
-        if (this.user.coverregion) {
-            if (this.user.coverregion.toUpperCase().length == 2) { // region names are 2 characters as you can see
-                return this.user.coverregion.toUpperCase();
-            }
-        } else if (rc == "E") {
+        if (rc == "E") {
             return "US";
         } else if (rc == "P") {
             return "EN";
@@ -77,39 +73,93 @@ class Tag extends events.EventEmitter{
             return "KO";
         } else if (rc == "W") {
             return "TW";
+        } else if (this.user.coverregion) {
+            if (rc == "P") {
+                if (this.user.coverregion.toUpperCase().length == 2) { // region names are 2 characters as you can see
+                    return this.user.coverregion.toUpperCase();
+                }
+            }
         } else {
             return "EN";
         }
     }
 
-    async downloadGameCover(game, region) {
-        var can = new Canvas.Canvas(176, 248);
+    getCoverType()
+    {
+        if (this.user.covertype) {
+            return this.user.covertype;
+        } else {
+            return "cover3D";
+        }
+    }
+
+    getCoverWidth(covertype)
+    {
+        if (covertype == "cover3D") {
+            return 176;
+        } else if (covertype == "cover") {
+            return 160;
+        } else if (covertype == "disc") {
+            return 160;
+        } else {
+            return 176;
+        }
+    }
+
+    getCoverHeight(covertype)
+    {
+        if (covertype == "cover3D") {
+            return 248;
+        } else if (covertype == "cover") {
+            return 224;
+        } else if (covertype == "disc") {
+            return 160;
+        } else {
+            return 248;
+        }
+    }
+
+    getNoCover(covertype)
+    {
+        if (covertype == "cover3D") {
+            nocover = "nocover.png";
+        } else if (covertype == "cover") {
+            nocover = "nocoverFlat.png";
+        } else if (covertype == "disc") {
+            nocover = "nodisc.png";
+        } else {
+            nocover = "nocover.png";
+        }
+    }
+
+    async downloadGameCover(game, region, covertype) {
+        var can = new Canvas.Canvas(this.getCoverWidth(covertype), this.getCoverHeight(covertype));
         var con = can.getContext("2d");
         var img;
 
-        img = await this.getImage(`https://art.gametdb.com/wii/cover3D/${region}/${game}.png`);
-        con.drawImage(img, 0, 0, 176, 248);
-        await this.savePNG(path.resolve(dataFolder, "cache", `${game}-${region}.png`), can);
+        img = await this.getImage(`https://art.gametdb.com/wii/${covertype}/${region}/${game}.png`);
+        con.drawImage(img, 0, 0, this.getCoverWidth(covertype), this.getCoverHeight(covertype));
+        await this.savePNG(path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`), can);
     }
 
-    async cacheGameCover(game, region) {
+    async cacheGameCover(game, region, covertype) {
         if (!fs.existsSync(path.resolve(dataFolder, "cache"))) {
             fs.mkdirSync(path.resolve(dataFolder, "cache"));
         }
-        if (fs.existsSync(path.resolve(dataFolder, "cache", `${game}-${region}.png`))) {
+        if (fs.existsSync(path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`))) {
             return;
         }
         try {
-            await this.downloadGameCover(game, region);
+            await this.downloadGameCover(game, region, covertype);
         } catch(e) {
             try {
-                await this.downloadGameCover(game, "EN"); // cover might not exist?
+                await this.downloadGameCover(game, "EN", covertype); // cover might not exist?
             } catch(e) {
                 try {
-                    await this.downloadGameCover(game, "US"); // small chance it's US region
+                    await this.downloadGameCover(game, "US", covertype); // small chance it's US region
                 } catch(e) {
                     console.error(e);
-                    region = fs.copyFileSync(path.resolve(dataFolder, "img", "nocover.png"), path.resolve(dataFolder, "cache", `${game}-${region}.png`))
+                    fs.copyFileSync(path.resolve(dataFolder, "img", getNoCover(covertype)), path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`))
                 }
             }
         }
@@ -136,8 +186,10 @@ class Tag extends events.EventEmitter{
 
     async drawGameCover(game) {
         var region = this.getGameRegion(game);
-        await this.cacheGameCover(game, region);
-        await this.drawImage(path.resolve(dataFolder, "cache", `${game}-${region}.png`), this.covCurX, this.covCurY);
+        var covertype = this.getCoverType();
+        console.log(region);
+        await this.cacheGameCover(game, region, covertype);
+        await this.drawImage(path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`), this.covCurX, this.covCurY);
         // console.log(game);
         this.covCurX += this.covIncX;
         this.covCurY += this.covIncY;
@@ -186,6 +238,15 @@ class Tag extends events.EventEmitter{
         
         this.covStartX = overlay.cover_start_x;
         this.covStartY = overlay.cover_start_y;
+        
+        var covertype = this.getCoverType();
+        
+        if (covertype == "cover") {
+            this.covStartY += 24;
+        } else if (covertype == "disc") {
+            this.covStartY += 88;
+        }
+
         this.covIncX = overlay.cover_increment_x;
         this.covIncY = overlay.cover_increment_y;
     

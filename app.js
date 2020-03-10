@@ -81,6 +81,7 @@ app.route("/edit")
                                     jdata: JSON.parse(jstring),
                                     overlays: getOverlayList(),
                                     flags: getFlagList(),
+                                    covertypes: getCoverTypes(),
                                     coverregions: getCoverRegions(),
                                     userKey: userKey
                                 });
@@ -100,6 +101,7 @@ app.route("/edit")
         editUser(req.user.id, "name", req.body.name);
         editUser(req.user.id, "friend_code", req.body.wiinumber);
         editUser(req.user.id, "games", req.body.games.split(";"));
+        editUser(req.user.id, "covertype", req.body.covertype);
         editUser(req.user.id, "coverregion", req.body.coverregion);
         editUser(req.user.id, "useavatar", req.body.useavatar);
         res.redirect(`/${req.user.id}`);
@@ -251,8 +253,12 @@ function getFlagList() {
     return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "flags", "flags.json")));
 }
 
+function getCoverTypes() {
+    return ["cover3D", "cover", "disc"];
+}
+
 function getCoverRegions() {
-    return ["EN", "FR", "DE", "ES", "IT", "NL", "PT", "AU", "SE", "DK", "NO", "FI", "TR"]
+    return ["EN", "FR", "DE", "ES", "IT", "NL", "PT", "AU", "SE", "DK", "NO", "FI", "TR"];
 }
 
 function editUser(id, key, value) {
