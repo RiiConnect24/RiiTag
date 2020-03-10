@@ -39,6 +39,7 @@ class Tag extends events.EventEmitter{
             img.onerror = function(err) {
                 reject(err);
             }
+            console.log(source);
             img.src = source;
         });
     }
@@ -62,43 +63,89 @@ class Tag extends events.EventEmitter{
     getGameRegion(game) {
         var chars = game.split("");
         var rc = chars[3];
-        if (rc == "E") {
+        if (this.user.coverregion) {
+            if (this.user.coverregion.toUpperCase().length == 2) { // region names are 2 characters as you can see
+                return this.user.coverregion.toUpperCase();
+            }
+        } else if (rc == "E") {
             return "US";
         } else if (rc == "P") {
             return "EN";
         } else if (rc == "J") {
             return "JA";
+        } else if (rc == "K") {
+            return "KO";
+        } else if (rc == "W") {
+            return "TW";
         } else {
-            return "US";
+            return "EN";
         }
+    }
+
+    async downloadGameCover(game, region) {
+        var can = new Canvas.Canvas(176, 248);
+        var con = can.getContext("2d");
+        var img;
+
+        img = await this.getImage(`https://art.gametdb.com/wii/cover3D/${region}/${game}.png`);
+        con.drawImage(img, 0, 0, 176, 248);
+        await this.savePNG(path.resolve(dataFolder, "cache", `${game}-${region}.png`), can);
     }
 
     async cacheGameCover(game, region) {
         if (!fs.existsSync(path.resolve(dataFolder, "cache"))) {
             fs.mkdirSync(path.resolve(dataFolder, "cache"));
         }
-        if (fs.existsSync(path.resolve(dataFolder, "cache", `${game}.png`))) {
+        if (fs.existsSync(path.resolve(dataFolder, "cache", `${game}-${region}.png`))) {
             return;
         }
-        var can = new Canvas.Canvas(176, 248);
+        try {
+            await this.downloadGameCover(game, region);
+        } catch(e) {
+            try {
+                await this.downloadGameCover(game, "EN"); // cover might not exist?
+            } catch(e) {
+                try {
+                    await this.downloadGameCover(game, "US"); // small chance it's US region
+                } catch(e) {
+                    console.error(e);
+                    region = fs.copyFileSync(path.resolve(dataFolder, "img", "nocover.png"), path.resolve(dataFolder, "cache", `${game}-${region}.png`))
+                }
+            }
+        }
+    }
+
+    async cacheAvatar() {
+        if (!fs.existsSync(path.resolve(dataFolder, "avatars"))) {
+            fs.mkdirSync(path.resolve(dataFolder, "avatars"));
+        }
+        if (fs.existsSync(path.resolve(dataFolder, "avatars", `${this.user.id}.png`))) {
+            return;
+        }
+        var can = new Canvas.Canvas(128, 128);
         var con = can.getContext("2d");
         var img;
         try {
-            img = await this.getImage(`https://art.gametdb.com/wii/cover3D/${region}/${game}.png`);
-            con.drawImage(img, 0, 0, 176, 248);
-            await this.savePNG(path.resolve(dataFolder, "cache", `${game}.png`), can);
+            img = await this.getImage(`https://cdn.discordapp.com/avatars/${this.user.id}/${this.user.avatar}.jpg?size=128`);
+            con.drawImage(img, 0, 0, 128, 128);
+            await this.savePNG(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), can);
         } catch(e) {
             console.error(e);
-            fs.copyFileSync(path.resolve(dataFolder, "img", "nocover.png"), path.resolve(dataFolder, "cache", `${game}.png`))
         }
     }
 
     async drawGameCover(game) {
-        await this.cacheGameCover(game, this.getGameRegion(game));
-        await this.drawImage(path.resolve(dataFolder, "cache", `${game}.png`), this.covCurX, this.covCurY);
+        var region = this.getGameRegion(game);
+        await this.cacheGameCover(game, region);
+        await this.drawImage(path.resolve(dataFolder, "cache", `${game}-${region}.png`), this.covCurX, this.covCurY);
         // console.log(game);
         this.covCurX += this.covIncX;
         this.covCurY += this.covIncY;
+    }
+
+    async drawAvatar(game) {
+        await this.cacheAvatar();
+        await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
     }
 
     async savePNG(out, c) {
@@ -158,6 +205,16 @@ class Tag extends events.EventEmitter{
         // background
         await this.drawImage(path.resolve(dataFolder, this.user.bg));
 
+        // game covers
+        if (this.user.sort.toLowerCase() != "none") {
+            for (var game of this.user.games.reverse().slice(this.overlay.max_covers * -1)) {
+                if (i < this.overlay.max_covers) {
+                    await this.drawGameCover(game);
+                    i++;
+                }
+            }
+        }
+
         // overlay image
         await this.drawImage(path.resolve(dataFolder, this.overlay.overlay_img));
 
@@ -196,14 +253,9 @@ class Tag extends events.EventEmitter{
             this.overlay.friend_code.x,
             this.overlay.friend_code.y);
 
-        // game covers
-        if (this.user.sort.toLowerCase() != "none") {
-            for (var game of this.user.games.reverse().slice(this.overlay.max_covers * -1)) {
-                if (i < this.overlay.max_covers) {
-                    await this.drawGameCover(game);
-                    i++;
-                }
-            }
+        // avatar
+        if (this.user.useavatar == "true") {
+            this.drawAvatar();
         }
 
         this.pngStream = this.canvas.createPNGStream();

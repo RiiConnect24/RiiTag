@@ -1,53 +1,49 @@
 {
-  "name": "Bottom Bar Light",
+  "name": "Wii Menu",
   "author": "dhtdht020",
-  "id": 5,
+  "id": 6,
   "width": 1200,
   "height": 450,
-  "overlay_img": "img/overlay5.png",
+  "overlay_img": "img/overlay6.png",
   "max_covers": 8,
   "cover_start_x": 80,
-  "cover_start_y": 10,
+  "cover_start_y": 50,
   "cover_increment_x": 120,
   "cover_increment_y": 0,
   "username": {
     "font_family": "RodinNTLG",
-    "font_size": 72,
+    "font_size": 48,
     "font_style": "normal",
-    "font_color": "#ffffff",
-    "x": -36,
-    "y": 293
+    "font_color": "#747576",
+    "x": 0,
+    "y": -2
   },
   "flag": {
-    "x": 820,
-    "y": 280
+    "x": 910,
+    "y": 355
   },
   "coin_icon": {
     "img": "img/coin.png",
-    "x": 890,
-    "y": 280
+    "x": 895,
+    "y": -10
   },
   "coin_count": {
     "font_family": "RodinNTLG",
     "font_size": 48,
     "font_style": "bold",
     "font_color": "#1d1d1d",
-    "x": 910,
-    "y": 287,
+    "x": 920,
+    "y": -2,
     "padded": true,
     "max": 99999
   },
   "friend_code": {
-    "font_family": "RodinNTLG",
+    "font_family": "digital7",
     "font_size": 48,
     "font_style": "normal",
-    "font_color": "#FFFFFF",
-    "x": -13,
-    "y": 373
-  },
-  "avatar": {
-    "x": 1074,
-    "y": 146
+    "font_color": "#9A9A9A",
+    "x": 355,
+    "y": 290
   },
   "enabled": true
 }

@@ -80,6 +80,8 @@ app.route("/edit")
                                     backgrounds: getBackgroundList(),
                                     jdata: JSON.parse(jstring),
                                     overlays: getOverlayList(),
+                                    flags: getFlagList(),
+                                    coverregions: getCoverRegions(),
                                     userKey: userKey
                                 });
         } catch(e) {
@@ -97,12 +99,15 @@ app.route("/edit")
         editUser(req.user.id, "region", req.body.flag);
         editUser(req.user.id, "name", req.body.name);
         editUser(req.user.id, "friend_code", req.body.wiinumber);
-        editUser(req.user.id, "games", req.body.games.split(";"))
+        editUser(req.user.id, "games", req.body.games.split(";"));
+        editUser(req.user.id, "coverregion", req.body.coverregion);
+        editUser(req.user.id, "useavatar", req.body.useavatar);
         res.redirect(`/${req.user.id}`);
     });
 
 app.get("/create", checkAuth, function(req, res) {
     createUser(req.user);
+    editUser(req.user.id, "avatar", req.user.avatar);
     res.redirect(`/${req.user.id}`);
 });
 
@@ -240,6 +245,14 @@ function getOverlayList() {
         overlays.push(JSON.parse(fs.readFileSync(path.resolve(dataFolder, "overlays", overlayFile))));
     });
     return overlays;
+}
+
+function getFlagList() {
+    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "flags", "flags.json")));
+}
+
+function getCoverRegions() {
+    return ["EN", "FR", "DE", "ES", "IT", "NL", "PT", "AU", "SE", "DK", "NO", "FI", "TR"]
 }
 
 function editUser(id, key, value) {

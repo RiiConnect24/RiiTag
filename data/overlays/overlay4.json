@@ -1,7 +1,7 @@
 {
   "name": "Bottom Bar Dark",
   "author": "dhtdht020",
-  "id": 5,
+  "id": 4,
   "width": 1200,
   "height": 450,
   "overlay_img": "img/overlay4.png",
@@ -44,6 +44,10 @@
     "font_color": "#FFFFFF",
     "x": -13,
     "y": 373
+  },
+  "avatar": {
+    "x": 1074,
+    "y": 146
   },
   "enabled": true
 }
