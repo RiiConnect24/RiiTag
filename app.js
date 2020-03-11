@@ -122,7 +122,7 @@ app.get("/img/flags/:flag.png", function(req, res) {
             s.pipe(res);
         });
     } catch(e) {
-        res.render("notfound.pug", {err: e});
+        res.status(404).render("notfound.pug", {err: e});
     }
 });
 
@@ -135,7 +135,7 @@ app.get("/img/:size/:background.png", function(req, res) {
             s.pipe(res);
         });
     } catch(e) {
-        res.render("notfound.pug", {err: e});
+        res.status(404).render("notfound.pug", {err: e});
     }
 });
 
@@ -149,7 +149,7 @@ app.get("/:id/tag.png", function(req, res) {
     } catch(e) {
         console.log(e);
         // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
-        res.render("notfound.pug", {err: e});
+        res.status(404).render("notfound.pug", {err: e});
     }
 });
 
@@ -163,7 +163,7 @@ app.get("/:id/tag.max.png", function(req, res) {
     } catch(e) {
         console.log(e);
         // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
-        res.render("notfound.pug", {err: e});
+        res.status(404).render("notfound.pug", {err: e});
     }
 });
 

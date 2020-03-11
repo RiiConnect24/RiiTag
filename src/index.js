@@ -84,6 +84,28 @@ class Tag extends events.EventEmitter{
         }
     }
 
+    getConsoleType(game) {
+        var chars = game.split("");
+        var code = chars[0];
+        if (code == "R" || code == "S") {
+            return "wii";
+        } else if (code == "A" || code == "B") {
+            return "wiiu";
+        } else {
+            return "wii";
+        }
+    }
+
+    getExtension(covertype, consoletype) {
+        if (consoletype == "wii") {
+            return "png";
+        } else if (consoletype == "wiiu" && covertype == "cover") {
+            return "jpg";
+        } else {
+            return "png";
+        }
+    }
+
     getCoverType()
     {
         if (this.user.covertype) {
@@ -119,30 +141,30 @@ class Tag extends events.EventEmitter{
         }
     }
 
-    getNoCover(covertype)
+    getNoCover(covertype, consoletype)
     {
         if (covertype == "cover3D") {
-            nocover = "nocover.png";
+            return "nocover.png";
         } else if (covertype == "cover") {
-            nocover = "nocoverFlat.png";
+            return "nocoverFlat.png";
         } else if (covertype == "disc") {
-            nocover = "nodisc.png";
+            return "nodisc.png";
         } else {
-            nocover = "nocover.png";
+            return "nocover.png";
         }
     }
 
-    async downloadGameCover(game, region, covertype) {
+    async downloadGameCover(game, region, covertype, consoletype, extension) {
         var can = new Canvas.Canvas(this.getCoverWidth(covertype), this.getCoverHeight(covertype));
         var con = can.getContext("2d");
         var img;
 
-        img = await this.getImage(`https://art.gametdb.com/wii/${covertype}/${region}/${game}.png`);
+        img = await this.getImage(`https://art.gametdb.com/${consoletype}/${covertype}/${region}/${game}.${extension}`);
         con.drawImage(img, 0, 0, this.getCoverWidth(covertype), this.getCoverHeight(covertype));
         await this.savePNG(path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`), can);
     }
 
-    async cacheGameCover(game, region, covertype) {
+    async cacheGameCover(game, region, covertype, consoletype, extension) {
         if (!fs.existsSync(path.resolve(dataFolder, "cache"))) {
             fs.mkdirSync(path.resolve(dataFolder, "cache"));
         }
@@ -150,16 +172,16 @@ class Tag extends events.EventEmitter{
             return;
         }
         try {
-            await this.downloadGameCover(game, region, covertype);
+            await this.downloadGameCover(game, region, covertype, consoletype, extension);
         } catch(e) {
             try {
-                await this.downloadGameCover(game, "EN", covertype); // cover might not exist?
+                await this.downloadGameCover(game, "EN", covertype, consoletype, extension); // cover might not exist?
             } catch(e) {
                 try {
-                    await this.downloadGameCover(game, "US", covertype); // small chance it's US region
+                    await this.downloadGameCover(game, "US", covertype, consoletype, extension); // small chance it's US region
                 } catch(e) {
                     console.error(e);
-                    fs.copyFileSync(path.resolve(dataFolder, "img", getNoCover(covertype)), path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`))
+                    fs.copyFileSync(path.resolve(dataFolder, "img", this.getNoCover(covertype)), path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`))
                 }
             }
         }
@@ -187,8 +209,9 @@ class Tag extends events.EventEmitter{
     async drawGameCover(game) {
         var region = this.getGameRegion(game);
         var covertype = this.getCoverType();
-        console.log(region);
-        await this.cacheGameCover(game, region, covertype);
+        var consoletype = this.getConsoleType(game);
+        var extension = this.getExtension(covertype, consoletype);
+        await this.cacheGameCover(game, region, covertype, consoletype, extension);
         await this.drawImage(path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`), this.covCurX, this.covCurY);
         // console.log(game);
         this.covCurX += this.covIncX;
