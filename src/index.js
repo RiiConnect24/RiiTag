@@ -1,3 +1,4 @@
+
 const Canvas = require("canvas");
 const Image = Canvas.Image;
 
@@ -63,22 +64,22 @@ class Tag extends events.EventEmitter{
     getGameRegion(game) {
         var chars = game.split("");
         var rc = chars[3];
-        if (rc == "E") {
+        if (rc == "P") {
+            if (this.user.coverregion) {
+                if (this.user.coverregion.toUpperCase().length == 2) { // region names are 2 characters as you can see
+                    return this.user.coverregion.toUpperCase();
+                }
+            } else {
+                return "EN";
+            }
+        } else if (rc == "E") {
             return "US";
-        } else if (rc == "P") {
-            return "EN";
         } else if (rc == "J") {
             return "JA";
         } else if (rc == "K") {
             return "KO";
         } else if (rc == "W") {
             return "TW";
-        } else if (this.user.coverregion) {
-            if (rc == "P") {
-                if (this.user.coverregion.toUpperCase().length == 2) { // region names are 2 characters as you can see
-                    return this.user.coverregion.toUpperCase();
-                }
-            }
         } else {
             return "EN";
         }
@@ -87,7 +88,11 @@ class Tag extends events.EventEmitter{
     getConsoleType(game) {
         var chars = game.split("");
         var code = chars[0];
-        if (code == "R" || code == "S") {
+        if (game.startsWith("wii-")) {
+            return "wii";
+        } else if (game.startsWith("wiiu-")) {
+            return "wiiu";
+        } else if (code == "R" || code == "S") {
             return "wii";
         } else if (code == "A" || code == "B") {
             return "wiiu";
@@ -161,15 +166,15 @@ class Tag extends events.EventEmitter{
 
         img = await this.getImage(`https://art.gametdb.com/${consoletype}/${covertype}/${region}/${game}.${extension}`);
         con.drawImage(img, 0, 0, this.getCoverWidth(covertype), this.getCoverHeight(covertype));
-        await this.savePNG(path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`), can);
+        await this.savePNG(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), can);
     }
 
     async cacheGameCover(game, region, covertype, consoletype, extension) {
         if (!fs.existsSync(path.resolve(dataFolder, "cache"))) {
             fs.mkdirSync(path.resolve(dataFolder, "cache"));
         }
-        if (fs.existsSync(path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`))) {
-            return;
+        if (fs.existsSync(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`))) {
+            return true;
         }
         try {
             await this.downloadGameCover(game, region, covertype, consoletype, extension);
@@ -181,10 +186,12 @@ class Tag extends events.EventEmitter{
                     await this.downloadGameCover(game, "US", covertype, consoletype, extension); // small chance it's US region
                 } catch(e) {
                     console.error(e);
-                    fs.copyFileSync(path.resolve(dataFolder, "img", this.getNoCover(covertype)), path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`))
+                    return false;
+                    // fs.copyFileSync(path.resolve(dataFolder, "img", this.getNoCover(covertype)), path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`))
                 }
             }
         }
+        return true;
     }
 
     async cacheAvatar() {
@@ -206,16 +213,20 @@ class Tag extends events.EventEmitter{
         }
     }
 
-    async drawGameCover(game) {
-        var region = this.getGameRegion(game);
+    async drawGameCover(game, draw) {
         var covertype = this.getCoverType();
         var consoletype = this.getConsoleType(game);
+        game = game.replace("wii-", "").replace("wiiu-", "");
+        var region = this.getGameRegion(game);
         var extension = this.getExtension(covertype, consoletype);
-        await this.cacheGameCover(game, region, covertype, consoletype, extension);
-        await this.drawImage(path.resolve(dataFolder, "cache", `${covertype}-${game}-${region}.png`), this.covCurX, this.covCurY);
-        // console.log(game);
-        this.covCurX += this.covIncX;
-        this.covCurY += this.covIncY;
+        var cache = await this.cacheGameCover(game, region, covertype, consoletype, extension);
+        if (cache && draw) {
+            await this.drawImage(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), this.covCurX, this.covCurY);
+            // console.log(game);
+            this.covCurX += this.covIncX;
+            this.covCurY += this.covIncY;
+        }
+        return cache;
     }
 
     async drawAvatar(game) {
@@ -290,13 +301,35 @@ class Tag extends events.EventEmitter{
         await this.drawImage(path.resolve(dataFolder, this.user.bg));
 
         // game covers
+        var games_draw = []
+        
         if (this.user.sort.toLowerCase() != "none") {
             for (var game of this.user.games.reverse().slice(this.overlay.max_covers * -1)) {
-                if (i < this.overlay.max_covers) {
-                    await this.drawGameCover(game);
-                    i++;
+                if (i < this.overlay.max_covers && game != "") {
+                    var draw = await this.drawGameCover(game, false);
+                    if (draw) {
+                        games_draw.push(game)
+                        i++;
+                    }
                 }
             }
+        }
+
+        // this code basically finds any blank spots where covers can be
+        // the blank spots are because it can't find the cover
+        // if there's blank spots, fill them in with covers until we reac the maximum amount
+        for (let j = this.overlay.max_covers; j < this.user.games.length; j++) {
+            if (games_draw.length < this.overlay.max_covers && games_draw.length != this.user.games.length && game != "") {
+                var draw = await this.drawGameCover(this.user.games.reverse()[j], false);
+                if (draw) {
+                    games_draw.unshift(this.user.games.reverse()[j])
+                }
+            }
+        }
+
+        // finally draw the covers
+        for (var game of games_draw) {
+            var draw = await this.drawGameCover(game, true);
         }
 
         // overlay image
