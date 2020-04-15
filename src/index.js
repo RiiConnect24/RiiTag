@@ -319,7 +319,7 @@ class Tag extends events.EventEmitter{
         // the blank spots are because it can't find the cover
         // if there's blank spots, fill them in with covers until we reac the maximum amount
         for (let j = this.overlay.max_covers; j < this.user.games.length; j++) {
-            if (games_draw.length < this.overlay.max_covers && games_draw.length != this.user.games.length && game != "") {
+            if (games_draw.length < this.overlay.max_covers && games_draw.length != this.user.games.length && game != "" && !games_draw.includes(this.user.games.reverse()[j])) {
                 var draw = await this.drawGameCover(this.user.games.reverse()[j], false);
                 if (draw) {
                     games_draw.unshift(this.user.games.reverse()[j])
