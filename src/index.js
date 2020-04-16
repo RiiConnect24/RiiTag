@@ -92,6 +92,10 @@ class Tag extends events.EventEmitter{
             return "wii";
         } else if (game.startsWith("wiiu-")) {
             return "wiiu";
+        } else if (game.startsWith("ds-")) {
+            return "ds";
+        } else if (game.startsWith("3ds-")) {
+            return "3ds";
         } else if (code == "R" || code == "S") {
             return "wii";
         } else if (code == "A" || code == "B") {
@@ -104,16 +108,18 @@ class Tag extends events.EventEmitter{
     getExtension(covertype, consoletype) {
         if (consoletype == "wii") {
             return "png";
-        } else if (consoletype == "wiiu" && covertype == "cover") {
+        } else if (consoletype != "wii" && covertype == "cover") {
             return "jpg";
         } else {
             return "png";
         }
     }
 
-    getCoverType()
+    getCoverType(consoletype)
     {
-        if (this.user.covertype) {
+        if (consoletype == "ds" || consoletype == "3ds") {
+            return "box";
+        } else if (this.user.covertype) {
             return this.user.covertype;
         } else {
             return "cover3D";
@@ -122,50 +128,45 @@ class Tag extends events.EventEmitter{
 
     getCoverWidth(covertype)
     {
-        if (covertype == "cover3D") {
-            return 176;
-        } else if (covertype == "cover") {
+        if (covertype == "cover") {
             return 160;
+        } else if (covertype == "cover3D") {
+            return 176;
         } else if (covertype == "disc") {
             return 160;
+        } else if (covertype == "box") {
+            return 176;
         } else {
             return 176;
         }
     }
 
-    getCoverHeight(covertype)
+    getCoverHeight(covertype, consoletype)
     {
-        if (covertype == "cover3D") {
+        if (covertype == "cover") {
+            if (consoletype == "ds" || consoletype == "3ds") {
+                return 144;
+            } else {
+                return 224;
+            }
+        } else if (covertype == "cover3D") {
             return 248;
-        } else if (covertype == "cover") {
-            return 224;
         } else if (covertype == "disc") {
             return 160;
+        } else if (covertype == "box") {
+            return 158;
         } else {
             return 248;
-        }
-    }
-
-    getNoCover(covertype, consoletype)
-    {
-        if (covertype == "cover3D") {
-            return "nocover.png";
-        } else if (covertype == "cover") {
-            return "nocoverFlat.png";
-        } else if (covertype == "disc") {
-            return "nodisc.png";
-        } else {
-            return "nocover.png";
         }
     }
 
     async downloadGameCover(game, region, covertype, consoletype, extension) {
-        var can = new Canvas.Canvas(this.getCoverWidth(covertype), this.getCoverHeight(covertype));
+        var can = new Canvas.Canvas(this.getCoverWidth(covertype), this.getCoverHeight(covertype, consoletype));
         var con = can.getContext("2d");
         var img;
 
         img = await this.getImage(`https://art.gametdb.com/${consoletype}/${covertype}/${region}/${game}.${extension}`);
-        con.drawImage(img, 0, 0, this.getCoverWidth(covertype), this.getCoverHeight(covertype));
+        con.drawImage(img, 0, 0, this.getCoverWidth(covertype), this.getCoverHeight(covertype, consoletype));
         await this.savePNG(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), can);
     }
 
@@ -187,7 +188,6 @@ class Tag extends events.EventEmitter{
                 } catch(e) {
                     console.error(e);
                     return false;
-                    // fs.copyFileSync(path.resolve(dataFolder, "img", this.getNoCover(covertype)), path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`))
                 }
             }
         }
@@ -214,14 +214,22 @@ class Tag extends events.EventEmitter{
     }
 
     async drawGameCover(game, draw) {
-        var covertype = this.getCoverType();
         var consoletype = this.getConsoleType(game);
-        game = game.replace("wii-", "").replace("wiiu-", "");
+        var covertype = this.getCoverType(consoletype);
+        game = game.replace("wii-", "").replace("wiiu-", "").replace("3ds-", "").replace("ds-", "");
         var region = this.getGameRegion(game);
         var extension = this.getExtension(covertype, consoletype);
         var cache = await this.cacheGameCover(game, region, covertype, consoletype, extension);
         if (cache && draw) {
-            await this.drawImage(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), this.covCurX, this.covCurY);
+            var inc = 0;
+            if (consoletype == "ds" || consoletype == "3ds") {
+                if (covertype == "box") {
+                    inc = 87;
+                } else if (covertype == "cover") {
+                    inc = 80;
+                }
+            }
+            await this.drawImage(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), this.covCurX, this.covCurY + inc);
             // console.log(game);
             this.covCurX += this.covIncX;
             this.covCurY += this.covIncY;
@@ -273,7 +281,7 @@ class Tag extends events.EventEmitter{
         this.covStartX = overlay.cover_start_x;
         this.covStartY = overlay.cover_start_y;
         
-        var covertype = this.getCoverType();
+        var covertype = this.getCoverType(false);
         
         if (covertype == "cover") {
             this.covStartY += 24;
@@ -389,3 +397,17 @@ class Tag extends events.EventEmitter{
 }
 
 module.exports = Tag;
+
+if (module == require.main) {
+    var jstring = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
+    var banner = new Tag(jstring, false);
+
+    banner.once("done", function () {
+        var out = fs.createWriteStream(path.resolve(dataFolder, "debug", "user1.png"));
+        var stream = banner.pngStream;
+
+        stream.on('data', function (chunk) {
+            out.write(chunk);
+        });
+    });
+}
