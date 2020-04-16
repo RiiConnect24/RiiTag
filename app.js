@@ -246,14 +246,15 @@ app.get("/:id", function(req, res) {
                                overlays: getOverlayList()
                               });
 });
+
 // app.get("/edit/:id", function(req, res) {
 //     // display a page with the user's jstring and allow them to edit it manually.
 //     // this is super dangerous lmao
 // });
 
 app.listen(3000, async function() {
-    cleanCache();
-    console.log("Cleaned cache");
+    // cleanCache();
+    // console.log("Cleaned cache");
     await db.create("users", ["id INTEGER PRIMARY KEY", "snowflake TEXT", "key TEXT"]);
     // db.insert("users", ["snowflake", "key"], ["test_sf", "test_key"]);
     console.log("RiiTag Server listening on port 3000");
