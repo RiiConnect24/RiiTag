@@ -24,3 +24,8 @@ var sel3 = document.getElementById('overlay');
 sel3.onchange = function () {
     document.getElementById("overlay-img").src = "/img/overlays/" + this.value.replace(".json", "") + ".png";
 }
+
+var sel4 = document.getElementById('coin');
+sel4.onchange = function () {
+    document.getElementById("coin-img").src = "/img/coin/" + this.value + ".png";
+}
