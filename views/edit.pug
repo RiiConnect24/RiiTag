@@ -32,22 +32,22 @@ block content
             label(for="flag" class="text-white") Flags
             br
             select(name="flag" id="flag")
-                each flag in flags
+                each k,v in flags
                     if jdata.region == flag
-                        option(value=flag selected=true)= flags.flag
+                        option(value=k selected=true)= v
                     else
-                        option(value=flag selected=false)= flags.flag
+                        option(value=k selected=false)= v
             br
             img(src=`/img/flags/${jdata.region}.png` id="flag-img" alt="Flag Preview")
         div(class="form-group")
             label(for="coin" class="text-white") Coin Icon
             br
             select(name="coin" id="coin")
-                each coin in coins
+                each k,v in coins
                     if jdata.coin == coin
-                        option(value=coin selected=true)= coins.coin
+                        option(value=k selected=true)= v
                     else
-                        option(value=coin selected=false)= coins.coin
+                        option(value=k selected=false)= v
             br
             img(src=`/img/coin/${jdata.coin}.png` id="coin-img" alt="Coin Preview")
         div(class="form-group")
