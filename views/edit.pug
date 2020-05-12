@@ -32,7 +32,7 @@ block content
             label(for="flag" class="text-white") Flags
             br
             select(name="flag" id="flag")
-                each k,v in flags
+                each v,k in flags
                     if jdata.region == flag
                         option(value=k selected=true)= v
                     else
@@ -43,7 +43,7 @@ block content
             label(for="coin" class="text-white") Coin Icon
             br
             select(name="coin" id="coin")
-                each k,v in coins
+                each v,k in coins
                     if jdata.coin == coin
                         option(value=k selected=true)= v
                     else
