@@ -293,7 +293,27 @@ block content
                 option(value="pride") Pride
                 option(value="rc24") RiiConnect24
                 option(value="trans") Transgender
+            br
             img(src=`/img/flags/${jdata.region}.png` id="flag-img" alt="Flag Preview")
+        div(class="form-group")
+            label(for="coin" class="text-white") Coin Icon
+            br
+            select(name="coin" id="coin")
+                option(value="animalcrossing") Animal Crossing Bell Bag
+                option(value="animalcrossing2") Animal Crossing Bell Coin
+                option(value="fortnite") Fortnite V-Bucks
+                option(value="mario") Mario Coin (2D)
+                option(value="mario2") Mario Coin (3D)
+                option(value="mario3") Mario Star Coin
+                option(value="money1") Dollar Bill
+                option(value="money2") Money Bag
+                option(value="reddit") Reddit Silver
+                option(value="reddit2") Reddit Gold
+                option(value="reddit3") Reddit Platinum
+                option(value="shekel") Shekel
+                option(value="zelda") Zelda Rupee
+            br
+            img(src=`/img/coin/${jdata.coin}.png` id="coin-img" alt="Coin Preview")
         div(class="form-group")
             label(for="nickname" class="text-white") Nickname
             br

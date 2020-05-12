@@ -160,6 +160,15 @@ class Tag extends events.EventEmitter{
         }
     }
 
+    getCoinImage()
+    {
+        if (this.user.coin) {
+            return this.user.coin;
+        } else {
+            return "mario";
+        }
+    }
+
     async downloadGameCover(game, region, covertype, consoletype, extension) {
         var can = new Canvas.Canvas(this.getCoverWidth(covertype), this.getCoverHeight(covertype, consoletype));
         var con = can.getContext("2d");
@@ -344,7 +353,7 @@ class Tag extends events.EventEmitter{
         await this.drawImage(path.resolve(dataFolder, this.overlay.overlay_img));
 
         // coin image/text
-        await this.drawImage(path.resolve(dataFolder, this.overlay.coin_icon.img),
+        await this.drawImage(path.resolve(dataFolder, "img", "coin", this.getCoinImage() + ".png"),
             this.overlay.coin_icon.x,
             this.overlay.coin_icon.y);
         this.drawText(this.overlay.coin_count.font_family,
