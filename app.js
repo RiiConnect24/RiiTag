@@ -98,6 +98,7 @@ app.route("/edit")
         editUser(req.user.id, "bg", req.body.background);
         editUser(req.user.id, "overlay", req.body.overlay);
         editUser(req.user.id, "region", req.body.flag);
+        editUser(req.user.id, "coin", req.body.coin);
         editUser(req.user.id, "name", req.body.name);
         editUser(req.user.id, "friend_code", req.body.wiinumber);
         editUser(req.user.id, "games", req.body.games.split(";"));
