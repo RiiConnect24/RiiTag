@@ -81,6 +81,7 @@ app.route("/edit")
                                     jdata: JSON.parse(jstring),
                                     overlays: getOverlayList(),
                                     flags: getFlagList(),
+                                    coins: getCoinList(),
                                     covertypes: getCoverTypes(),
                                     coverregions: getCoverRegions(),
                                     userKey: userKey
@@ -279,7 +280,11 @@ function getOverlayList() {
 }
 
 function getFlagList() {
-    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "flags", "flags.json")));
+    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "meta", "flags.json")));
+}
+
+function getCoinList() {
+    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "meta", "coin.json")));
 }
 
 function getCoverTypes() {
