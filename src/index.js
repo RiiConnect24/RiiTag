@@ -61,7 +61,7 @@ class Tag extends events.EventEmitter{
         obj.ctx.drawImage(source, x, y, shrinkx, shrinky);
     }
 
-    getGameRegion(game) {
+    getGameRegion(game) { // determine the game's region by its ID
         var chars = game.split("");
         var rc = chars[3];
         if (rc == "P") {
@@ -165,7 +165,7 @@ class Tag extends events.EventEmitter{
         if (this.user.coin) {
             return this.user.coin;
         } else {
-            return "mario";
+            return "mario"; // the mario coin is the default image
         }
     }
 
