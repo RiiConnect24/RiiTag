@@ -173,52 +173,64 @@ app.get("/wii", async function(req, res) {
     var key = req.query.key || "";
     var gameID = req.query.game || "";
 
-    if (key == "") {
-        return respond(res, "key is undefined", 400);
-    } else if (gameID == "") {
-        return respond(res, "game is undefined", 400);
+    if (key == "" || gameID == "") {
+        res.status(400).send();
+        return
     }
 
     var userID = await getUserID(key);
     if (userID == undefined) {
-        return respond(res, "A user by that key does not exist", 400);
-    } else {
-        var c = getUserAttrib(userID, "coins")
-        var games = getUserAttrib(userID, "games");
-        var newGames = updateGameArray(games, "wii-" + gameID);
-        // console.log(games);
-        // console.log(newGames);
-        setUserAttrib(userID, "coins", c + 1);
-        setUserAttrib(userID, "games", newGames);
-        res.status(200).send();
+        res.status(400).send();
+        return
     }
+
+    if (getUserAttrib(userID, "lastplayed") !== null) {
+        if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
+            res.status(429).send(); // cooldown
+            return
+        }
+    }
+
+    var c = getUserAttrib(userID, "coins")
+    var games = getUserAttrib(userID, "games");
+    var newGames = updateGameArray(games, "wii-" + gameID);
+    setUserAttrib(userID, "coins", c + 1);
+    setUserAttrib(userID, "games", newGames);
+    setUserAttrib(userID, "lastplayed", ["wii-" + gameID, Math.floor(Date.now() / 1000)]);
+    res.status(200).send();
 });
 
 app.get("/wiiu", async function(req, res) {
     var key = req.query.key || "";
     var gameTID = req.query.game.toUpperCase() || "";
 
-    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "wiiu.json")))
+    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "wiiu.json"))) // 16 digit TID -> 4 or 6 digit game ID
 
-    if (key == "") {
-        return respond(res, "key is undefined", 400);
-    } else if (gameTID == "") {
-        return respond(res, "game is undefined", 400);
+    if (key == "" || gameTID == "") {
+        res.status(400).send();
+        return
     }
 
     var userID = await getUserID(key);
     if (userID == undefined) {
-        return respond(res, "A user by that key does not exist", 400);
-    } else {
-        var c = getUserAttrib(userID, "coins")
-        var games = getUserAttrib(userID, "games");
-        var newGames = updateGameArray(games, "wiiu-" + ids[gameTID]);
-        // console.log(games);
-        // console.log(newGames);
-        setUserAttrib(userID, "coins", c + 1);
-        setUserAttrib(userID, "games", newGames);
-        res.status(200).send();
+        res.status(400).send();
+        return
     }
+
+    if (getUserAttrib(userID, "lastplayed") !== null) {
+        if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
+            res.status(429).send(); // cooldown
+            return
+        }
+    }
+
+    var c = getUserAttrib(userID, "coins")
+    var games = getUserAttrib(userID, "games");
+    var newGames = updateGameArray(games, "wiiu-" + ids[gameTID]);
+    setUserAttrib(userID, "coins", c + 1);
+    setUserAttrib(userID, "games", newGames);
+    setUserAttrib(userID, "lastplayed", ["wiiu-" + gameID, Math.floor(Date.now() / 1000)]);
+    res.status(200).send();
 });
 
 app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
