@@ -33,7 +33,7 @@ passport.deserializeUser(function(obj, done) {
 var scopes = ['identify'];
 
 passport.use(new DiscordStrategy({
-    clientID: "583346143736627213",
+    clientID: config.clientID,
     clientSecret: config.clientSecret,
     callbackURL: config.callbackURL
 }, function(accessToken, refreshToken, profile, done) {
