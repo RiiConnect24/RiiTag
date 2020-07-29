@@ -10,14 +10,14 @@ const dataFolder = path.resolve(__dirname, "..", "data");
 // const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
 class Tag extends events.EventEmitter{
-    constructor(user, size) {
+    constructor(user, size, doMake=true) {
         super();
 
         this.size = size;
         this.user = this.loadUser(user);
         this.overlay = this.loadOverlay(this.user.overlay);
 
-        this.makeBanner();
+        if (doMake) this.makeBanner();
     }
 
     loadUser(json_string) {
@@ -169,12 +169,16 @@ class Tag extends events.EventEmitter{
         }
     }
 
+    getCoverUrl(consoletype, covertype, region, game, extension) {
+        return `https://art.gametdb.com/${consoletype}/${covertype}/${region}/${game}.${extension}`;
+    }
+
     async downloadGameCover(game, region, covertype, consoletype, extension) {
         var can = new Canvas.Canvas(this.getCoverWidth(covertype), this.getCoverHeight(covertype, consoletype));
         var con = can.getContext("2d");
         var img;
 
-        img = await this.getImage(`https://art.gametdb.com/${consoletype}/${covertype}/${region}/${game}.${extension}`);
+        img = await this.getImage(this.getCoverUrl(consoletype, covertype, region, game, extension));
         con.drawImage(img, 0, 0, this.getCoverWidth(covertype), this.getCoverHeight(covertype, consoletype));
         await this.savePNG(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), can);
     }

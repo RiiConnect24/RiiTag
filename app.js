@@ -276,6 +276,45 @@ app.get("/:id", function(req, res, next) {
 //     // this is super dangerous lmao
 // });
 
+app.get("/:id/json", function(req, res) {
+    var userData = getUserData(req.params.id);
+    res.type("application/json");
+
+    if (!userData) {
+        res.status(404).send(JSON.stringify({error: "That user ID does not exist."}));
+
+        return;
+    };
+
+    var lastPlayed = {};
+    if (userData.lastplayed !== null) {
+        var banner = new Banner(JSON.stringify(userData), doMake=false);
+        var game = userData.lastplayed[0];
+        var time = userData.lastplayed[1];
+        var gameid = game.split("-")[1]
+
+        var consoletype = banner.getConsoleType(game);
+        var covertype = banner.getCoverType(consoletype);
+        var region = banner.getGameRegion(gameid);
+        var extension = banner.getExtension(covertype, consoletype);
+
+        var lastPlayed = {
+            game_id: gameid,
+            console: consoletype,
+            region: region,
+            cover_url: banner.getCoverUrl(consoletype, covertype, region, gameid, extension),
+            time: time
+        };
+    };
+
+    var tagUrl = `https://tag.rc24.xyz/${userData.id}/tag.png`;
+    res.send(JSON.stringify({
+        user: {name: userData.name, id: userData.id},
+        tag_url: {normal: tagUrl, max: tagUrl.replace(".png", ".max.png")},
+        game_data: {last_played: lastPlayed, games: userData.games}
+    }));
+})
+
 app.listen(3000, async function() {
     // cleanCache();
     // console.log("Cleaned cache");
@@ -339,8 +378,13 @@ function setUserAttrib(id, key, value) {
 
 function getUserData(id) {
     var p = path.resolve(dataFolder, "users", id + ".json");
-    var jdata = JSON.parse(fs.readFileSync(p));
-    return jdata || null;
+    try {
+        var jdata = JSON.parse(fs.readFileSync(p));
+    } catch(e) {
+        return null;
+    }
+    
+    return jdata;
 }
 
 async function createUser(user) {
@@ -349,6 +393,7 @@ async function createUser(user) {
             name: user.username,
             id: user.id,
             games: [],
+            last_played: {},
             coins: 0,
             friend_code: "0000 0000 0000 0000",
             region: "rc24",
