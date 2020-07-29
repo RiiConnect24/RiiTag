@@ -313,7 +313,7 @@ app.get("/:id/json", function(req, res) {
         tag_url: {normal: tagUrl, max: tagUrl.replace(".png", ".max.png")},
         game_data: {last_played: lastPlayed, games: userData.games}
     }));
-})
+});
 
 app.listen(3000, async function() {
     // cleanCache();
