@@ -33,7 +33,7 @@ passport.deserializeUser(function(obj, done) {
 var scopes = ['identify'];
 
 passport.use(new DiscordStrategy({
-    clientID: "737308231986315348",
+    clientID: "684886188603080716",
     clientSecret: config.clientSecret,
     callbackURL: config.callbackURL
 }, function(accessToken, refreshToken, profile, done) {
@@ -310,7 +310,7 @@ app.get("/:id/json", function(req, res) {
         tag_url: {normal: tagUrl, max: tagUrl.replace(".png", ".max.png")},
         game_data: {last_played: lastPlayed, games: userData.games}
     }));
-})
+});
 
 app.listen(3000, async function() {
     // cleanCache();
