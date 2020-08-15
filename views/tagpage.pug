@@ -2,25 +2,15 @@ extends head
 
 mixin background
   each bg in backgrounds
-    if user.bg == `img/1200x450/${bg}`
+    if tuser.bg == `img/1200x450/${bg}`
       
 
 block content
-  nav.navbar.navbar-light.navbar-expand-md.bg-dark
-    .container-fluid
-      a.navbar-brand.text-light(href='#') RiiTag
-      button.navbar-toggler(data-toggle='collapse' data-target='#navcol-1')
-        span.sr-only Toggle navigation
-        span.navbar-toggler-icon
-      #navcol-1.collapse.navbar-collapse
-        ul.nav.navbar-nav
-          li.nav-item(role='presentation')
-            a.nav-link.text-white-50(href='/') Home
   div(style='margin-top: 20px;')
     .container
       .row
         .col-md-12
-          h1.text-white #{user.name}
+          h1.text-white #{tuser.name}
       .row
        .col-md-6
          h5.text-white Their Tag:
@@ -39,19 +29,19 @@ block content
           .card-body
             span.text-white
               strong Display Name: 
-              | #{user.name}
+              | #{tuser.name}
               br
               strong Background: 
-              | #{user.bg.replace("img/1200x450/", "")}
+              | #{tuser.bg.replace("img/1200x450/", "")}
               br
               strong Flag: 
-              | #{user.region}
+              | #{tuser.region}
               br
               strong Wii Number: 
-              | #{user.friend_code}
+              | #{tuser.friend_code}
               br
               each overlay in overlays
-                if user.overlay == `overlay${overlay.id}.json`
+                if tuser.overlay == `overlay${overlay.id}.json`
                   strong Overlay: 
                   | #{overlay.name}
               br
@@ -87,11 +77,11 @@ block content
               h5.mb-0 Stats
             .card-body
               span.text-white
-                | #{user.name} has 
-                if user.coins == 1
+                | #{tuser.name} has 
+                if tuser.coins == 1
                   strong 1 coin
                 else
-                  strong #{user.coins} coins
+                  strong #{tuser.coins} coins
                 | .
                 br
   script(src='assets/js/jquery.min.js')
