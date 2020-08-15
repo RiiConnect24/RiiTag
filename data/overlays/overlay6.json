@@ -4,7 +4,7 @@
   "id": 6,
   "width": 1200,
   "height": 450,
-  "overlay_img": "img/overlay6.png",
+  "overlay_img": "img/overlay/overlay6.png",
   "max_covers": 8,
   "cover_start_x": 80,
   "cover_start_y": 50,

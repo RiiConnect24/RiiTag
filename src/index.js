@@ -10,14 +10,14 @@ const dataFolder = path.resolve(__dirname, "..", "data");
 // const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
 class Tag extends events.EventEmitter{
-    constructor(user, size) {
+    constructor(user, size, doMake=true) {
         super();
 
         this.size = size;
         this.user = this.loadUser(user);
         this.overlay = this.loadOverlay(this.user.overlay);
 
-        this.makeBanner();
+        if (doMake) this.makeBanner();
     }
 
     loadUser(json_string) {
@@ -61,7 +61,7 @@ class Tag extends events.EventEmitter{
         obj.ctx.drawImage(source, x, y, shrinkx, shrinky);
     }
 
-    getGameRegion(game) {
+    getGameRegion(game) { // determine the game's region by its ID
         var chars = game.split("");
         var rc = chars[3];
         if (rc == "P") {
@@ -160,12 +160,25 @@ class Tag extends events.EventEmitter{
         }
     }
 
+    getCoinImage()
+    {
+        if (this.user.coin) {
+            return this.user.coin;
+        } else {
+            return "mario"; // the mario coin is the default image
+        }
+    }
+
+    getCoverUrl(consoletype, covertype, region, game, extension) {
+        return `https://art.gametdb.com/${consoletype}/${covertype}/${region}/${game}.${extension}`;
+    }
+
     async downloadGameCover(game, region, covertype, consoletype, extension) {
         var can = new Canvas.Canvas(this.getCoverWidth(covertype), this.getCoverHeight(covertype, consoletype));
         var con = can.getContext("2d");
         var img;
 
-        img = await this.getImage(`https://art.gametdb.com/${consoletype}/${covertype}/${region}/${game}.${extension}`);
+        img = await this.getImage(this.getCoverUrl(consoletype, covertype, region, game, extension));
         con.drawImage(img, 0, 0, this.getCoverWidth(covertype), this.getCoverHeight(covertype, consoletype));
         await this.savePNG(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), can);
     }
@@ -344,7 +357,7 @@ class Tag extends events.EventEmitter{
         await this.drawImage(path.resolve(dataFolder, this.overlay.overlay_img));
 
         // coin image/text
-        await this.drawImage(path.resolve(dataFolder, this.overlay.coin_icon.img),
+        await this.drawImage(path.resolve(dataFolder, "img", "coin", this.getCoinImage() + ".png"),
             this.overlay.coin_icon.x,
             this.overlay.coin_icon.y);
         this.drawText(this.overlay.coin_count.font_family,

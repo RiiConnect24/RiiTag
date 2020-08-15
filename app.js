@@ -33,7 +33,7 @@ passport.deserializeUser(function(obj, done) {
 var scopes = ['identify'];
 
 passport.use(new DiscordStrategy({
-    clientID: "583346143736627213",
+    clientID: config.clientID,
     clientSecret: config.clientSecret,
     callbackURL: config.callbackURL
 }, function(accessToken, refreshToken, profile, done) {
@@ -81,6 +81,7 @@ app.route("/edit")
                                     jdata: JSON.parse(jstring),
                                     overlays: getOverlayList(),
                                     flags: getFlagList(),
+                                    coins: getCoinList(),
                                     covertypes: getCoverTypes(),
                                     coverregions: getCoverRegions(),
                                     userKey: userKey
@@ -98,6 +99,7 @@ app.route("/edit")
         editUser(req.user.id, "bg", req.body.background);
         editUser(req.user.id, "overlay", req.body.overlay);
         editUser(req.user.id, "region", req.body.flag);
+        editUser(req.user.id, "coin", req.body.coin);
         editUser(req.user.id, "name", req.body.name);
         editUser(req.user.id, "friend_code", req.body.wiinumber);
         editUser(req.user.id, "games", req.body.games.split(";"));
@@ -171,52 +173,64 @@ app.get("/wii", async function(req, res) {
     var key = req.query.key || "";
     var gameID = req.query.game || "";
 
-    if (key == "") {
-        return respond(res, "key is undefined", 400);
-    } else if (gameID == "") {
-        return respond(res, "game is undefined", 400);
+    if (key == "" || gameID == "") {
+        res.status(400).send();
+        return
     }
 
     var userID = await getUserID(key);
     if (userID == undefined) {
-        return respond(res, "A user by that key does not exist", 400);
-    } else {
-        var c = getUserAttrib(userID, "coins")
-        var games = getUserAttrib(userID, "games");
-        var newGames = updateGameArray(games, "wii-" + gameID);
-        // console.log(games);
-        // console.log(newGames);
-        setUserAttrib(userID, "coins", c + 1);
-        setUserAttrib(userID, "games", newGames);
-        res.status(200).send();
+        res.status(400).send();
+        return
     }
+
+    if (getUserAttrib(userID, "lastplayed") !== null) {
+        if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
+            res.status(429).send(); // cooldown
+            return
+        }
+    }
+
+    var c = getUserAttrib(userID, "coins")
+    var games = getUserAttrib(userID, "games");
+    var newGames = updateGameArray(games, "wii-" + gameID);
+    setUserAttrib(userID, "coins", c + 1);
+    setUserAttrib(userID, "games", newGames);
+    setUserAttrib(userID, "lastplayed", ["wii-" + gameID, Math.floor(Date.now() / 1000)]);
+    res.status(200).send();
 });
 
 app.get("/wiiu", async function(req, res) {
     var key = req.query.key || "";
     var gameTID = req.query.game.toUpperCase() || "";
 
-    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "wiiu.json")))
+    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "wiiu.json"))) // 16 digit TID -> 4 or 6 digit game ID
 
-    if (key == "") {
-        return respond(res, "key is undefined", 400);
-    } else if (gameTID == "") {
-        return respond(res, "game is undefined", 400);
+    if (key == "" || gameTID == "") {
+        res.status(400).send();
+        return
     }
 
     var userID = await getUserID(key);
     if (userID == undefined) {
-        return respond(res, "A user by that key does not exist", 400);
-    } else {
-        var c = getUserAttrib(userID, "coins")
-        var games = getUserAttrib(userID, "games");
-        var newGames = updateGameArray(games, "wiiu-" + ids[gameTID]);
-        // console.log(games);
-        // console.log(newGames);
-        setUserAttrib(userID, "coins", c + 1);
-        setUserAttrib(userID, "games", newGames);
-        res.status(200).send();
+        res.status(400).send();
+        return
     }
+
+    if (getUserAttrib(userID, "lastplayed") !== null) {
+        if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
+            res.status(429).send(); // cooldown
+            return
+        }
+    }
+
+    var c = getUserAttrib(userID, "coins")
+    var games = getUserAttrib(userID, "games");
+    var newGames = updateGameArray(games, "wiiu-" + ids[gameTID]);
+    setUserAttrib(userID, "coins", c + 1);
+    setUserAttrib(userID, "games", newGames);
+    setUserAttrib(userID, "lastplayed", ["wiiu-" + gameID, Math.floor(Date.now() / 1000)]);
+    res.status(200).send();
 });
 
 app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
@@ -262,6 +276,45 @@ app.get("/:id", function(req, res, next) {
 //     // this is super dangerous lmao
 // });
 
+app.get("/:id/json", function(req, res) {
+    var userData = getUserData(req.params.id);
+    res.type("application/json");
+
+    if (!userData) {
+        res.status(404).send(JSON.stringify({error: "That user ID does not exist."}));
+
+        return;
+    };
+
+    var lastPlayed = {};
+    if (userData.lastplayed !== null) {
+        var banner = new Banner(JSON.stringify(userData), doMake=false);
+        var game = userData.lastplayed[0];
+        var time = userData.lastplayed[1];
+        var gameid = game.split("-")[1]
+
+        var consoletype = banner.getConsoleType(game);
+        var covertype = banner.getCoverType(consoletype);
+        var region = banner.getGameRegion(gameid);
+        var extension = banner.getExtension(covertype, consoletype);
+
+        var lastPlayed = {
+            game_id: gameid,
+            console: consoletype,
+            region: region,
+            cover_url: banner.getCoverUrl(consoletype, covertype, region, gameid, extension),
+            time: time
+        };
+    };
+
+    var tagUrl = `https://tag.rc24.xyz/${userData.id}/tag.png`;
+    res.send(JSON.stringify({
+        user: {name: userData.name, id: userData.id},
+        tag_url: {normal: tagUrl, max: tagUrl.replace(".png", ".max.png")},
+        game_data: {last_played: lastPlayed, games: userData.games}
+    }));
+});
+
 app.listen(3000, async function() {
     // cleanCache();
     // console.log("Cleaned cache");
@@ -288,7 +341,11 @@ function getOverlayList() {
 }
 
 function getFlagList() {
-    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "flags", "flags.json")));
+    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "meta", "flags.json")));
+}
+
+function getCoinList() {
+    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "meta", "coin.json")));
 }
 
 function getCoverTypes() {
@@ -321,8 +378,13 @@ function setUserAttrib(id, key, value) {
 
 function getUserData(id) {
     var p = path.resolve(dataFolder, "users", id + ".json");
-    var jdata = JSON.parse(fs.readFileSync(p));
-    return jdata || null;
+    try {
+        var jdata = JSON.parse(fs.readFileSync(p));
+    } catch(e) {
+        return null;
+    }
+    
+    return jdata;
 }
 
 async function createUser(user) {
@@ -331,6 +393,7 @@ async function createUser(user) {
             name: user.username,
             id: user.id,
             games: [],
+            last_played: {},
             coins: 0,
             friend_code: "0000 0000 0000 0000",
             region: "rc24",

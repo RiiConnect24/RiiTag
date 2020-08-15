@@ -4,7 +4,8 @@
   "description": "Tag generation for RC24",
   "main": "src/index.js",
   "scripts": {
-    "test": "node src/index.js"
+    "test": "node src/index.js",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
