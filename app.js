@@ -33,7 +33,7 @@ passport.deserializeUser(function(obj, done) {
 var scopes = ['identify'];
 
 passport.use(new DiscordStrategy({
-    clientID: "684886188603080716",
+    clientID: "583346143736627213",
     clientSecret: config.clientSecret,
     callbackURL: config.callbackURL
 }, function(accessToken, refreshToken, profile, done) {
@@ -237,11 +237,21 @@ app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
 });
 
 
-app.get("/:id", function(req, res) {
+app.get("/:id", function(req, res, next) {
     // var key = req.params.id;
     // console.log(key);
+    var userData;
+
+    try {
+        userData = getUserData(req.params.id);
+    } catch(e) {
+        console.log(e);
+        res.render("notfound.pug");
+        return;
+    }
+
     res.render("tagpage.pug", {id: req.params.id,
-                               user: getUserData(req.params.id),
+                               user: userData,
                                backgrounds: getBackgroundList(),
                                overlays: getOverlayList()
                               });
@@ -395,3 +405,8 @@ function updateGameArray(games, game) {
     games.unshift(game);
     return games;
 }
+
+app.use(function(req, res, next) {
+    res.status(404);
+    res.render("notfound");
+});
