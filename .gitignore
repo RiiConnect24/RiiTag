@@ -3,3 +3,4 @@ src/*.png
 data/cache/
 .DS_Store
 data/users/
+config.json
