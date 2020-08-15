@@ -35,30 +35,29 @@ block content
             br
             select(name="flag" id="flag")
                 each v,k in flags
-                    if jdata.region == flag
+                    if jdata.region == k
                         option(value=k selected=true)= v
                     else
                         option(value=k selected=false)= v
             br
-            img(src=`/flags/${jdata.region}.png` id="flag-img" alt="Flag Preview")
+            span(title=jdata.region)
+                img(src=`/flags/${jdata.region}.png` id="flag-img" alt="Flag Preview")
         div(class="form-group")
             label(for="coin" class="text-white") Coin Icon
             br
             select(name="coin" id="coin")
                 each v,k in coins
-                    if jdata.coin == coin
+                    if jdata.coin == k
                         option(value=k selected=true)= v
                     else
                         option(value=k selected=false)= v
             br
             - var cimg
-            - console.log(jdata.coin)
             if jdata.coin == "default"
-                cimg = soverlay.coin_icon.img
+                - cimg = soverlay.coin_icon.img
             else
-                cimg = jdata.coin
-            span(title=soverlay.coin_icon.img)
-                img(src=`/img/coin/${soverlay.coin_icon.img}` id="coin-img" alt="Coin Preview")
+                - cimg = jdata.coin
+            img(src=`/img/coin/${soverlay.coin_icon.img}` id="coin-img" alt="Coin Preview")
         div(class="form-group")
             label(for="nickname" class="text-white") Nickname
             br

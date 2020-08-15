@@ -11,9 +11,10 @@ const bodyParser = require("body-parser");
 const xml = require("xml");
 const DatabaseDriver = require("./dbdriver");
 
-const db = new DatabaseDriver(path.join(__dirname, "data", "users", "users.db"));
+const db = new DatabaseDriver(path.join(__dirname, "users.db"));
 const Sentry = require('@sentry/node');
 const express = require("express");
+// const { render } = require("pug");
 const app = express();
 
 Sentry.init({ dsn: config.sentryURL });
@@ -53,7 +54,7 @@ app.use(express.static("data/"));
 app.set("view engine", "pug");
 
 app.get("/", function(req, res) {
-    res.render("index.pug");
+    res.render("index.pug", { user: req.user });
 });
 
 
@@ -64,7 +65,12 @@ app.get("/demo", async function(req, res) {
     });
 });
 
-app.get('/login', passport.authenticate('discord', { scope: scopes }), function(req, res) {});
+app.get('/login', function(req, res, next) {
+    if (req.isAuthenticated()) {
+        res.redirect("/");
+    }
+    next()
+}, passport.authenticate('discord', { scope: scopes }));
 
 app.get('/callback',
     passport.authenticate('discord', { failureRedirect: '/' }), function(req, res) { res.redirect("/create") } // auth success
@@ -87,7 +93,8 @@ app.route("/edit")
                                     coins: getCoinList(),
                                     covertypes: getCoverTypes(),
                                     coverregions: getCoverRegions(),
-                                    userKey: userKey
+                                    userKey: userKey,
+                                    user: req.user
                                 });
         } catch(e) {
             console.log(e);
@@ -143,33 +150,36 @@ app.get("/create", checkAuth, function(req, res) {
 //         res.status(404).render("notfound.pug", {err: e});
 //     }
 // });
+function getTag(id, limitSize) {
+    return new Promise(function(resolve, reject) {
+        try {
+            var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
+            var banner = new Banner(jstring, limitSize);
+            banner.once("done", function() {
+                resolve(banner);
+            });
+        } catch(e) {
+            console.log(e);
+            // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
+            // res.status(404).render("notfound.pug", {err: e});
+            reject(e);
+        }
+    })
+}
 
-app.get("^/:id([0-9]+)/tag.png", function(req, res) {
-    try {
-        var jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.params.id + ".json"));
-        var banner = new Banner(jstring, true);
-        banner.once("done", function() {
-            banner.pngStream.pipe(res);
-        });
-    } catch(e) {
-        console.log(e);
-        // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
+
+app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
+    var banner = await getTag(req.params.id, true).catch(function() {
         res.status(404).render("notfound.pug", {err: e});
-    }
+    });
+    banner.pngStream.pipe(res);
 });
 
-app.get("^/:id([0-9]+)/tag.max.png", function(req, res) {
-    try {
-        var jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.params.id + ".json"));
-        var banner = new Banner(jstring, false);
-        banner.once("done", function() {
-            banner.pngStream.pipe(res);
-        });
-    } catch(e) {
-        console.log(e);
-        // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
+app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
+    var banner = await getTag(req.params.id, false).catch(function() {
         res.status(404).render("notfound.pug", {err: e});
-    }
+    });
+    banner.pngStream.pipe(res);
 });
 
 app.get("/wii", async function(req, res) {
@@ -265,7 +275,8 @@ app.get("^/:id([0-9]+)", function(req, res, next) {
     };
 
     res.render("tagpage.pug", {id: req.params.id,
-                               user: userData,
+                               tuser: userData,
+                               user: req.user,
                                backgrounds: getBackgroundList(),
                                overlays: getOverlayList()
                               });
@@ -340,6 +351,7 @@ function getOverlayList() {
 }
 
 function getFlagList() {
+    console.log()
     return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "meta", "flags.json")));
 }
 
