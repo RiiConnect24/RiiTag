@@ -1,0 +1,12 @@
+extends head
+
+block content
+    p That resource does not exist.
+    p ~Nick "Larsenv" Fibonacci - 2019
+    if err
+        br
+        br
+        p
+            b Debug info:
+        p= err
+    br

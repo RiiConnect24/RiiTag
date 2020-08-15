@@ -48,6 +48,9 @@ app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static("public/"));
+app.use(express.static("data/"));
+
+app.set("view engine", "pug");
 
 app.get("/", function(req, res) {
     res.render("index.pug");
@@ -115,33 +118,33 @@ app.get("/create", checkAuth, function(req, res) {
     res.redirect(`/${req.user.id}`);
 });
 
-app.get("/img/flags/:flag.png", function(req, res) {
-    try {
-        var file = path.resolve(dataFolder, "flags", req.params.flag + ".png");
-        var s = fs.createReadStream(file);
-        s.on('open', function() {
-            res.set('Content-Type', 'image/png');
-            s.pipe(res);
-        });
-    } catch(e) {
-        res.status(404).render("notfound.pug", {err: e});
-    }
-});
+// app.get("/img/flags/:flag.png", function(req, res) {
+//     try {
+//         var file = path.resolve(dataFolder, "flags", req.params.flag + ".png");
+//         var s = fs.createReadStream(file);
+//         s.on('open', function() {
+//             res.set('Content-Type', 'image/png');
+//             s.pipe(res);
+//         });
+//     } catch(e) {
+//         res.status(404).render("notfound.pug", {err: e});
+//     }
+// });
 
-app.get("/img/:size/:background.png", function(req, res) {
-    try {
-        var file = path.resolve(dataFolder, "img", req.params.size, req.params.background + ".png");
-        var s = fs.createReadStream(file);
-        s.on('open', function() {
-            res.set('Content-Type', 'image/png');
-            s.pipe(res);
-        });
-    } catch(e) {
-        res.status(404).render("notfound.pug", {err: e});
-    }
-});
+// app.get("/img/:size/:background.png", function(req, res) {
+//     try {
+//         var file = path.resolve(dataFolder, "img", req.params.size, req.params.background + ".png");
+//         var s = fs.createReadStream(file);
+//         s.on('open', function() {
+//             res.set('Content-Type', 'image/png');
+//             s.pipe(res);
+//         });
+//     } catch(e) {
+//         res.status(404).render("notfound.pug", {err: e});
+//     }
+// });
 
-app.get("/:id/tag.png", function(req, res) {
+app.get("^/:id([0-9]+)/tag.png", function(req, res) {
     try {
         var jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.params.id + ".json"));
         var banner = new Banner(jstring, true);
@@ -155,7 +158,7 @@ app.get("/:id/tag.png", function(req, res) {
     }
 });
 
-app.get("/:id/tag.max.png", function(req, res) {
+app.get("^/:id([0-9]+)/tag.max.png", function(req, res) {
     try {
         var jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.params.id + ".json"));
         var banner = new Banner(jstring, false);
@@ -251,18 +254,15 @@ app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
 });
 
 
-app.get("/:id", function(req, res, next) {
+app.get("^/:id([0-9]+)", function(req, res, next) {
     // var key = req.params.id;
     // console.log(key);
-    var userData;
-
-    try {
-        userData = getUserData(req.params.id);
-    } catch(e) {
-        console.log(e);
-        res.render("notfound.pug");
+    var userData = getUserData(req.params.id);
+    
+    if (!userData) {
+        res.status(404).render("notfound.pug");
         return;
-    }
+    };
 
     res.render("tagpage.pug", {id: req.params.id,
                                user: userData,
@@ -276,13 +276,12 @@ app.get("/:id", function(req, res, next) {
 //     // this is super dangerous lmao
 // });
 
-app.get("/:id/json", function(req, res) {
+app.get("^/:id([0-9]+)/json", function(req, res) {
     var userData = getUserData(req.params.id);
     res.type("application/json");
 
     if (!userData) {
         res.status(404).send(JSON.stringify({error: "That user ID does not exist."}));
-
         return;
     };
 
@@ -470,6 +469,17 @@ function updateGameArray(games, game) {
 }
 
 app.use(function(req, res, next) {
+    var allowed = [
+        "/img",
+        "/overlays",
+        "/flags"
+    ];
+    for (var index of allowed) {
+        if (req.path.indexOf(index)) {
+            console.log(req.path);
+            next();
+        }
+    }
     res.status(404);
-    res.render("notfound");
+    res.render("notfound2.pug");
 });
