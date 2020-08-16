@@ -5,3 +5,15 @@
 .space-top {
     margin-top: 10px
 }
+
+.big-space-top {
+    margin-top: 20px
+}
+
+.space-bottom {
+    margin-bottom: 10px
+}
+
+.big-space-bottom {
+    margin-bottom: 20px
+}
