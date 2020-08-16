@@ -39,7 +39,7 @@ sel3.onchange = function () {
     document.getElementById("overlay-img").src = "/img/overlays/" + this.value.replace(".json", "") + ".png";
     var overlay = JSON.parse(getOverlay(`/overlays/${this.value}`));
     if (sel4.value == "default") {
-        cimg = overlay.coin_icon.img;
+        cimg = overlay.coin_icon.img + ".png";
         document.getElementById("coin-img").src = "/img/coin/" + cimg;
     }
 }
@@ -48,7 +48,7 @@ sel4.onchange = function () {
     var cimg;
     var overlay = JSON.parse(getOverlay(`/overlays/${sel3.value}`));
     if (this.value == "default") {
-        cimg = overlay.coin_icon.img;
+        cimg = overlay.coin_icon.img + ".png";
     } else {
         cimg = this.value + ".png";
     }
