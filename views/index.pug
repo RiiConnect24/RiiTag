@@ -19,7 +19,10 @@ block content
             img(width="50%" src="/demo" alt="Example")
             br
             br
-            a(href="/login" type="button" class="btn btn-primary") Log In
+            if !user
+              a(href="/login" type="button" class="btn btn-primary space-right") Log In
+            else
+              a(href="/logout" type="button" class="btn btn-primary space-right") Log Out
             a(href="https://wii.guide/riitag" type="button" class="btn btn-primary") Instructions
   script(src='assets/js/jquery.min.js')
   script(src='assets/bootstrap/js/bootstrap.min.js')

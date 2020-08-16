@@ -72,6 +72,11 @@ app.get('/login', function(req, res, next) {
     next()
 }, passport.authenticate('discord', { scope: scopes }));
 
+app.get('/logout', function(req, res) {
+    req.logout();
+    res.redirect("/")
+});
+
 app.get('/callback',
     passport.authenticate('discord', { failureRedirect: '/' }), function(req, res) { res.redirect("/create") } // auth success
 );
@@ -277,6 +282,7 @@ app.get("^/:id([0-9]+)", function(req, res, next) {
     res.render("tagpage.pug", {id: req.params.id,
                                tuser: userData,
                                user: req.user,
+                               flags: getFlagList(),
                                backgrounds: getBackgroundList(),
                                overlays: getOverlayList()
                               });
