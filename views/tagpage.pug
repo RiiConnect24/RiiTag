@@ -1,11 +1,11 @@
 extends head
 
 block content
-    div(style='margin-top: 20px;')
+    div.big-space-top
         .container
-            .row
-                .col-md-12
-                    h1.text-white #{tuser.name}
+            //- .row
+            //-     .col-md-12
+            //-         h1.text-white.text-center.big-space-bottom #{tuser.name}
             .row
                 .col-md-6
                     if user && tuser.id == user.id
