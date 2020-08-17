@@ -23,7 +23,7 @@
         "y": 10
     },
     "coin_icon": {
-        "img": "img/coin.png",
+        "img": "mario",
         "x": 864,
         "y": 10
     },
@@ -49,5 +49,15 @@
         "x": 1063,
         "y": 250
     },
+    "draw_order": [
+        "overlay",
+        "covers",
+        "flag",
+        "coin",
+        "avatar",
+        "username",
+        "coin_count",
+        "friend_code"
+    ],
     "enabled": true
 }

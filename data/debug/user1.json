@@ -6,8 +6,8 @@
     "friend_code": "7457 8523 6283 1041",
     "region": "us",
     "covertype": "cover3D",
-    "overlay": "overlay2.json",
+    "overlay": "overlay1.json",
     "bg": "img/1200x450/riiconnect247.png",
-    "coin": "fortnite",
+    "coin": "mario",
     "sort": ""
 }
