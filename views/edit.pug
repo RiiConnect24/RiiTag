@@ -2,126 +2,79 @@ extends head
 
 block content
     - var soverlay
-    div.big-space-top
-        form(method="POST" action="/edit")
-            .container
-                .row
-                    .col-md-6
-                        .card.big-space-bottom
-                            .card-header
-                                h5.mb-0 Background
-                            .card-body
-                                span.text-white
-                                    div.form-group
-                                        .container
-                                            .row.justify-content-center
-                                                .col-11
-                                                   select(name="background" id="background").big-space-bottom
-                                                        each bg in backgrounds
-                                                            if jdata.bg == `img/1200x450/${bg}`
-                                                                option(value=`img/1200x450/${bg}` selected=true)= bg
-                                                            else
-                                                                option(value=`img/1200x450/${bg}` selected=false)= bg
-                                            .row.justify-content-center
-                                                .col-12
-                                                    div.text-center.space-top
-                                                        img(src=jdata.bg width="75%" id="background-img" alt="Background Preview").editor
-                    .col-md-6
-                        .card.big-space-bottom
-                            .card-header
-                                h5.mb-0 Overlay
-                            .card-body
-                                span.text-white
-                                    div.form-group
-                                        .container
-                                            .row.justify-content-center
-                                                .col-11
-                                                    select(name="overlay" id="overlay").big-space-bottom
-                                                        each overlay in overlays
-                                                            if overlay.enabled
-                                                                if jdata.overlay == `overlay${overlay.id}.json`
-                                                                    option(value=`overlay${overlay.id}.json` selected=true)= overlay.name
-                                                                    - soverlay = overlay
-                                                                else
-                                                                    option(value=`overlay${overlay.id}.json` selected=false)= overlay.name
-                                            .row.justify-content-center
-                                                .col-12
-                                                    div.text-center.space-top
-                                                        img(src=`/img/overlays/${jdata.overlay.replace(".json", "")}.png` width="75%" id="overlay-img" alt="Overlay Preview").editor
-                .row
-                    .col-md-6
-                        .card.big-space-bottom
-                            .card-header
-                                h5.mb-0 Flag
-                            .card-body
-                                span.text-white
-                                    div.form-group
-                                        .container
-                                            .row.justify-content-center
-                                                .col-11
-                                                    select(name="flag" id="flag")
-                                                        each v,k in flags
-                                                            option(value=k selected=(jdata.region == k))= v
-                                            .row.justify-content-center
-                                                .col-12
-                                                    div.text-center.big-space-top
-                                                        img(src=`/flags/${jdata.region}.png` id="flag-img" alt="Flag Preview")
-                                        
-                    .col-md-6
-                        .card.big-space-bottom
-                            .card-header
-                                h5.mb-0 Coin Icon
-                            .card-body
-                                span.text-white
-                                    div.form-group
-                                        .container
-                                            .row.justify-content-center
-                                                .col-11
-                                                    select(name="coin" id="coin")
-                                                        each v,k in coins
-                                                            option(value=k selected=(jdata.coin == k))= v
-                                            .row.justify-content-center
-                                                .col-12
-                                                    - var cimg
-                                                    if jdata.coin == "default"
-                                                        - cimg = soverlay.coin_icon.img
-                                                    else
-                                                        - cimg = jdata.coin
-                                                    div.text-center.big-space-top
-                                                        img(src=`/img/coin/${soverlay.coin_icon.img}.png` id="coin-img" alt="Coin Preview")
-                .row
-                    .col-md-6
-                        .card.big-space-bottom
-                            .card-header
-                                h5.mb-0 Other Information
-                            .card-body
-                                span.text-white
-                                    div.form-group
-                                        .container
-                                            .row.text-center
-                                                .col-12
-                                                    h5.mb-0 Nickname
-                                                    input(type="text" name="name" value=jdata.name id="nickname").space-top.big-space-bottom
-                                                    h5.mb-0 Wii Number
-                                                    input(type="text" name="wiinumber" value=jdata.friend_code id="wiinumber").space-top.big-space-bottom
-                                                    h5.mb-0 Games
-                                                    h6.mb-0 Game IDs should be separated by a semicolon (;). Using a USB Loader allows games to appear automagically.
-                                                    input(type="text" name="games" value=jdata.games.join(";") id="games").space-top
-                    .col-md-6
-                        .card.big-space-bottom
-                            .card-header
-                                h5.mb-0 RiiTag Private Key
-                            .card-body
-                                span.text-white
-                                    .container
-                                        .row.text-center
-                                            .col-12
-                                                h5.mb-0.text-warning ! WARNING !
-                                                h6.mb-0.text-warning This key is NOT to be shared with anyone else. 
-                                                //- Doing so may result in a ban from the RiiTag leaderboards
-                                                input#keybox(type="password" value=userKey readonly style="width: 75%").big-space-top
-                                                br
-                                                input#keybutton(type="button" onclick="showPassword(\"keybox\", \"keybutton\")" value="Show Key").btn.btn-danger.big-space-top
-            button(type="submit").btn.btn-success.btn-circle.btn-circle-xl.m-1.save-btn
-                i.fas.fa-save
-    script(src="edit.js")
+    form(method="POST" action="/edit")
+        //- textarea(type="text", name="jstring", value=jstring)
+        div(class="form-group")
+            label(for="background" class="text-white") Backgrounds
+            br
+            select(name="background" id="background")
+                each bg in backgrounds
+                    if jdata.bg == `img/1200x450/${bg}`
+                        option(value=`img/1200x450/${bg}` selected=true)= bg
+                    else
+                        option(value=`img/1200x450/${bg}` selected=false)= bg
+            br
+            img(src=jdata.bg width="50%" id="background-img" alt="Background Preview")
+        br
+        div(class="form-group")
+            label(for="overlay" class="text-white") Overlays
+            br
+            select(name="overlay" id="overlay")
+                each overlay in overlays
+                    if overlay.enabled
+                        if jdata.overlay == `overlay${overlay.id}.json`
+                            option(value=`overlay${overlay.id}.json` selected=true)= overlay.name
+                            - soverlay = overlay
+                        else
+                            option(value=`overlay${overlay.id}.json` selected=false)= overlay.name
+            br
+            img(src=`/img/overlays/${jdata.overlay.replace(".json", "")}.png` width="50%" id="overlay-img" alt="Overlay Preview")
+        br
+        div(class="form-group")
+            label(for="flag" class="text-white") Flags
+            br
+            select(name="flag" id="flag")
+                each v,k in flags
+                    if jdata.region == k
+                        option(value=k selected=true)= v
+                    else
+                        option(value=k selected=false)= v
+            br
+            span(title=jdata.region)
+                img(src=`/flags/${jdata.region}.png` id="flag-img" alt="Flag Preview")
+        div(class="form-group")
+            label(for="coin" class="text-white") Coin Icon
+            br
+            select(name="coin" id="coin")
+                each v,k in coins
+                    if jdata.coin == k
+                        option(value=k selected=true)= v
+                    else
+                        option(value=k selected=false)= v
+            br
+            - var cimg
+            if jdata.coin == "default"
+                - cimg = soverlay.coin_icon.img
+            else
+                - cimg = jdata.coin
+            img(src=`/img/coin/${soverlay.coin_icon.img}.png` id="coin-img" alt="Coin Preview")
+        div(class="form-group")
+            label(for="nickname" class="text-white") Nickname
+            br
+            input(type="text" name="name" value=jdata.name id="nickname")
+        br
+        div(class="form-group")
+            label(for="wiinumber" class="text-white") Wii Number
+            br
+            input(type="text" name="wiinumber" value=jdata.friend_code id="wiinumber")
+        br
+        div(class="form-group")
+            label(for="games" class="text-white") Games on Tag (game IDs separated by a semicolon, using a USB Loader allows games to show up automatically)
+            br
+            input(type="text" name="games" value=jdata.games.join(";") id="games")
+        br
+        input#keybox(type="password" value=userKey readonly)
+        input#keybutton(type="button" onclick="showPassword(\"keybox\", \"keybutton\")" value="Show Key", class="btn btn-primary")
+        br
+        input(type="submit", value="Submit" class="btn btn-primary")
+    script(src="edit.js") 
