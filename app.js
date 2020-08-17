@@ -11,9 +11,10 @@ const bodyParser = require("body-parser");
 const xml = require("xml");
 const DatabaseDriver = require("./dbdriver");
 
-const db = new DatabaseDriver(path.join(__dirname, "data", "users", "users.db"));
+const db = new DatabaseDriver(path.join(__dirname, "users.db"));
 const Sentry = require('@sentry/node');
 const express = require("express");
+// const { render } = require("pug");
 const app = express();
 
 Sentry.init({ dsn: config.sentryURL });
@@ -48,9 +49,12 @@ app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static("public/"));
+app.use(express.static("data/"));
+
+app.set("view engine", "pug");
 
 app.get("/", function(req, res) {
-    res.render("index.pug");
+    res.render("index.pug", { user: req.user });
 });
 
 
@@ -61,7 +65,17 @@ app.get("/demo", async function(req, res) {
     });
 });
 
-app.get('/login', passport.authenticate('discord', { scope: scopes }), function(req, res) {});
+app.get('/login', function(req, res, next) {
+    if (req.isAuthenticated()) {
+        res.redirect("/");
+    }
+    next()
+}, passport.authenticate('discord', { scope: scopes }));
+
+app.get('/logout', function(req, res) {
+    req.logout();
+    res.redirect("/")
+});
 
 app.get('/callback',
     passport.authenticate('discord', { failureRedirect: '/' }), function(req, res) { res.redirect("/create") } // auth success
@@ -84,7 +98,8 @@ app.route("/edit")
                                     coins: getCoinList(),
                                     covertypes: getCoverTypes(),
                                     coverregions: getCoverRegions(),
-                                    userKey: userKey
+                                    userKey: userKey,
+                                    user: req.user
                                 });
         } catch(e) {
             console.log(e);
@@ -115,58 +130,61 @@ app.get("/create", checkAuth, function(req, res) {
     res.redirect(`/${req.user.id}`);
 });
 
-app.get("/img/flags/:flag.png", function(req, res) {
-    try {
-        var file = path.resolve(dataFolder, "flags", req.params.flag + ".png");
-        var s = fs.createReadStream(file);
-        s.on('open', function() {
-            res.set('Content-Type', 'image/png');
-            s.pipe(res);
-        });
-    } catch(e) {
+// app.get("/img/flags/:flag.png", function(req, res) {
+//     try {
+//         var file = path.resolve(dataFolder, "flags", req.params.flag + ".png");
+//         var s = fs.createReadStream(file);
+//         s.on('open', function() {
+//             res.set('Content-Type', 'image/png');
+//             s.pipe(res);
+//         });
+//     } catch(e) {
+//         res.status(404).render("notfound.pug", {err: e});
+//     }
+// });
+
+// app.get("/img/:size/:background.png", function(req, res) {
+//     try {
+//         var file = path.resolve(dataFolder, "img", req.params.size, req.params.background + ".png");
+//         var s = fs.createReadStream(file);
+//         s.on('open', function() {
+//             res.set('Content-Type', 'image/png');
+//             s.pipe(res);
+//         });
+//     } catch(e) {
+//         res.status(404).render("notfound.pug", {err: e});
+//     }
+// });
+function getTag(id, limitSize) {
+    return new Promise(function(resolve, reject) {
+        try {
+            var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
+            var banner = new Banner(jstring, limitSize);
+            banner.once("done", function() {
+                resolve(banner);
+            });
+        } catch(e) {
+            console.log(e);
+            // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
+            // res.status(404).render("notfound.pug", {err: e});
+            reject(e);
+        }
+    })
+}
+
+
+app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
+    var banner = await getTag(req.params.id, true).catch(function() {
         res.status(404).render("notfound.pug", {err: e});
-    }
+    });
+    banner.pngStream.pipe(res);
 });
 
-app.get("/img/:size/:background.png", function(req, res) {
-    try {
-        var file = path.resolve(dataFolder, "img", req.params.size, req.params.background + ".png");
-        var s = fs.createReadStream(file);
-        s.on('open', function() {
-            res.set('Content-Type', 'image/png');
-            s.pipe(res);
-        });
-    } catch(e) {
+app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
+    var banner = await getTag(req.params.id, false).catch(function() {
         res.status(404).render("notfound.pug", {err: e});
-    }
-});
-
-app.get("/:id/tag.png", function(req, res) {
-    try {
-        var jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.params.id + ".json"));
-        var banner = new Banner(jstring, true);
-        banner.once("done", function() {
-            banner.pngStream.pipe(res);
-        });
-    } catch(e) {
-        console.log(e);
-        // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
-        res.status(404).render("notfound.pug", {err: e});
-    }
-});
-
-app.get("/:id/tag.max.png", function(req, res) {
-    try {
-        var jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.params.id + ".json"));
-        var banner = new Banner(jstring, false);
-        banner.once("done", function() {
-            banner.pngStream.pipe(res);
-        });
-    } catch(e) {
-        console.log(e);
-        // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
-        res.status(404).render("notfound.pug", {err: e});
-    }
+    });
+    banner.pngStream.pipe(res);
 });
 
 app.get("/wii", async function(req, res) {
@@ -251,18 +269,20 @@ app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
 });
 
 
-app.get("/:id", function(req, res) {
+app.get("^/:id([0-9]+)", function(req, res, next) {
     // var key = req.params.id;
     // console.log(key);
     var userData = getUserData(req.params.id);
-    if (userData == null) {
-        res.status(404).render("notfound.pug", {err: "Unknown user ID"});
-
+    
+    if (!userData) {
+        res.status(404).render("notfound.pug");
         return;
     };
 
     res.render("tagpage.pug", {id: req.params.id,
-                               user: userData,
+                               tuser: userData,
+                               user: req.user,
+                               flags: getFlagList(),
                                backgrounds: getBackgroundList(),
                                overlays: getOverlayList()
                               });
@@ -273,13 +293,12 @@ app.get("/:id", function(req, res) {
 //     // this is super dangerous lmao
 // });
 
-app.get("/:id/json", function(req, res) {
+app.get("^/:id([0-9]+)/json", function(req, res) {
     var userData = getUserData(req.params.id);
     res.type("application/json");
 
     if (!userData) {
         res.status(404).send(JSON.stringify({error: "That user ID does not exist."}));
-
         return;
     };
 
@@ -338,6 +357,7 @@ function getOverlayList() {
 }
 
 function getFlagList() {
+    console.log()
     return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "meta", "flags.json")));
 }
 
@@ -465,3 +485,19 @@ function updateGameArray(games, game) {
     games.unshift(game);
     return games;
 }
+
+app.use(function(req, res, next) {
+    var allowed = [
+        "/img",
+        "/overlays",
+        "/flags"
+    ];
+    for (var index of allowed) {
+        if (req.path.indexOf(index)) {
+            console.log(req.path);
+            next();
+        }
+    }
+    res.status(404);
+    res.render("notfound2.pug");
+});

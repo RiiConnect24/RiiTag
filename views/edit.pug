@@ -1,6 +1,7 @@
 extends head
 
 block content
+    - var soverlay
     form(method="POST" action="/edit")
         //- textarea(type="text", name="jstring", value=jstring)
         div(class="form-group")
@@ -23,6 +24,7 @@ block content
                     if overlay.enabled
                         if jdata.overlay == `overlay${overlay.id}.json`
                             option(value=`overlay${overlay.id}.json` selected=true)= overlay.name
+                            - soverlay = overlay
                         else
                             option(value=`overlay${overlay.id}.json` selected=false)= overlay.name
             br
@@ -33,23 +35,29 @@ block content
             br
             select(name="flag" id="flag")
                 each v,k in flags
-                    if jdata.region == flag
+                    if jdata.region == k
                         option(value=k selected=true)= v
                     else
                         option(value=k selected=false)= v
             br
-            img(src=`/img/flags/${jdata.region}.png` id="flag-img" alt="Flag Preview")
+            span(title=jdata.region)
+                img(src=`/flags/${jdata.region}.png` id="flag-img" alt="Flag Preview")
         div(class="form-group")
             label(for="coin" class="text-white") Coin Icon
             br
             select(name="coin" id="coin")
                 each v,k in coins
-                    if jdata.coin == coin
+                    if jdata.coin == k
                         option(value=k selected=true)= v
                     else
                         option(value=k selected=false)= v
             br
-            img(src=`/img/coin/${jdata.coin}.png` id="coin-img" alt="Coin Preview")
+            - var cimg
+            if jdata.coin == "default"
+                - cimg = soverlay.coin_icon.img
+            else
+                - cimg = jdata.coin
+            img(src=`/img/coin/${soverlay.coin_icon.img}.png` id="coin-img" alt="Coin Preview")
         div(class="form-group")
             label(for="nickname" class="text-white") Nickname
             br

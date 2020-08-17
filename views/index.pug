@@ -1,21 +1,11 @@
 extends head
 
-mixin background
-  each bg in backgrounds
-    if user.bg == `img/1200x450/${bg}`
+//- mixin background
+//-   each bg in backgrounds
+//-     if user.bg == `img/1200x450/${bg}`
       
 
 block content
-  nav.navbar.navbar-light.navbar-expand-md.bg-dark
-    .container-fluid
-      a.navbar-brand.text-light(href='#') RiiTag
-      button.navbar-toggler(data-toggle='collapse' data-target='#navcol-1')
-        span.sr-only Toggle navigation
-        span.navbar-toggler-icon
-      #navcol-1.collapse.navbar-collapse
-        ul.nav.navbar-nav
-          li.nav-item(role='presentation')
-            a.nav-link.text-white-50(href='/') Home
   div(style='margin-top: 20px;')
     .container
       .row
@@ -26,10 +16,13 @@ block content
             | RiiTag is a customizable gamertag for the Wii. By sharing your gamertag (a dynamic image), you can show what you've been playing to your friends! You connect it to a USB Loader, and the tag updates on-the-fly. You need a Discord account in order to start using RiiTag. Covers are provided by GameTDB and this service is developed by RiiConnect24.
             br
             br
-            img(width="33%" src="https://cdn.discordapp.com/attachments/364885761318846464/685540568423596050/demo.png" alt="Example")
+            img(width="50%" src="/demo" alt="Example")
             br
             br
-            a(href="/login" type="button" class="btn btn-primary") Log In
+            if !user
+              a(href="/login" type="button" class="btn btn-primary space-right") Log In
+            else
+              a(href="/logout" type="button" class="btn btn-primary space-right") Log Out
             a(href="https://wii.guide/riitag" type="button" class="btn btn-primary") Instructions
   script(src='assets/js/jquery.min.js')
   script(src='assets/bootstrap/js/bootstrap.min.js')

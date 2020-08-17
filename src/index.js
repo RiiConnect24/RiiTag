@@ -9,6 +9,17 @@ const path = require("path");
 const dataFolder = path.resolve(__dirname, "..", "data");
 // const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
+const defaultDrawOrder = [
+    "overlay",
+    "covers",
+    "flag",
+    "coin",
+    "avatar",
+    "username",
+    "coin_count",
+    "friend_code"
+]
+
 class Tag extends events.EventEmitter{
     constructor(user, size, doMake=true) {
         super();
@@ -163,6 +174,9 @@ class Tag extends events.EventEmitter{
     getCoinImage()
     {
         if (this.user.coin) {
+            if (this.user.coin == "default") {
+                return this.overlay.coin_icon.img;
+            }
             return this.user.coin;
         } else {
             return "mario"; // the mario coin is the default image
@@ -250,7 +264,7 @@ class Tag extends events.EventEmitter{
         return cache;
     }
 
-    async drawAvatar(game) {
+    async drawAvatar() {
         await this.cacheAvatar();
         await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
     }
@@ -311,6 +325,8 @@ class Tag extends events.EventEmitter{
         return overlay;
     }
 
+    
+
     async makeBanner() {
         await this.loadFonts();
         var i = 0;
@@ -320,6 +336,9 @@ class Tag extends events.EventEmitter{
 
         // background
         await this.drawImage(path.resolve(dataFolder, this.user.bg));
+
+        // overlay image
+        await this.drawImage(path.resolve(dataFolder, this.overlay.overlay_img));
 
         // game covers
         var games_draw = []
@@ -353,28 +372,18 @@ class Tag extends events.EventEmitter{
             var draw = await this.drawGameCover(game, true);
         }
 
-        // overlay image
-        await this.drawImage(path.resolve(dataFolder, this.overlay.overlay_img));
-
-        // coin image/text
-        await this.drawImage(path.resolve(dataFolder, "img", "coin", this.getCoinImage() + ".png"),
-            this.overlay.coin_icon.x,
-            this.overlay.coin_icon.y);
-        this.drawText(this.overlay.coin_count.font_family,
-            this.overlay.coin_count.font_size,
-            this.overlay.coin_count.font_style,
-            this.overlay.coin_count.font_color,
-            this.user.coins,
-            this.overlay.coin_count.x,
-            this.overlay.coin_count.y);
-
         // flag icon
         await this.drawImage(path.resolve(dataFolder, "flags", `${this.user.region}.png`),
             this.overlay.flag.x,
             this.overlay.flag.y);
 
+        // coin image/text
+        await this.drawImage(path.resolve(dataFolder, "img", "coin", this.getCoinImage() + ".png"),
+            this.overlay.coin_icon.x,
+            this.overlay.coin_icon.y);
+
         // username text
-        this.drawText(this.overlay.username.font_family,
+        await this.drawText(this.overlay.username.font_family,
             this.overlay.username.font_size,
             this.overlay.username.font_style,
             this.overlay.username.font_color,
@@ -383,13 +392,21 @@ class Tag extends events.EventEmitter{
             this.overlay.username.y)
 
         // friend code text
-        this.drawText(this.overlay.friend_code.font_family,
+        await this.drawText(this.overlay.friend_code.font_family,
             this.overlay.friend_code.font_size,
             this.overlay.friend_code.font_style,
             this.overlay.friend_code.font_color,
             this.user.friend_code,
             this.overlay.friend_code.x,
             this.overlay.friend_code.y);
+
+        await this.drawText(this.overlay.coin_count.font_family,
+            this.overlay.coin_count.font_size,
+            this.overlay.coin_count.font_style,
+            this.overlay.coin_count.font_color,
+            this.user.coins,
+            this.overlay.coin_count.x,
+            this.overlay.coin_count.y);
 
         // avatar
         if (this.user.useavatar == "true") {
@@ -413,7 +430,7 @@ module.exports = Tag;
 
 if (module == require.main) {
     var jstring = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
-    var banner = new Tag(jstring, false);
+    var banner = new Tag(jstring, true);
 
     banner.once("done", function () {
         var out = fs.createWriteStream(path.resolve(dataFolder, "debug", "user1.png"));
