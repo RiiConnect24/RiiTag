@@ -303,7 +303,7 @@ app.get("^/:id([0-9]+)/json", function(req, res) {
     };
 
     var lastPlayed = {};
-    if (userData.lastplayed !== null) {
+    if (userData.lastplayed.length !== 0) {
         var banner = new Banner(JSON.stringify(userData), doMake=false);
         var game = userData.lastplayed[0];
         var time = userData.lastplayed[1];
@@ -410,7 +410,7 @@ async function createUser(user) {
             name: user.username,
             id: user.id,
             games: [],
-            last_played: {},
+            lastplayed: [],
             coins: 0,
             friend_code: "0000 0000 0000 0000",
             region: "rc24",
