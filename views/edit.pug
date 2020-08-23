@@ -116,12 +116,12 @@ block content
                                                 .col-12
                                                     h5.mb-0 Cover Type
                                                     select(name="covertype" id="covertype")
-                                                        each v,k in covertype
-                                                            option(value=k selected=(jdata.covertype == k))= v
+                                                        each k in covertype
+                                                            option(value=k selected=(jdata.covertype == k))= k
                                                     h5.mb-0 Cover Region
                                                     select(name="coverregion" id="coverregion")
-                                                        each v,k in coverregion
-                                                            option(value=k selected=(jdata.coverregion == k))= v
+                                                        each k in coverregion
+                                                            option(value=k selected=(jdata.coverregion == k))= k
                 .row
                     .col-md-6
                         .card.big-space-bottom
