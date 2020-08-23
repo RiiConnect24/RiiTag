@@ -116,11 +116,11 @@ block content
                                                 .col-12
                                                     h5.mb-0 Cover Type
                                                     select(name="covertype" id="covertype")
-                                                        each k in covertype
+                                                        each k in covertypes
                                                             option(value=k selected=(jdata.covertype == k))= k
                                                     h5.mb-0 Cover Region
                                                     select(name="coverregion" id="coverregion")
-                                                        each k in coverregion
+                                                        each k in coverregions
                                                             option(value=k selected=(jdata.coverregion == k))= k
                 .row
                     .col-md-6
