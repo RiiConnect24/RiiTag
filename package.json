@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node src/index.js",
     "start": "node app.js",
-    "testMii": "node src/miitest.js"
+    "prerender": "node src/rendermiis.js"
   },
   "repository": {
     "type": "git",

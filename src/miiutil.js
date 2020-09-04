@@ -19,7 +19,7 @@ const wrinkles = {
     "11": 11
 };
 
-module.exports.wii2studio = function(miiPath) {
+function wii2studio(miiPath) {
     var origMiiFile = fs.readFileSync(miiPath);
     var origMii;
     var studioMii = {};
@@ -107,8 +107,10 @@ module.exports.wii2studio = function(miiPath) {
     studioMii["noseType"] = origMii.noseType
     studioMii["noseVertical"] = origMii.noseVertical
 
-    console.log(studioMii);
+    return studioMii;
+}
 
+function getStudioMiiRenderURL(studioMii) {
     var miiData = new Buffer.from("");
     var u8 = new Buffer.alloc(1);
     // u8.writeUInt8(0x0, 0);
@@ -122,5 +124,14 @@ module.exports.wii2studio = function(miiPath) {
         miiData += u8.toString('hex');
     }
 
-    console.log("https://studio.mii.nintendo.com/miis/image.png?data=" + miiData.toString('utf-8') + "&type=face&width=512&instanceCount=1");
+    return "https://studio.mii.nintendo.com/miis/image.png?data=" + miiData.toString('utf-8') + "&type=face&width=512&instanceCount=1";
+}
+
+function getWiiMiiRenderURL(miiPath) {
+    return getStudioMiiRenderURL(wii2studio(miiPath));
+}
+
+module.exports = {
+    getWiiMiiRenderURL,
+    getStudioMiiRenderURL,
 }

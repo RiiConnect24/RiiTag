@@ -5,3 +5,4 @@ data/cache/
 data/users/
 config.json
 users.db
+*.rcd

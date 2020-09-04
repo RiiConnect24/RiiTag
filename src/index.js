@@ -5,6 +5,9 @@ const Image = Canvas.Image;
 const fs = require("fs");
 const events = require("events");
 
+const savePNG = require("./utils").savePNG;
+const getImage = require("./utils").getImage;
+
 const path = require("path");
 const dataFolder = path.resolve(__dirname, "..", "data");
 // const outpath = path.resolve(__dirname, "banner.png"); // debug variable
@@ -42,24 +45,24 @@ class Tag extends events.EventEmitter{
         this.ctx.fillText(text, size + x, size + y);
     }
 
-    async getImage(source) {
-        var img = new Image();
-        return new Promise(function(resolve, reject) {
-            img.onload = function() {
-                resolve(img);
-            }
-            img.onerror = function(err) {
-                reject(err);
-            }
-            console.log(source);
-            img.src = source;
-        });
-    }
+    // async getImage(source) {
+    //     var img = new Image();
+    //     return new Promise(function(resolve, reject) {
+    //         img.onload = function() {
+    //             resolve(img);
+    //         }
+    //         img.onerror = function(err) {
+    //             reject(err);
+    //         }
+    //         console.log(source);
+    //         img.src = source;
+    //     });
+    // }
 
     async drawImage(source, x=0, y=0) {
         var obj = this;
         // console.log(source);
-        this.getImage(source).then(function(img) {
+        getImage(source).then(function(img) {
             obj.ctx.drawImage(img, x, y);
         }).catch(function(err) {
             console.error(err);
@@ -192,9 +195,9 @@ class Tag extends events.EventEmitter{
         var con = can.getContext("2d");
         var img;
 
-        img = await this.getImage(this.getCoverUrl(consoletype, covertype, region, game, extension));
+        img = await getImage(this.getCoverUrl(consoletype, covertype, region, game, extension));
         con.drawImage(img, 0, 0, this.getCoverWidth(covertype), this.getCoverHeight(covertype, consoletype));
-        await this.savePNG(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), can);
+        await savePNG(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), can);
     }
 
     async cacheGameCover(game, region, covertype, consoletype, extension) {
@@ -232,9 +235,9 @@ class Tag extends events.EventEmitter{
         var con = can.getContext("2d");
         var img;
         try {
-            img = await this.getImage(`https://cdn.discordapp.com/avatars/${this.user.id}/${this.user.avatar}.jpg?size=128`);
+            img = await getImage(`https://cdn.discordapp.com/avatars/${this.user.id}/${this.user.avatar}.jpg?size=128`);
             con.drawImage(img, 0, 0, 128, 128);
-            await this.savePNG(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), can);
+            await savePNG(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), can);
         } catch(e) {
             console.error(e);
         }
@@ -269,14 +272,14 @@ class Tag extends events.EventEmitter{
         await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
     }
 
-    async savePNG(out, c) {
-        return new Promise(function(resolve) {
-            c.createPNGStream().pipe(fs.createWriteStream(out)).on("close", function() {
-                // console.log("File written");
-                resolve();
-            });
-        });
-    }
+    // async savePNG(out, c) {
+    //     return new Promise(function(resolve) {
+    //         c.createPNGStream().pipe(fs.createWriteStream(out)).on("close", function() {
+    //             // console.log("File written");
+    //             resolve();
+    //         });
+    //     });
+    // }
 
     async loadFont(file) {
         var font = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "fonts", file)));
@@ -431,9 +434,19 @@ module.exports = Tag;
 if (module == require.main) {
     var jstring = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
     var banner = new Tag(jstring, true);
+    var maxbanner = new Tag(jstring, false);
 
     banner.once("done", function () {
         var out = fs.createWriteStream(path.resolve(dataFolder, "debug", "user1.png"));
+        var stream = banner.pngStream;
+
+        stream.on('data', function (chunk) {
+            out.write(chunk);
+        });
+    });
+
+    maxbanner.once("done", function () {
+        var out = fs.createWriteStream(path.resolve(dataFolder, "debug", "user1.max.png"));
         var stream = banner.pngStream;
 
         stream.on('data', function (chunk) {
