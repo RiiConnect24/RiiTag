@@ -6,3 +6,4 @@ data/users/
 config.json
 users.db
 *.rcd
+data/miis
