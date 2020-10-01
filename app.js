@@ -175,14 +175,16 @@ function getTag(id, limitSize) {
 
 app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
     var banner = await getTag(req.params.id, true).catch(function() {
-        res.status(404).render("notfound.pug", {err: e});
+        res.status(404).render("notfound.pug");
+	return
     });
     banner.pngStream.pipe(res);
 });
 
 app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
     var banner = await getTag(req.params.id, false).catch(function() {
-        res.status(404).render("notfound.pug", {err: e});
+        res.status(404).render("notfound.pug");
+	return
     });
     banner.pngStream.pipe(res);
 });
