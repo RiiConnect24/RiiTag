@@ -9,9 +9,6 @@ const path = require("path");
 const dataFolder = path.resolve(__dirname, "..", "data");
 // const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
-const MiiLoad = require("./mii");
-const KaitaiStream = require('kaitai-struct/KaitaiStream');
-
 const defaultDrawOrder = [
     "overlay",
     "covers",
