@@ -98,6 +98,7 @@ app.route("/edit")
                                     coins: getCoinList(),
                                     covertypes: getCoverTypes(),
                                     coverregions: getCoverRegions(),
+                                    fonts: getFonts(),
                                     userKey: userKey,
                                     user: req.user
                                 });
@@ -121,6 +122,7 @@ app.route("/edit")
         editUser(req.user.id, "covertype", req.body.covertype);
         editUser(req.user.id, "coverregion", req.body.coverregion);
         editUser(req.user.id, "useavatar", req.body.useavatar);
+        editUser(req.user.id, "font", req.body.font);
         res.redirect(`/${req.user.id}`);
     });
 
@@ -373,6 +375,10 @@ function getCoverTypes() {
 
 function getCoverRegions() {
     return ["EN", "FR", "DE", "ES", "IT", "NL", "PT", "AU", "SE", "DK", "NO", "FI", "TR"];
+}
+
+function getFonts() {
+    return ["RodinNTLG", "NintendoU", "Humming", "PopHappiness", "Seurat"]
 }
 
 function editUser(id, key, value) {

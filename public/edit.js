@@ -25,6 +25,7 @@ var sel = document.getElementById('background');
 var sel2 = document.getElementById('flag');
 var sel3 = document.getElementById('overlay');
 var sel4 = document.getElementById('coin');
+var sel5 = document.getElementById('font');
 
 sel.onchange = function () {
     document.getElementById("background-img").src = "/" + this.value;
@@ -53,4 +54,8 @@ sel4.onchange = function () {
         cimg = this.value + ".png";
     }
     document.getElementById("coin-img").src = "/img/coin/" + cimg;
+}
+
+sel5.onchange = function () {
+    document.getElementById("font-img").src = "/img/font/" + this.value + ".png";
 }
