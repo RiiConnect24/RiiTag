@@ -12,19 +12,8 @@ const folder = path.join(__dirname, "data", "miis", "guests");
 
 (async function() {
     for (const file of fs.readdirSync(folder)) {
-        if (!file.endsWith(".rcd")) {
-            continue;
+        if (file.endsWith(".mii") || file.endsWith(".rcd")) {
+            fs.unlinkSync(folder + "/" + file);
         }
-
-        const canvas = new Canvas.Canvas(512, 512);
-        const ctx = canvas.getContext("2d");
-        const url = MiiUtils.getWiiMiiRenderURL(path.join(folder, file));
-        const id = file.replace(".rcd", "");
-
-        var img;
-
-        img = await utils.getImage(url);
-        ctx.drawImage(img, 0, 0, 512, 512);
-        await utils.savePNG(path.join(folder, `${id}.png`), canvas);
     }
 })();
