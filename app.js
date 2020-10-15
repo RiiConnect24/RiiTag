@@ -5,7 +5,7 @@ const dataFolder = path.resolve(__dirname, "data");
 const json_string = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
 const DiscordStrategy = require("passport-discord").Strategy;
 const passport = require("passport");
-const config = JSON.parse(fs.readFileSync("config.json"));
+const config = loadConfig();
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const xml = require("xml");
@@ -393,4 +393,13 @@ function updateGameArray(games, game) {
     }
     games.unshift(game);
     return games;
+}
+
+function loadConfig() {
+    const configFile = "config.json";
+    if (!fs.existsSync(configFile)) {
+        fs.copyFileSync("config.example.json", configFile);
+        console.log("'config.json' has been created. Please edit the values in 'config.json' and restart the server.")
+        process.exit(0);
+    }
 }
