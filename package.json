@@ -4,11 +4,12 @@
   "description": "Tag generation for RC24",
   "main": "src/index.js",
   "scripts": {
-    "test": "node src/engine.js"
+    "test": "node src/index.js",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bennyman123abc/rc24-tag.git"
+    "url": "git+https://github.com/RiiConnect24/riitag.git"
   },
   "keywords": [
     "rc24"
@@ -16,12 +17,15 @@
   "author": "bendevnull",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/bennyman123abc/rc24-tag/issues"
+    "url": "https://github.com/RiiConnect24/riitag/issues"
   },
-  "homepage": "https://github.com/bennyman123abc/rc24-tag#readme",
+  "homepage": "https://github.com/RiiConnect24/riitag#readme",
   "dependencies": {
+    "@sentry/node": "^5.15.4",
     "axios": "^0.18.1",
-    "canvas": "^2.5.0",
+    "body-parser": "^1.19.0",
+    "canvas": "2.5.0",
+    "express": "^4.17.1",
     "express-session": "^1.17.0",
     "passport": "^0.4.0",
     "passport-discord": "^0.1.3",

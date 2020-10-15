@@ -9,15 +9,26 @@ const path = require("path");
 const dataFolder = path.resolve(__dirname, "..", "data");
 // const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
+const defaultDrawOrder = [
+    "overlay",
+    "covers",
+    "flag",
+    "coin",
+    "avatar",
+    "username",
+    "coin_count",
+    "friend_code"
+]
+
 class Tag extends events.EventEmitter{
-    constructor(user, size) {
+    constructor(user, size, doMake=true) {
         super();
 
         this.size = size;
         this.user = this.loadUser(user);
         this.overlay = this.loadOverlay(this.user.overlay);
 
-        this.makeBanner();
+        if (doMake) this.makeBanner();
     }
 
     loadUser(json_string) {
@@ -61,7 +72,7 @@ class Tag extends events.EventEmitter{
         obj.ctx.drawImage(source, x, y, shrinkx, shrinky);
     }
 
-    getGameRegion(game) {
+    getGameRegion(game) { // determine the game's region by its ID
         var chars = game.split("");
         var rc = chars[3];
         if (rc == "P") {
@@ -92,6 +103,10 @@ class Tag extends events.EventEmitter{
             return "wii";
         } else if (game.startsWith("wiiu-")) {
             return "wiiu";
+        } else if (game.startsWith("ds-")) {
+            return "ds";
+        } else if (game.startsWith("3ds-")) {
+            return "3ds";
         } else if (code == "R" || code == "S") {
             return "wii";
         } else if (code == "A" || code == "B") {
@@ -104,16 +119,18 @@ class Tag extends events.EventEmitter{
     getExtension(covertype, consoletype) {
         if (consoletype == "wii") {
             return "png";
-        } else if (consoletype == "wiiu" && covertype == "cover") {
+        } else if (consoletype != "wii" && covertype == "cover") {
             return "jpg";
         } else {
             return "png";
         }
     }
 
-    getCoverType()
+    getCoverType(consoletype)
     {
-        if (this.user.covertype) {
+        if (consoletype == "ds" || consoletype == "3ds") {
+            return "box";
+        } else if (this.user.covertype) {
             return this.user.covertype;
         } else {
             return "cover3D";
@@ -122,50 +139,61 @@ class Tag extends events.EventEmitter{
 
     getCoverWidth(covertype)
     {
-        if (covertype == "cover3D") {
-            return 176;
-        } else if (covertype == "cover") {
+        if (covertype == "cover") {
             return 160;
+        } else if (covertype == "cover3D") {
+            return 176;
         } else if (covertype == "disc") {
             return 160;
+        } else if (covertype == "box") {
+            return 176;
         } else {
             return 176;
         }
     }
 
-    getCoverHeight(covertype)
+    getCoverHeight(covertype, consoletype)
     {
-        if (covertype == "cover3D") {
+        if (covertype == "cover") {
+            if (consoletype == "ds" || consoletype == "3ds") {
+                return 144;
+            } else {
+                return 224;
+            }
+        } else if (covertype == "cover3D") {
             return 248;
-        } else if (covertype == "cover") {
-            return 224;
         } else if (covertype == "disc") {
             return 160;
+        } else if (covertype == "box") {
+            return 158;
         } else {
             return 248;
         }
     }
 
-    getNoCover(covertype, consoletype)
+    getCoinImage()
     {
-        if (covertype == "cover3D") {
-            return "nocover.png";
-        } else if (covertype == "cover") {
-            return "nocoverFlat.png";
-        } else if (covertype == "disc") {
-            return "nodisc.png";
+        if (this.user.coin) {
+            if (this.user.coin == "default") {
+                return this.overlay.coin_icon.img;
+            }
+            return this.user.coin;
         } else {
-            return "nocover.png";
+            return "mario"; // the mario coin is the default image
         }
+    }
+
+    getCoverUrl(consoletype, covertype, region, game, extension) {
+        return `https://art.gametdb.com/${consoletype}/${covertype}/${region}/${game}.${extension}`;
     }
 
     async downloadGameCover(game, region, covertype, consoletype, extension) {
-        var can = new Canvas.Canvas(this.getCoverWidth(covertype), this.getCoverHeight(covertype));
+        var can = new Canvas.Canvas(this.getCoverWidth(covertype), this.getCoverHeight(covertype, consoletype));
         var con = can.getContext("2d");
         var img;
 
-        img = await this.getImage(`https://art.gametdb.com/${consoletype}/${covertype}/${region}/${game}.${extension}`);
-        con.drawImage(img, 0, 0, this.getCoverWidth(covertype), this.getCoverHeight(covertype));
+        img = await this.getImage(this.getCoverUrl(consoletype, covertype, region, game, extension));
+        con.drawImage(img, 0, 0, this.getCoverWidth(covertype), this.getCoverHeight(covertype, consoletype));
         await this.savePNG(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), can);
     }
 
@@ -187,7 +215,6 @@ class Tag extends events.EventEmitter{
                 } catch(e) {
                     console.error(e);
                     return false;
-                    // fs.copyFileSync(path.resolve(dataFolder, "img", this.getNoCover(covertype)), path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`))
                 }
             }
         }
@@ -214,14 +241,22 @@ class Tag extends events.EventEmitter{
     }
 
     async drawGameCover(game, draw) {
-        var covertype = this.getCoverType();
         var consoletype = this.getConsoleType(game);
-        game = game.replace("wii-", "").replace("wiiu-", "");
+        var covertype = this.getCoverType(consoletype);
+        game = game.replace("wii-", "").replace("wiiu-", "").replace("3ds-", "").replace("ds-", "");
         var region = this.getGameRegion(game);
         var extension = this.getExtension(covertype, consoletype);
         var cache = await this.cacheGameCover(game, region, covertype, consoletype, extension);
         if (cache && draw) {
-            await this.drawImage(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), this.covCurX, this.covCurY);
+            var inc = 0;
+            if (consoletype == "ds" || consoletype == "3ds") {
+                if (covertype == "box") {
+                    inc = 87;
+                } else if (covertype == "cover") {
+                    inc = 80;
+                }
+            }
+            await this.drawImage(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), this.covCurX, this.covCurY + inc);
             // console.log(game);
             this.covCurX += this.covIncX;
             this.covCurY += this.covIncY;
@@ -229,7 +264,7 @@ class Tag extends events.EventEmitter{
         return cache;
     }
 
-    async drawAvatar(game) {
+    async drawAvatar() {
         await this.cacheAvatar();
         await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
     }
@@ -273,7 +308,7 @@ class Tag extends events.EventEmitter{
         this.covStartX = overlay.cover_start_x;
         this.covStartY = overlay.cover_start_y;
         
-        var covertype = this.getCoverType();
+        var covertype = this.getCoverType(false);
         
         if (covertype == "cover") {
             this.covStartY += 24;
@@ -290,6 +325,8 @@ class Tag extends events.EventEmitter{
         return overlay;
     }
 
+    
+
     async makeBanner() {
         await this.loadFonts();
         var i = 0;
@@ -299,6 +336,9 @@ class Tag extends events.EventEmitter{
 
         // background
         await this.drawImage(path.resolve(dataFolder, this.user.bg));
+
+        // overlay image
+        await this.drawImage(path.resolve(dataFolder, this.overlay.overlay_img));
 
         // game covers
         var games_draw = []
@@ -332,28 +372,18 @@ class Tag extends events.EventEmitter{
             var draw = await this.drawGameCover(game, true);
         }
 
-        // overlay image
-        await this.drawImage(path.resolve(dataFolder, this.overlay.overlay_img));
-
-        // coin image/text
-        await this.drawImage(path.resolve(dataFolder, this.overlay.coin_icon.img),
-            this.overlay.coin_icon.x,
-            this.overlay.coin_icon.y);
-        this.drawText(this.overlay.coin_count.font_family,
-            this.overlay.coin_count.font_size,
-            this.overlay.coin_count.font_style,
-            this.overlay.coin_count.font_color,
-            this.user.coins,
-            this.overlay.coin_count.x,
-            this.overlay.coin_count.y);
-
         // flag icon
         await this.drawImage(path.resolve(dataFolder, "flags", `${this.user.region}.png`),
             this.overlay.flag.x,
             this.overlay.flag.y);
 
+        // coin image/text
+        await this.drawImage(path.resolve(dataFolder, "img", "coin", this.getCoinImage() + ".png"),
+            this.overlay.coin_icon.x,
+            this.overlay.coin_icon.y);
+
         // username text
-        this.drawText(this.overlay.username.font_family,
+        await this.drawText(this.overlay.username.font_family,
             this.overlay.username.font_size,
             this.overlay.username.font_style,
             this.overlay.username.font_color,
@@ -362,13 +392,21 @@ class Tag extends events.EventEmitter{
             this.overlay.username.y)
 
         // friend code text
-        this.drawText(this.overlay.friend_code.font_family,
+        await this.drawText(this.overlay.friend_code.font_family,
             this.overlay.friend_code.font_size,
             this.overlay.friend_code.font_style,
             this.overlay.friend_code.font_color,
             this.user.friend_code,
             this.overlay.friend_code.x,
             this.overlay.friend_code.y);
+
+        await this.drawText(this.overlay.coin_count.font_family,
+            this.overlay.coin_count.font_size,
+            this.overlay.coin_count.font_style,
+            this.overlay.coin_count.font_color,
+            this.user.coins,
+            this.overlay.coin_count.x,
+            this.overlay.coin_count.y);
 
         // avatar
         if (this.user.useavatar == "true") {
@@ -389,3 +427,17 @@ class Tag extends events.EventEmitter{
 }
 
 module.exports = Tag;
+
+if (module == require.main) {
+    var jstring = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
+    var banner = new Tag(jstring, true);
+
+    banner.once("done", function () {
+        var out = fs.createWriteStream(path.resolve(dataFolder, "debug", "user1.png"));
+        var stream = banner.pngStream;
+
+        stream.on('data', function (chunk) {
+            out.write(chunk);
+        });
+    });
+}

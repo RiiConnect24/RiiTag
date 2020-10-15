@@ -4,7 +4,7 @@ Tag generation for RC24
 
 ## Usage
 
-Run `npm install` then `npm test`
+Run `npm install` to install the dependencies, then run `npm start` to start the server or `npm test` to test srs/index.js syntax.
 
 ## Credits
 

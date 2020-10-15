@@ -4,7 +4,7 @@
     "id": 2,
     "width": 1200,
     "height": 450,
-    "overlay_img": "img/overlay2.png",
+    "overlay_img": "img/overlay/overlay2.png",
     "max_covers": 8,
     "cover_start_x": 80,
     "cover_start_y": 110,
@@ -23,7 +23,7 @@
         "y": 10
     },
     "coin_icon": {
-        "img": "img/coin.png",
+        "img": "mario",
         "x": 864,
         "y": 10
     },

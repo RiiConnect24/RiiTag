@@ -1,11 +1,13 @@
 {
     "name": "bendevnull",
     "id": "194822900577075200",
-    "games": ["RSPE01", "GMSE01", "R64E01", "GMBE8P", "RMCE01", "MKAE01"],
+    "games": ["ds-A2DE", "RSPE01", "3ds-ABEE", "wii-GMSE01", "wiiu-AMKE01", "wii-R64E01", "wii-GMBE8P", "wii-RMCE01"],
     "coins": 9999999,
     "friend_code": "7457 8523 6283 1041",
     "region": "us",
-    "overlay": "overlay2.json",
+    "covertype": "cover3D",
+    "overlay": "overlay1.json",
     "bg": "img/1200x450/riiconnect247.png",
+    "coin": "mario",
     "sort": ""
 }

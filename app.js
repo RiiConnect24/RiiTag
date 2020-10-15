@@ -11,9 +11,10 @@ const bodyParser = require("body-parser");
 const xml = require("xml");
 const DatabaseDriver = require("./dbdriver");
 
-const db = new DatabaseDriver(path.join(__dirname, "data", "users", "users.db"));
+const db = new DatabaseDriver(path.join(__dirname, "users.db"));
 const Sentry = require('@sentry/node');
 const express = require("express");
+// const { render } = require("pug");
 const app = express();
 
 Sentry.init({ dsn: config.sentryURL });
@@ -33,7 +34,7 @@ passport.deserializeUser(function(obj, done) {
 var scopes = ['identify'];
 
 passport.use(new DiscordStrategy({
-    clientID: "684886188603080716",
+    clientID: config.clientID,
     clientSecret: config.clientSecret,
     callbackURL: config.callbackURL
 }, function(accessToken, refreshToken, profile, done) {
@@ -48,9 +49,12 @@ app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static("public/"));
+app.use(express.static("data/"));
+
+app.set("view engine", "pug");
 
 app.get("/", function(req, res) {
-    res.render("index.pug");
+    res.render("index.pug", { user: req.user });
 });
 
 
@@ -61,7 +65,17 @@ app.get("/demo", async function(req, res) {
     });
 });
 
-app.get('/login', passport.authenticate('discord', { scope: scopes }), function(req, res) {});
+app.get('/login', function(req, res, next) {
+    if (req.isAuthenticated()) {
+        res.redirect("/");
+    }
+    next()
+}, passport.authenticate('discord', { scope: scopes }));
+
+app.get('/logout', function(req, res) {
+    req.logout();
+    res.redirect("/")
+});
 
 app.get('/callback',
     passport.authenticate('discord', { failureRedirect: '/' }), function(req, res) { res.redirect("/create") } // auth success
@@ -81,9 +95,11 @@ app.route("/edit")
                                     jdata: JSON.parse(jstring),
                                     overlays: getOverlayList(),
                                     flags: getFlagList(),
+                                    coins: getCoinList(),
                                     covertypes: getCoverTypes(),
                                     coverregions: getCoverRegions(),
-                                    userKey: userKey
+                                    userKey: userKey,
+                                    user: req.user
                                 });
         } catch(e) {
             console.log(e);
@@ -98,6 +114,7 @@ app.route("/edit")
         editUser(req.user.id, "bg", req.body.background);
         editUser(req.user.id, "overlay", req.body.overlay);
         editUser(req.user.id, "region", req.body.flag);
+        editUser(req.user.id, "coin", req.body.coin);
         editUser(req.user.id, "name", req.body.name);
         editUser(req.user.id, "friend_code", req.body.wiinumber);
         editUser(req.user.id, "games", req.body.games.split(";"));
@@ -113,110 +130,125 @@ app.get("/create", checkAuth, function(req, res) {
     res.redirect(`/${req.user.id}`);
 });
 
-app.get("/img/flags/:flag.png", function(req, res) {
-    try {
-        var file = path.resolve(dataFolder, "flags", req.params.flag + ".png");
-        var s = fs.createReadStream(file);
-        s.on('open', function() {
-            res.set('Content-Type', 'image/png');
-            s.pipe(res);
-        });
-    } catch(e) {
+// app.get("/img/flags/:flag.png", function(req, res) {
+//     try {
+//         var file = path.resolve(dataFolder, "flags", req.params.flag + ".png");
+//         var s = fs.createReadStream(file);
+//         s.on('open', function() {
+//             res.set('Content-Type', 'image/png');
+//             s.pipe(res);
+//         });
+//     } catch(e) {
+//         res.status(404).render("notfound.pug", {err: e});
+//     }
+// });
+
+// app.get("/img/:size/:background.png", function(req, res) {
+//     try {
+//         var file = path.resolve(dataFolder, "img", req.params.size, req.params.background + ".png");
+//         var s = fs.createReadStream(file);
+//         s.on('open', function() {
+//             res.set('Content-Type', 'image/png');
+//             s.pipe(res);
+//         });
+//     } catch(e) {
+//         res.status(404).render("notfound.pug", {err: e});
+//     }
+// });
+function getTag(id, limitSize) {
+    return new Promise(function(resolve, reject) {
+        try {
+            var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
+            var banner = new Banner(jstring, limitSize);
+            banner.once("done", function() {
+                resolve(banner);
+            });
+        } catch(e) {
+            console.log(e);
+            // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
+            // res.status(404).render("notfound.pug", {err: e});
+            reject(e);
+        }
+    })
+}
+
+
+app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
+    var banner = await getTag(req.params.id, true).catch(function() {
         res.status(404).render("notfound.pug", {err: e});
-    }
+    });
+    banner.pngStream.pipe(res);
 });
 
-app.get("/img/:size/:background.png", function(req, res) {
-    try {
-        var file = path.resolve(dataFolder, "img", req.params.size, req.params.background + ".png");
-        var s = fs.createReadStream(file);
-        s.on('open', function() {
-            res.set('Content-Type', 'image/png');
-            s.pipe(res);
-        });
-    } catch(e) {
+app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
+    var banner = await getTag(req.params.id, false).catch(function() {
         res.status(404).render("notfound.pug", {err: e});
-    }
-});
-
-app.get("/:id/tag.png", function(req, res) {
-    try {
-        var jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.params.id + ".json"));
-        var banner = new Banner(jstring, true);
-        banner.once("done", function() {
-            banner.pngStream.pipe(res);
-        });
-    } catch(e) {
-        console.log(e);
-        // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
-        res.status(404).render("notfound.pug", {err: e});
-    }
-});
-
-app.get("/:id/tag.max.png", function(req, res) {
-    try {
-        var jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.params.id + ".json"));
-        var banner = new Banner(jstring, false);
-        banner.once("done", function() {
-            banner.pngStream.pipe(res);
-        });
-    } catch(e) {
-        console.log(e);
-        // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
-        res.status(404).render("notfound.pug", {err: e});
-    }
+    });
+    banner.pngStream.pipe(res);
 });
 
 app.get("/wii", async function(req, res) {
     var key = req.query.key || "";
     var gameID = req.query.game || "";
 
-    if (key == "") {
-        return respond(res, "key is undefined", 400);
-    } else if (gameID == "") {
-        return respond(res, "game is undefined", 400);
+    if (key == "" || gameID == "") {
+        res.status(400).send();
+        return
     }
 
     var userID = await getUserID(key);
     if (userID == undefined) {
-        return respond(res, "A user by that key does not exist", 400);
-    } else {
-        var c = getUserAttrib(userID, "coins")
-        var games = getUserAttrib(userID, "games");
-        var newGames = updateGameArray(games, "wii-" + gameID);
-        // console.log(games);
-        // console.log(newGames);
-        setUserAttrib(userID, "coins", c + 1);
-        setUserAttrib(userID, "games", newGames);
-        res.status(200).send();
+        res.status(400).send();
+        return
     }
+
+    if (getUserAttrib(userID, "lastplayed") !== null) {
+        if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
+            res.status(429).send(); // cooldown
+            return
+        }
+    }
+
+    var c = getUserAttrib(userID, "coins")
+    var games = getUserAttrib(userID, "games");
+    var newGames = updateGameArray(games, "wii-" + gameID);
+    setUserAttrib(userID, "coins", c + 1);
+    setUserAttrib(userID, "games", newGames);
+    setUserAttrib(userID, "lastplayed", ["wii-" + gameID, Math.floor(Date.now() / 1000)]);
+    res.status(200).send();
 });
 
 app.get("/wiiu", async function(req, res) {
     var key = req.query.key || "";
     var gameTID = req.query.game.toUpperCase() || "";
 
-    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "wiiu.json")))
+    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "wiiu.json"))) // 16 digit TID -> 4 or 6 digit game ID
 
-    if (key == "") {
-        return respond(res, "key is undefined", 400);
-    } else if (gameTID == "") {
-        return respond(res, "game is undefined", 400);
+    if (key == "" || gameTID == "") {
+        res.status(400).send();
+        return
     }
 
     var userID = await getUserID(key);
     if (userID == undefined) {
-        return respond(res, "A user by that key does not exist", 400);
-    } else {
-        var c = getUserAttrib(userID, "coins")
-        var games = getUserAttrib(userID, "games");
-        var newGames = updateGameArray(games, "wiiu-" + ids[gameTID]);
-        // console.log(games);
-        // console.log(newGames);
-        setUserAttrib(userID, "coins", c + 1);
-        setUserAttrib(userID, "games", newGames);
-        res.status(200).send();
+        res.status(400).send();
+        return
     }
+
+    if (getUserAttrib(userID, "lastplayed") !== null) {
+        if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
+            res.status(429).send(); // cooldown
+            return
+        }
+    }
+
+    var c = getUserAttrib(userID, "coins")
+    var games = getUserAttrib(userID, "games");
+    var newGames = updateGameArray(games, "wiiu-" + ids[gameTID]);
+    setUserAttrib(userID, "coins", c + 1);
+    setUserAttrib(userID, "games", newGames);
+    setUserAttrib(userID, "lastplayed", ["wiiu-" + gameID, Math.floor(Date.now() / 1000)]);
+    res.status(200).send();
 });
 
 app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
@@ -237,23 +269,71 @@ app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
 });
 
 
-app.get("/:id", function(req, res) {
+app.get("^/:id([0-9]+)", function(req, res, next) {
     // var key = req.params.id;
     // console.log(key);
+    var userData = getUserData(req.params.id);
+    
+    if (!userData) {
+        res.status(404).render("notfound.pug");
+        return;
+    };
+
     res.render("tagpage.pug", {id: req.params.id,
-                               user: getUserData(req.params.id),
+                               tuser: userData,
+                               user: req.user,
+                               flags: getFlagList(),
                                backgrounds: getBackgroundList(),
                                overlays: getOverlayList()
                               });
 });
+
 // app.get("/edit/:id", function(req, res) {
 //     // display a page with the user's jstring and allow them to edit it manually.
 //     // this is super dangerous lmao
 // });
 
+app.get("^/:id([0-9]+)/json", function(req, res) {
+    var userData = getUserData(req.params.id);
+    res.type("application/json");
+
+    if (!userData) {
+        res.status(404).send(JSON.stringify({error: "That user ID does not exist."}));
+        return;
+    };
+
+    var lastPlayed = {};
+    if (userData.lastplayed.length !== 0) {
+        var banner = new Banner(JSON.stringify(userData), doMake=false);
+        var game = userData.lastplayed[0];
+        var time = userData.lastplayed[1];
+        var gameid = game.split("-")[1]
+
+        var consoletype = banner.getConsoleType(game);
+        var covertype = banner.getCoverType(consoletype);
+        var region = banner.getGameRegion(gameid);
+        var extension = banner.getExtension(covertype, consoletype);
+
+        var lastPlayed = {
+            game_id: gameid,
+            console: consoletype,
+            region: region,
+            cover_url: banner.getCoverUrl(consoletype, covertype, region, gameid, extension),
+            time: time
+        };
+    };
+
+    var tagUrl = `https://tag.rc24.xyz/${userData.id}/tag.png`;
+    res.send(JSON.stringify({
+        user: {name: userData.name, id: userData.id},
+        tag_url: {normal: tagUrl, max: tagUrl.replace(".png", ".max.png")},
+        game_data: {last_played: lastPlayed, games: userData.games}
+    }));
+});
+
 app.listen(3000, async function() {
-    cleanCache();
-    console.log("Cleaned cache");
+    // cleanCache();
+    // console.log("Cleaned cache");
     await db.create("users", ["id INTEGER PRIMARY KEY", "snowflake TEXT", "key TEXT"]);
     // db.insert("users", ["snowflake", "key"], ["test_sf", "test_key"]);
     console.log("RiiTag Server listening on port 3000");
@@ -277,7 +357,12 @@ function getOverlayList() {
 }
 
 function getFlagList() {
-    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "flags", "flags.json")));
+    console.log()
+    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "meta", "flags.json")));
+}
+
+function getCoinList() {
+    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "meta", "coin.json")));
 }
 
 function getCoverTypes() {
@@ -310,8 +395,13 @@ function setUserAttrib(id, key, value) {
 
 function getUserData(id) {
     var p = path.resolve(dataFolder, "users", id + ".json");
-    var jdata = JSON.parse(fs.readFileSync(p));
-    return jdata || null;
+    try {
+        var jdata = JSON.parse(fs.readFileSync(p));
+    } catch(e) {
+        return null;
+    }
+    
+    return jdata;
 }
 
 async function createUser(user) {
@@ -320,6 +410,7 @@ async function createUser(user) {
             name: user.username,
             id: user.id,
             games: [],
+            lastplayed: [],
             coins: 0,
             friend_code: "0000 0000 0000 0000",
             region: "rc24",
@@ -403,3 +494,19 @@ function loadConfig() {
         process.exit(0);
     }
 }
+
+app.use(function(req, res, next) {
+    var allowed = [
+        "/img",
+        "/overlays",
+        "/flags"
+    ];
+    for (var index of allowed) {
+        if (req.path.indexOf(index)) {
+            console.log(req.path);
+            next();
+        }
+    }
+    res.status(404);
+    res.render("notfound2.pug");
+});
