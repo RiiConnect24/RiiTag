@@ -15,7 +15,7 @@ block content
                                     div.form-group
                                         .container
                                             .row.justify-content-center
-                                                .col-11
+                                                .col-12
                                                    select(name="background" id="background").big-space-bottom
                                                         each bg in backgrounds
                                                             if jdata.bg == `img/1200x450/${bg}`
@@ -35,7 +35,7 @@ block content
                                     div.form-group
                                         .container
                                             .row.justify-content-center
-                                                .col-11
+                                                .col-12
                                                     select(name="overlay" id="overlay").big-space-bottom
                                                         each overlay in overlays
                                                             if overlay.enabled
@@ -58,7 +58,7 @@ block content
                                     div.form-group
                                         .container
                                             .row.justify-content-center
-                                                .col-11
+                                                .col-12
                                                     select(name="flag" id="flag")
                                                         each v,k in flags
                                                             option(value=k selected=(jdata.region == k))= v
@@ -66,7 +66,6 @@ block content
                                                 .col-12
                                                     div.text-center.big-space-top
                                                         img(src=`/flags/${jdata.region}.png` id="flag-img" alt="Flag Preview")
-                                        
                     .col-md-6
                         .card.big-space-bottom
                             .card-header
@@ -76,7 +75,7 @@ block content
                                     div.form-group
                                         .container
                                             .row.justify-content-center
-                                                .col-11
+                                                .col-12
                                                     select(name="coin" id="coin")
                                                         each v,k in coins
                                                             option(value=k selected=(jdata.coin == k))= v
@@ -88,7 +87,53 @@ block content
                                                     else
                                                         - cimg = jdata.coin
                                                     div.text-center.big-space-top
-                                                        img(src=`/img/coin/${soverlay.coin_icon.img}.png` id="coin-img" alt="Coin Preview")
+                                                        img(src=`/img/coin/${cimg}.png` id="coin-img" alt="Coin Preview")
+                .row
+                    .col-md-6
+                        .card.big-space-bottom
+                            .card-header
+                                h5.mb-0 Personalization
+                            .card-body
+                                span.text-white
+                                    div.form-group
+                                        .container
+                                            .row.justify-content-center
+                                                .col-12
+                                                    h5.mb-0 Use Discord Profile Picture
+                                                    select(name="useavatar" id="useavatar")
+                                                        option(value="true" selected=(jdata.useavatar == "true"))= "Yes"
+                                                        option(value="false" selected=(jdata.useavatar == "false"))= "No"
+                                                    br
+                                            .row.justify-content-center
+                                                .col-12
+                                                    h5.mb-0 Font
+                                                    - jdata.font = "RodinNTLG"
+                                                    select(name="font" id="font")
+                                                        each k in fonts
+                                                            option(value=k selected=(jdata.font == k))= k
+                                            .row.justify-content-center
+                                                .col-12
+                                                    div.text-center.big-space-top
+                                                        img(src=`/img/font/${jdata.font}.png` width="75%" id="font-img" alt="Font Preview")
+                    .col-md-6
+                        .card.big-space-bottom
+                            .card-header
+                                h5.mb-0 Cover Display
+                            .card-body
+                                span.text-white
+                                    div.form-group
+                                        .container
+                                            .row.justify-content-center
+                                                .col-12
+                                                    h5.mb-0 Cover Type
+                                                    select(name="covertype" id="covertype")
+                                                        each k in covertypes
+                                                            option(value=k selected=(jdata.covertype == k))= k
+                                                    br
+                                                    h5.mb-0 Cover Region
+                                                    select(name="coverregion" id="coverregion")
+                                                        each k in coverregions
+                                                            option(value=k selected=(jdata.coverregion == k))= k
                 .row
                     .col-md-6
                         .card.big-space-bottom

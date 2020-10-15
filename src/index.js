@@ -183,6 +183,21 @@ class Tag extends events.EventEmitter{
         }
     }
 
+    getFont(type)
+    {
+        if (type == "username" && this.overlay.username.font_family != "RodinNTLG") {
+            return this.overlay.username.font_family;
+        } else if (type == "friend_code" && this.overlay.friend_code.font_family != "RodinNTLG") {
+            return this.overlay.friend_code.font_family;
+        } else if (type == "coin_count" && this.overlay.coin_count.font_family != "RodinNTLG") {
+            return this.overlay.coin_count.font_family;
+        } else if (this.user.font) {
+            return this.user.font;
+        } else {
+            return "RodinNTLG";
+        }
+    }
+
     getCoverUrl(consoletype, covertype, region, game, extension) {
         return `https://art.gametdb.com/${consoletype}/${covertype}/${region}/${game}.${extension}`;
     }
@@ -383,7 +398,7 @@ class Tag extends events.EventEmitter{
             this.overlay.coin_icon.y);
 
         // username text
-        await this.drawText(this.overlay.username.font_family,
+        await this.drawText(this.getFont("username"),
             this.overlay.username.font_size,
             this.overlay.username.font_style,
             this.overlay.username.font_color,
@@ -392,7 +407,7 @@ class Tag extends events.EventEmitter{
             this.overlay.username.y)
 
         // friend code text
-        await this.drawText(this.overlay.friend_code.font_family,
+        await this.drawText(this.getFont("friend_code"),
             this.overlay.friend_code.font_size,
             this.overlay.friend_code.font_style,
             this.overlay.friend_code.font_color,
@@ -400,7 +415,8 @@ class Tag extends events.EventEmitter{
             this.overlay.friend_code.x,
             this.overlay.friend_code.y);
 
-        await this.drawText(this.overlay.coin_count.font_family,
+        // coin count text
+        await this.drawText(this.getFont("coin_count"),
             this.overlay.coin_count.font_size,
             this.overlay.coin_count.font_style,
             this.overlay.coin_count.font_color,
