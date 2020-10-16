@@ -2,7 +2,8 @@ node_modules/
 src/*.png
 data/cache/
 .DS_Store
-data/users/
+data/users/*
+!data/users/important_file
 config.json
 users.db
 *.rcd

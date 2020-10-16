@@ -3,14 +3,15 @@ head
     meta(charset='utf-8')
     meta(name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no')
     title RiiTag
-    link(rel='stylesheet' href='assets/bootstrap/css/bootstrap.min.css')
-    link(rel='stylesheet' href='assets/css/all.css')
-    link(rel='stylesheet' href='assets/css/styles.css')
-    link(rel='stylesheet' href='assets/css/cry-for-help.css')
+    link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
+    link(rel='stylesheet' href='/assets/css/all.css')
+    link(rel='stylesheet' href='/assets/css/styles.css')
+    link(rel='stylesheet' href='/assets/css/cry-for-help.css')
 body
     nav.navbar.navbar-light.navbar-expand-md.bg-dark
         .container-fluid
-            a.navbar-brand.text-light(href='/') RiiTag
+            a.navbar-brand.text-light(href='/')
+                img(src="/logo.svg" height="48" style="margin-top: -4px" alt="RiiTag Logo")
             button.navbar-toggler(data-toggle='collapse' data-target='#navcol-1')
                 span.sr-only Toggle navigation
                 span.navbar-toggler-icon

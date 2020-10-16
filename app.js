@@ -5,7 +5,7 @@ const dataFolder = path.resolve(__dirname, "data");
 const json_string = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
 const DiscordStrategy = require("passport-discord").Strategy;
 const passport = require("passport");
-const config = JSON.parse(fs.readFileSync("config.json"));
+const config = loadConfig();
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const xml = require("xml");
@@ -98,6 +98,7 @@ app.route("/edit")
                                     coins: getCoinList(),
                                     covertypes: getCoverTypes(),
                                     coverregions: getCoverRegions(),
+                                    fonts: getFonts(),
                                     userKey: userKey,
                                     user: req.user
                                 });
@@ -121,6 +122,7 @@ app.route("/edit")
         editUser(req.user.id, "covertype", req.body.covertype);
         editUser(req.user.id, "coverregion", req.body.coverregion);
         editUser(req.user.id, "useavatar", req.body.useavatar);
+        editUser(req.user.id, "font", req.body.font);
         res.redirect(`/${req.user.id}`);
     });
 
@@ -175,14 +177,16 @@ function getTag(id, limitSize) {
 
 app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
     var banner = await getTag(req.params.id, true).catch(function() {
-        res.status(404).render("notfound.pug", {err: e});
+        res.status(404).render("notfound.pug");
+	return
     });
     banner.pngStream.pipe(res);
 });
 
 app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
     var banner = await getTag(req.params.id, false).catch(function() {
-        res.status(404).render("notfound.pug", {err: e});
+        res.status(404).render("notfound.pug");
+	return
     });
     banner.pngStream.pipe(res);
 });
@@ -373,6 +377,10 @@ function getCoverRegions() {
     return ["EN", "FR", "DE", "ES", "IT", "NL", "PT", "AU", "SE", "DK", "NO", "FI", "TR"];
 }
 
+function getFonts() {
+    return ["RodinNTLG", "NintendoU", "Humming", "PopHappiness", "Seurat"]
+}
+
 function editUser(id, key, value) {
     var p = path.resolve(dataFolder, "users", id + ".json");
     var jdata = JSON.parse(fs.readFileSync(p));
@@ -484,6 +492,16 @@ function updateGameArray(games, game) {
     }
     games.unshift(game);
     return games;
+}
+
+function loadConfig() {
+    const configFile = "config.json";
+    if (!fs.existsSync(configFile)) {
+        fs.copyFileSync("config.example.json", configFile);
+        console.log("'config.json' has been created. Please edit the values in 'config.json' and restart the server.")
+        process.exit(0);
+    }
+    return JSON.parse(fs.readFileSync("config.json"));
 }
 
 app.use(function(req, res, next) {

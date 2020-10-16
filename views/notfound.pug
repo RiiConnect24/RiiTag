@@ -1,13 +1,14 @@
 extends head
 
 block content
-    p That user ID does not exist.
-    p ~<a href="https://www.nicksspaghettiandsteakhouse.com/">Nick</a> "Larsenv" Fibonacci - 2019
-    if err
-        br
-        br
-        p
-            b Debug info:
-        p= err
-    br
-    a(href="/create") Is this you? Create your tag here.
+  - var soverlay
+  div.big-space-top
+    .container
+      .row
+        .col-md-12
+          span.text-white
+            p That user or page does not exist.
+            p ~<a href="https://www.nicksspaghettiandsteakhouse.com/">Nick</a> "Larsenv" Fibonacci - 2019
+            a(href="/create") Is this you? Create your tag here.
+  script(src='/assets/js/jquery.min.js')
+  script(src='/assets/bootstrap/js/bootstrap.min.js')
