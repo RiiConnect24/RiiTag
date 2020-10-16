@@ -2,6 +2,7 @@ extends head
 
 block content
     - var soverlay
+    - var guests = {"a": "Guest A","b": "Guest B","c": "Guest C","d": "Guest D","e": "Guest E","f": "Guest F"}
     div.big-space-top
         form(method="POST" action="/edit")
             .container
@@ -90,7 +91,7 @@ block content
                                                     div.text-center.big-space-top
                                                         img(src=`/img/coin/${soverlay.coin_icon.img}.png` id="coin-img" alt="Coin Preview")
                 .row
-                    .col-md-6
+                    .col-md-12
                         .card.big-space-bottom
                             .card-header
                                 h5.mb-0 Other Information
@@ -107,6 +108,28 @@ block content
                                                     h5.mb-0 Games
                                                     h6.mb-0 Game IDs should be separated by a semicolon (;). Using a USB Loader allows games to appear automagically.
                                                     input(type="text" name="games" value=jdata.games.join(";") id="games").space-top
+                .row
+                    .col-md-6
+                        .card.big-space-bottom
+                            .card-header
+                                h5.mb-0 Your Mii
+                            .card-body
+                                span.text-white
+                                    div.form-group
+                                        .container
+                                            .row.text-center
+                                                .col-12
+                                                    h5.mb-0 Current Mii
+                                                    img#mii-img(src="/miis/guests/" + jdata.mii + ".png" width="150px" height="150px" style="img:hover: {};").space-top.big-space-bottom
+                                                    h5.mb-0 Mii Selection
+                                                    select(type="text" name="miiselection" value=jdata.friend_code id="miiselection").space-top.big-space-bottom
+                                                        - var guest = false
+                                                        each v,k in guests
+                                                            option(value=k selected=(jdata.mii == k))= v
+                                                        option(value="custom" selected=(guest)) Custom Mii
+                                                    h5#mii(style="display: none;").mb-0 Mii File
+                                                    h6#mii(style="display: none;").mb-0 Currently only supports Gen 1 (Wii) Miis
+                                                    input(type="file" name="mii" id="mii" style="display: none;").space-top
                     .col-md-6
                         .card.big-space-bottom
                             .card-header
