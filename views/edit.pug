@@ -172,9 +172,11 @@ block content
                                                         each v,k in guests
                                                             option(value=k selected=(jdata.mii == k))= v
                                                         option(value="custom" selected=(guest)) Custom Mii
-                                                    h5#mii(style="display: none;").mb-0 Mii File
-                                                    h6#mii(style="display: none;").mb-0 Currently only supports Gen 1 (Wii) Miis
-                                                    input(type="file" name="mii" id="mii" style="display: none;").space-top
+                                                    form#mii(method="POST" action="/upload_mii")
+                                                        h5.mb-0 Mii File
+                                                        h6.mb-0 Currently only supports Gen 1 (Wii) Miis
+                                                        input(type="file" name="mii").space-top
+                                                        button(type="submit").btn.btn-success Upload Mii
                     .col-md-6
                         .card.big-space-bottom
                             .card-header

@@ -122,8 +122,26 @@ app.route("/edit")
         editUser(req.user.id, "covertype", req.body.covertype);
         editUser(req.user.id, "coverregion", req.body.coverregion);
         editUser(req.user.id, "useavatar", req.body.useavatar);
+        editUser(req.user.id, "usemii", req.body.usemii);
         editUser(req.user.id, "font", req.body.font);
         res.redirect(`/${req.user.id}`);
+    });
+
+app.route("/editmii")
+    .get(checkAuth, async function(req, res) {
+        var jstring;
+        try {
+            jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.user.id + ".json")).toString();
+            res.render("edit.pug", {jstring: jstring,
+                                    user: req.user
+                                });
+        } catch(e) {
+            console.log(e);
+            res.redirect("/create");
+        }
+    })
+    .post(checkAuth, async function(req, res) {
+
     });
 
 app.get("/create", checkAuth, function(req, res) {
