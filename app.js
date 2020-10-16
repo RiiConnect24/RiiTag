@@ -501,6 +501,7 @@ function loadConfig() {
         console.log("'config.json' has been created. Please edit the values in 'config.json' and restart the server.")
         process.exit(0);
     }
+    return JSON.parse(fs.readFileSync("config.json"));
 }
 
 app.use(function(req, res, next) {
