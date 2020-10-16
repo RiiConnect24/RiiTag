@@ -1,5 +1,6 @@
 {
-	"clientID": "684886188603080716",
+	"clientID": "583346143736627213",
     "clientSecret": "kPFRYvJhoVX7mSC7byGHZ5uHnwfgufej",
-    "callbackURL": "http://localhost:3000/callback"
+    "callbackURL": "http://localhost:3000/callback",
+    "sentryURL": "",
 }
