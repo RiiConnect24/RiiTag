@@ -396,7 +396,7 @@ function getCoverRegions() {
 }
 
 function getFonts() {
-    return ["RodinNTLG", "NintendoU", "Humming", "PopHappiness", "Seurat"]
+    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "meta", "fonts.json")))
 }
 
 function editUser(id, key, value) {

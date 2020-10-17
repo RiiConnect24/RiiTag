@@ -25,7 +25,6 @@ var sel = document.getElementById('background');
 var sel2 = document.getElementById('flag');
 var sel3 = document.getElementById('overlay');
 var sel4 = document.getElementById('coin');
-var sel5 = document.getElementById('miiselection');
 var sel6 = document.getElementById('font');
 
 sel.onchange = function () {
@@ -56,12 +55,15 @@ sel4.onchange = function () {
     }
     document.getElementById("coin-img").src = "/img/coin/" + cimg;
 }
-sel5.onchange = function() {
-    if (sel5 != "custom") {
-        document.getElementById("mii-img").src = `/miis/guests/${sel5.value}.png`;
-    }
-}
 
 sel6.onchange = function () {
-    document.getElementById("font-img").src = "/img/font/" + this.value + ".png";
+    var cimg;
+    var overlay = JSON.parse(getOverlay(`/overlays/${sel3.value}`));
+    console.log(this.value);
+    if (this.value == "default") {
+        cimg = overlay.username.font_family + ".png";
+    } else {
+        cimg = this.value + ".png";
+    }
+    document.getElementById("font-img").src = "/img/font/" + cimg;
 }

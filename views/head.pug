@@ -6,7 +6,6 @@ head
     link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
     link(rel='stylesheet' href='/assets/css/all.css')
     link(rel='stylesheet' href='/assets/css/styles.css')
-    link(rel='stylesheet' href='/assets/css/cry-for-help.css')
 body
     nav.navbar.navbar-light.navbar-expand-md.bg-dark
         .container-fluid
@@ -25,6 +24,10 @@ body
                             a.nav-link.text-white-50(href='/login') Login
                     else
                         li.nav-item(role='presentation')
-                            a.nav-link.text-white-50(href=`/${user.id}`)= user.username
+                            a.nav-link.text-white-50(href=`/${user.id}`)
+                                h6.mb-0
+                                    img(src=`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.jpg?size=128` width="32px" height="32px").space-right.rounded
+                                    =user.username
+                                
 
     block content

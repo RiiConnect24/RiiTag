@@ -101,21 +101,33 @@ block content
                                             .row.justify-content-center
                                                 .col-12
                                                     h5.mb-0 Use Discord Profile Picture
-                                                    select(name="useavatar" id="useavatar")
+                                                    select(name="useavatar" id="useavatar").space-top.space-bottom
                                                         option(value="true" selected=(jdata.useavatar == "true"))= "Yes"
                                                         option(value="false" selected=(jdata.useavatar == "false"))= "No"
                                                     br
                                             .row.justify-content-center
                                                 .col-12
+                                                    h5.mb-0 Use Mii
+                                                    select(name="usemii" id="usemii").space-top.space-bottom
+                                                        option(value="true" selected=(jdata.usemii == "true"))= "Yes"
+                                                        option(value="false" selected=(jdata.usemii == "false"))= "No"
+                                                    br
+                                            .row.justify-content-center
+                                                .col-12
                                                     h5.mb-0 Font
-                                                    - jdata.font = "RodinNTLG"
-                                                    select(name="font" id="font")
-                                                        each k in fonts
-                                                            option(value=k selected=(jdata.font == k))= k
+                                                    - if (!jdata.font) { jdata.font = "default"; }
+                                                    select(name="font" id="font").space-top.space-bottom
+                                                        each v,k in fonts
+                                                            option(value=k selected=(jdata.font == k))= v
                                             .row.justify-content-center
                                                 .col-12
                                                     div.text-center.big-space-top
-                                                        img(src=`/img/font/${jdata.font}.png` width="75%" id="font-img" alt="Font Preview")
+                                                        - var fimg
+                                                        if jdata.font == "default"
+                                                            - fimg = soverlay.username.font_family
+                                                        else
+                                                            - fimg = jdata.font
+                                                        img(src=`/img/font/${fimg}.png` width="75%" id="font-img" alt="Font Preview")
                     .col-md-6
                         .card.big-space-bottom
                             .card-header
@@ -127,16 +139,14 @@ block content
                                             .row.justify-content-center
                                                 .col-12
                                                     h5.mb-0 Cover Type
-                                                    select(name="covertype" id="covertype")
+                                                    select(name="covertype" id="covertype").space-top.big-space-bottom
                                                         each k in covertypes
                                                             option(value=k selected=(jdata.covertype == k))= k
                                                     br
                                                     h5.mb-0 Cover Region
-                                                    select(name="coverregion" id="coverregion")
+                                                    select(name="coverregion" id="coverregion").space-top.big-space-bottom
                                                         each k in coverregions
                                                             option(value=k selected=(jdata.coverregion == k))= k
-                .row
-                    .col-md-12
                         .card.big-space-bottom
                             .card-header
                                 h5.mb-0 Other Information
@@ -154,30 +164,7 @@ block content
                                                     h6.mb-0 Game IDs should be separated by a semicolon (;). Using a USB Loader allows games to appear automagically.
                                                     input(type="text" name="games" value=jdata.games.join(";") id="games").space-top
                 .row
-                    .col-md-6
-                        .card.big-space-bottom
-                            .card-header
-                                h5.mb-0 Your Mii
-                            .card-body
-                                span.text-white
-                                    div.form-group
-                                        .container
-                                            .row.text-center
-                                                .col-12
-                                                    h5.mb-0 Current Mii
-                                                    img#mii-img(src="/miis/guests/" + jdata.mii + ".png" width="150px" height="150px" style="img:hover: {};").space-top.big-space-bottom
-                                                    h5.mb-0 Mii Selection
-                                                    select(type="text" name="miiselection" value=jdata.friend_code id="miiselection").space-top.big-space-bottom
-                                                        - var guest = false
-                                                        each v,k in guests
-                                                            option(value=k selected=(jdata.mii == k))= v
-                                                        option(value="custom" selected=(guest)) Custom Mii
-                                                    form#mii(method="POST" action="/upload_mii")
-                                                        h5.mb-0 Mii File
-                                                        h6.mb-0 Currently only supports Gen 1 (Wii) Miis
-                                                        input(type="file" name="mii").space-top
-                                                        button(type="submit").btn.btn-success Upload Mii
-                    .col-md-6
+                    .col-md-12
                         .card.big-space-bottom
                             .card-header
                                 h5.mb-0 RiiTag Private Key
