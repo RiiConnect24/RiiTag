@@ -277,9 +277,10 @@ class Tag extends events.EventEmitter{
     }
 
     async drawAvatar() {
-        await this.cacheAvatar();
         if (!fs.existsSync(path.resolve(dataFolder, "avatars", `${this.user.id}.png`))) {
             return;
+        } else {
+            await this.cacheAvatar();
         }
         await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
     }
