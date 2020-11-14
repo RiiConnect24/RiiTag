@@ -247,7 +247,7 @@ class Tag extends events.EventEmitter{
             con.drawImage(img, 0, 0, 128, 128);
             await this.savePNG(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), can);
         } catch(e) {
-            console.error(e);
+            return false;
         }
     }
 
@@ -276,12 +276,13 @@ class Tag extends events.EventEmitter{
     }
 
     async drawAvatar() {
+        var avy = true;
         if (!fs.existsSync(path.resolve(dataFolder, "avatars", `${this.user.id}.png`))) {
-            return;
-        } else {
-            await this.cacheAvatar();
+            var avy = await this.cacheAvatar();
         }
-        await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
+        if (avy != false) {
+            await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
+        }
     }
 
     async savePNG(out, c) {
