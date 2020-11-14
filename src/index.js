@@ -51,6 +51,9 @@ class Tag extends events.EventEmitter{
             img.onerror = function(err) {
                 reject(err);
             }
+            setTimeout(function() {
+                reject("Timed out");
+            }, 1000);
             console.log(source);
             img.src = source;
         });
