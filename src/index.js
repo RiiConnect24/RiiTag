@@ -228,7 +228,6 @@ class Tag extends events.EventEmitter{
                 try {
                     await this.downloadGameCover(game, "US", covertype, consoletype, extension); // small chance it's US region
                 } catch(e) {
-                    console.error(e);
                     return false;
                 }
             }
