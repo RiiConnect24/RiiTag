@@ -240,9 +240,6 @@ class Tag extends events.EventEmitter{
         if (!fs.existsSync(path.resolve(dataFolder, "avatars"))) {
             fs.mkdirSync(path.resolve(dataFolder, "avatars"));
         }
-        if (fs.existsSync(path.resolve(dataFolder, "avatars", `${this.user.id}.png`))) {
-            return;
-        }
         var can = new Canvas.Canvas(128, 128);
         var con = can.getContext("2d");
         var img;
@@ -281,6 +278,9 @@ class Tag extends events.EventEmitter{
 
     async drawAvatar() {
         await this.cacheAvatar();
+        if (!fs.existsSync(path.resolve(dataFolder, "avatars", `${this.user.id}.png`))) {
+            return;
+        }
         await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
     }
 
