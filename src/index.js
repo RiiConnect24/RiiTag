@@ -435,12 +435,10 @@ class Tag extends events.EventEmitter{
 
         await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.max.png`), this.canvas);
 
-        if (this.size) {
-            this.canvas2 = new Canvas.Canvas(this.overlay.width / 3, this.overlay.height / 3);
-            this.ctx = this.canvas2.getContext("2d");
-            await this.drawImageShrink(this.canvas, 0, 0, this.overlay.width / 3, this.overlay.height / 3);
-            await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.png`), this.canvas2);
-        }
+        this.canvas2 = new Canvas.Canvas(this.overlay.width / 3, this.overlay.height / 3);
+        this.ctx = this.canvas2.getContext("2d");
+        await this.drawImageShrink(this.canvas, 0, 0, this.overlay.width / 3, this.overlay.height / 3);
+        await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.png`), this.canvas2);
 
         this.emit("done");
     }
