@@ -169,7 +169,7 @@ function getTag(id) {
     return new Promise(function(resolve, reject) {
         try {
             var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
-            var banner = new Banner(jstring, limitSize);
+            var banner = new Banner(jstring);
             banner.once("done", function() {
                 resolve(banner);
             });

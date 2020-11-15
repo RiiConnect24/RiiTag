@@ -21,10 +21,9 @@ const defaultDrawOrder = [
 ]
 
 class Tag extends events.EventEmitter{
-    constructor(user, size, doMake=true) {
+    constructor(user, doMake=true) {
         super();
 
-        this.size = size;
         this.user = this.loadUser(user);
         this.overlay = this.loadOverlay(this.user.overlay);
 
@@ -448,7 +447,7 @@ module.exports = Tag;
 
 if (module == require.main) {
     var jstring = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
-    var banner = new Tag(jstring, true);
+    var banner = new Tag(jstring);
 
     banner.once("done", function () {
         var out = fs.createWriteStream(path.resolve(dataFolder, "debug", "user1.png"));
