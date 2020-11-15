@@ -107,7 +107,7 @@ app.route("/edit")
             res.redirect("/create");
         }
     })
-    .post(checkAuth, function(req, res) {
+    .post(checkAuth, async function(req, res) {
         // fs.writeFileSync(path.resolve(dataFolder, "users", req.user.id + ".json"), req.body.jstring);
         // var jdata = JSON.parse(path.resolve(dataFolder, "users", req.user.id + ".json"));
         // console.log(req.body.background);
@@ -124,7 +124,7 @@ app.route("/edit")
         editUser(req.user.id, "useavatar", req.body.useavatar);
         editUser(req.user.id, "font", req.body.font);
         res.redirect(`/${req.user.id}`);
-        var banner = getTag(req.params.id, false).catch(function () {
+        var banner = await getTag(req.user.id, false).catch(function () {
             res.status(404).render("notfound.pug");
             return
         });
@@ -274,7 +274,7 @@ app.get("/wiiu", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["wiiu-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    var banner = getTag(req.params.id, false).catch(function () {
+    var banner = await getTag(userID, false).catch(function () {
         res.status(404).render("notfound.pug");
         return
     });
