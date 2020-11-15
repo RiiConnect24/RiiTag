@@ -124,16 +124,20 @@ app.route("/edit")
         editUser(req.user.id, "useavatar", req.body.useavatar);
         editUser(req.user.id, "font", req.body.font);
         res.redirect(`/${req.user.id}`);
-        var banner = await getTag(req.user.id, false).catch(function () {
+        var banner = await getTag(req.user.id).catch(function () {
             res.status(404).render("notfound.pug");
             return
         });
     });
 
-app.get("/create", checkAuth, function(req, res) {
+app.get("/create", checkAuth, async function(req, res) {
     createUser(req.user);
     editUser(req.user.id, "avatar", req.user.avatar);
     res.redirect(`/${req.user.id}`);
+    var banner = await getTag(req.user.id).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
 });
 
 // app.get("/img/flags/:flag.png", function(req, res) {
@@ -161,10 +165,9 @@ app.get("/create", checkAuth, function(req, res) {
 //         res.status(404).render("notfound.pug", {err: e});
 //     }
 // });
-function getTag(id, limitSize) {
+function getTag(id) {
     return new Promise(function(resolve, reject) {
         try {
-            console.log("hi");
             var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
             var banner = new Banner(jstring, limitSize);
             banner.once("done", function() {
@@ -182,6 +185,9 @@ function getTag(id, limitSize) {
 
 app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
     try {
+        if (!fs.existsSync(path.resolve(dataFolder, "users", `{id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `{id}.png`))) {
+            res.status(404).render("notfound.pug");
+        }
         var file = path.resolve(dataFolder, "tag", req.params.id + ".png");
         var s = fs.createReadStream(file);
         s.on('open', function () {
@@ -195,6 +201,9 @@ app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
 
 app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
     try {
+        if (!fs.existsSync(path.resolve(dataFolder, "users", `{id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `{id}.png`))) {
+            res.status(404).render("notfound.pug");
+        }
         var file = path.resolve(dataFolder, "tag", req.params.id + ".max.png");
         var s = fs.createReadStream(file);
         s.on('open', function() {
@@ -236,7 +245,7 @@ app.get("/wii", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["wii-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    var banner = await getTag(userID, false).catch(function () {
+    var banner = await getTag(userID).catch(function () {
         res.status(404).render("notfound.pug");
         return
     });
@@ -274,7 +283,7 @@ app.get("/wiiu", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["wiiu-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    var banner = await getTag(userID, false).catch(function () {
+    var banner = await getTag(userID).catch(function () {
         res.status(404).render("notfound.pug");
         return
     });
