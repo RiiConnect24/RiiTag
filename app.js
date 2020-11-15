@@ -133,11 +133,11 @@ app.route("/edit")
 app.get("/create", checkAuth, async function(req, res) {
     createUser(req.user);
     editUser(req.user.id, "avatar", req.user.avatar);
-    res.redirect(`/${req.user.id}`);
     var banner = await getTag(req.user.id).catch(function () {
         res.status(404).render("notfound.pug");
         return
     });
+    res.redirect(`/${req.user.id}`);
 });
 
 // app.get("/img/flags/:flag.png", function(req, res) {
