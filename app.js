@@ -185,7 +185,7 @@ function getTag(id) {
 
 app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
     try {
-        if (!fs.existsSync(path.resolve(dataFolder, "users", `{id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `{id}.png`))) {
+        if (!fs.existsSync(path.resolve(dataFolder, "users", `{req.params.id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `{req.params.id}.png`))) {
             res.status(404).render("notfound.pug");
         }
         var file = path.resolve(dataFolder, "tag", req.params.id + ".png");
@@ -201,7 +201,7 @@ app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
 
 app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
     try {
-        if (!fs.existsSync(path.resolve(dataFolder, "users", `{id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `{id}.png`))) {
+        if (!fs.existsSync(path.resolve(dataFolder, "users", `{req.params.id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `{req.params.id}.png`))) {
             res.status(404).render("notfound.pug");
         }
         var file = path.resolve(dataFolder, "tag", req.params.id + ".max.png");
