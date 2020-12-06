@@ -131,6 +131,9 @@ app.route("/edit")
     });
 
 app.get("/create", checkAuth, async function(req, res) {
+    if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
+        fs.mkdirSync(path.resolve(dataFolder, "tag"));
+    }
     createUser(req.user);
     editUser(req.user.id, "avatar", req.user.avatar);
     var banner = await getTag(req.user.id).catch(function () {
@@ -185,6 +188,9 @@ function getTag(id) {
 
 app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
     try {
+        if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
+            fs.mkdirSync(path.resolve(dataFolder, "tag"));
+        }
         if (!fs.existsSync(path.resolve(dataFolder, "users", `${req.params.id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `${req.params.id}.png`))) {
             res.status(404).render("notfound.pug");
         }
@@ -201,6 +207,9 @@ app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
 
 app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
     try {
+        if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
+            fs.mkdirSync(path.resolve(dataFolder, "tag"));
+        }
         if (!fs.existsSync(path.resolve(dataFolder, "users", `${req.params.id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `${req.params.id}.max.png`))) {
             res.status(404).render("notfound.pug");
         }
@@ -531,7 +540,7 @@ function updateGameArray(games, game) {
 function loadConfig() {
     const configFile = "config.json";
     if (!fs.existsSync(configFile)) {
-        fs.copyFileSync("config.example.json", configFile);
+        fs.copyFileSync("config.json.example", configFile);
         console.log("'config.json' has been created. Please edit the values in 'config.json' and restart the server.")
         process.exit(0);
     }
