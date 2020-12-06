@@ -107,7 +107,7 @@ app.route("/edit")
             res.redirect("/create");
         }
     })
-    .post(checkAuth, function(req, res) {
+    .post(checkAuth, async function(req, res) {
         // fs.writeFileSync(path.resolve(dataFolder, "users", req.user.id + ".json"), req.body.jstring);
         // var jdata = JSON.parse(path.resolve(dataFolder, "users", req.user.id + ".json"));
         // console.log(req.body.background);
@@ -124,11 +124,19 @@ app.route("/edit")
         editUser(req.user.id, "useavatar", req.body.useavatar);
         editUser(req.user.id, "font", req.body.font);
         res.redirect(`/${req.user.id}`);
+        var banner = await getTag(req.user.id).catch(function () {
+            res.status(404).render("notfound.pug");
+            return
+        });
     });
 
-app.get("/create", checkAuth, function(req, res) {
+app.get("/create", checkAuth, async function(req, res) {
     createUser(req.user);
     editUser(req.user.id, "avatar", req.user.avatar);
+    var banner = await getTag(req.user.id).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
     res.redirect(`/${req.user.id}`);
 });
 
@@ -157,11 +165,11 @@ app.get("/create", checkAuth, function(req, res) {
 //         res.status(404).render("notfound.pug", {err: e});
 //     }
 // });
-function getTag(id, limitSize) {
+function getTag(id) {
     return new Promise(function(resolve, reject) {
         try {
             var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
-            var banner = new Banner(jstring, limitSize);
+            var banner = new Banner(jstring);
             banner.once("done", function() {
                 resolve(banner);
             });
@@ -176,19 +184,35 @@ function getTag(id, limitSize) {
 
 
 app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
-    var banner = await getTag(req.params.id, true).catch(function() {
-        res.status(404).render("notfound.pug");
-	return
-    });
-    banner.pngStream.pipe(res);
+    try {
+        if (!fs.existsSync(path.resolve(dataFolder, "users", `${req.params.id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `${req.params.id}.png`))) {
+            res.status(404).render("notfound.pug");
+        }
+        var file = path.resolve(dataFolder, "tag", req.params.id + ".png");
+        var s = fs.createReadStream(file);
+        s.on('open', function () {
+            res.set('Content-Type', 'image/png');
+            s.pipe(res);
+        });
+    } catch (e) {
+        res.status(404).render("notfound.pug", { err: e });
+    }
 });
 
 app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
-    var banner = await getTag(req.params.id, false).catch(function() {
-        res.status(404).render("notfound.pug");
-	return
-    });
-    banner.pngStream.pipe(res);
+    try {
+        if (!fs.existsSync(path.resolve(dataFolder, "users", `${req.params.id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `${req.params.id}.max.png`))) {
+            res.status(404).render("notfound.pug");
+        }
+        var file = path.resolve(dataFolder, "tag", req.params.id + ".max.png");
+        var s = fs.createReadStream(file);
+        s.on('open', function() {
+            res.set('Content-Type', 'image/png');
+            s.pipe(res);
+        });
+     } catch(e) {
+         res.status(404).render("notfound.pug", {err: e});
+     }
 });
 
 app.get("/wii", async function(req, res) {
@@ -220,6 +244,11 @@ app.get("/wii", async function(req, res) {
     setUserAttrib(userID, "games", newGames);
     setUserAttrib(userID, "lastplayed", ["wii-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
+
+    var banner = await getTag(userID).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
 });
 
 app.get("/wiiu", async function(req, res) {
@@ -253,6 +282,11 @@ app.get("/wiiu", async function(req, res) {
     setUserAttrib(userID, "games", newGames);
     setUserAttrib(userID, "lastplayed", ["wiiu-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
+
+    var banner = await getTag(userID).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
 });
 
 app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {

@@ -21,10 +21,9 @@ const defaultDrawOrder = [
 ]
 
 class Tag extends events.EventEmitter{
-    constructor(user, size, doMake=true) {
+    constructor(user, doMake=true) {
         super();
 
-        this.size = size;
         this.user = this.loadUser(user);
         this.overlay = this.loadOverlay(this.user.overlay);
 
@@ -51,6 +50,9 @@ class Tag extends events.EventEmitter{
             img.onerror = function(err) {
                 reject(err);
             }
+            setTimeout(function() {
+                reject("Timed out");
+            }, 1000);
             console.log(source);
             img.src = source;
         });
@@ -228,7 +230,6 @@ class Tag extends events.EventEmitter{
                 try {
                     await this.downloadGameCover(game, "US", covertype, consoletype, extension); // small chance it's US region
                 } catch(e) {
-                    console.error(e);
                     return false;
                 }
             }
@@ -240,9 +241,6 @@ class Tag extends events.EventEmitter{
         if (!fs.existsSync(path.resolve(dataFolder, "avatars"))) {
             fs.mkdirSync(path.resolve(dataFolder, "avatars"));
         }
-        if (fs.existsSync(path.resolve(dataFolder, "avatars", `${this.user.id}.png`))) {
-            return;
-        }
         var can = new Canvas.Canvas(128, 128);
         var con = can.getContext("2d");
         var img;
@@ -251,7 +249,7 @@ class Tag extends events.EventEmitter{
             con.drawImage(img, 0, 0, 128, 128);
             await this.savePNG(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), can);
         } catch(e) {
-            console.error(e);
+            return false;
         }
     }
 
@@ -280,8 +278,13 @@ class Tag extends events.EventEmitter{
     }
 
     async drawAvatar() {
-        await this.cacheAvatar();
-        await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
+        var avy = true;
+        if (!fs.existsSync(path.resolve(dataFolder, "avatars", `${this.user.id}.png`))) {
+            var avy = await this.cacheAvatar();
+        }
+        if (avy != false) {
+            await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
+        }
     }
 
     async savePNG(out, c) {
@@ -429,14 +432,12 @@ class Tag extends events.EventEmitter{
             this.drawAvatar();
         }
 
-        this.pngStream = this.canvas.createPNGStream();
+        await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.max.png`), this.canvas);
 
-        if (this.size) {
-            this.canvas2 = new Canvas.Canvas(this.overlay.width / 3, this.overlay.height / 3);
-            this.ctx = this.canvas2.getContext("2d");
-            await this.drawImageShrink(this.canvas, 0, 0, this.overlay.width / 3, this.overlay.height / 3);
-            this.pngStream = this.canvas2.createPNGStream();
-        }
+        this.canvas2 = new Canvas.Canvas(this.overlay.width / 3, this.overlay.height / 3);
+        this.ctx = this.canvas2.getContext("2d");
+        await this.drawImageShrink(this.canvas, 0, 0, this.overlay.width / 3, this.overlay.height / 3);
+        await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.png`), this.canvas2);
 
         this.emit("done");
     }
@@ -446,7 +447,7 @@ module.exports = Tag;
 
 if (module == require.main) {
     var jstring = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
-    var banner = new Tag(jstring, true);
+    var banner = new Tag(jstring);
 
     banner.once("done", function () {
         var out = fs.createWriteStream(path.resolve(dataFolder, "debug", "user1.png"));
