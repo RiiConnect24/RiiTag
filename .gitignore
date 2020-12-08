@@ -4,6 +4,7 @@ data/cache/
 .DS_Store
 data/users/*
 data/avatars/*
+data/tag/*
 !data/users/important_file
 config.json
 users.db

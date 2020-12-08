@@ -1,5 +1,10 @@
 extends head
 
+mixin miiUploadBox()
+    hr.big-space-top(style="border-top: 2px solid rgba(0, 0, 0, 0.1);")
+    h5.mb-0.big-space-top Upload Mii
+    input#mii-file(type="file").space-top
+
 block content
     - var soverlay
     - var guests = {"a": "Guest A","b": "Guest B","c": "Guest C","d": "Guest D","e": "Guest E","f": "Guest F"}
@@ -163,6 +168,36 @@ block content
                                                     h5.mb-0 Games
                                                     h6.mb-0 Game IDs should be separated by a semicolon (;). Using a USB Loader allows games to appear automagically.
                                                     input(type="text" name="games" value=jdata.games.join(";") id="games").space-top
+                .row
+                    .col-md-6
+                        .card.big-space-bottom
+                            .card-header
+                                h5.mb-0 Your Mii
+                            .card-body
+                                span.text-white
+                                    div.form-group
+                                        .container
+                                            .row.text-center
+                                                .col-12
+                                                    div.alert.alert-danger#mii-error-box.space-bottom(role="alert" style="display: none;")
+                                                        b.alert-danger#mii-error-text No error has occurred. Please contact bendevnull#1417 if you see this message.
+                                                    div.alert.alert-success#mii-success(role="alert" style="display: none;")
+                                                        b.alert-success Your Mii has successfully been uploaded!
+                                                    h5.mb-0 Select a Mii
+                                                    select.big-space-top.space-bottom#mii-select
+                                                        option(value="undefined" selected=(jdata.miidata == "undefined")) No Mii
+                                                        each k,v in guests
+                                                            option(value=v selected=(jdata.miidata == v))= k
+                                                        - var guestList = Array.from(Object.keys(guests));
+                                                        - var customSelected = jdata.miidata != "undefined" && !guestList.includes(jdata.miidata)
+                                                        option(value="custom" selected=(customSelected)) Upload Your Own Mii
+                                                    if customSelected
+                                                        div#mii-box(style="")
+                                                            +miiUploadBox
+                                                    else
+                                                        div#mii-box(style="display: none;")
+                                                            +miiUploadBox
+                                                    input#mii-data(type="text" name="miidata" style="display: none;")
                 .row
                     .col-md-12
                         .card.big-space-bottom

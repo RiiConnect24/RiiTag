@@ -49,6 +49,10 @@
         "x": 1063,
         "y": 250
     },
+    "mii": {
+        "x": 0,
+        "y": 250
+    },
     "draw_order": [
         "overlay",
         "covers",

@@ -63,6 +63,7 @@ class Tag extends events.EventEmitter{
         var obj = this;
         // console.log(source);
         getImage(source).then(function(img) {
+            console.log(img);
             obj.ctx.drawImage(img, x, y);
         }).catch(function(err) {
             console.error(err);
@@ -243,12 +244,12 @@ class Tag extends events.EventEmitter{
     }
 
     async cacheAvatar() {
-        if (!fs.existsSync(path.resolve(dataFolder, "avatars"))) {
-            fs.mkdirSync(path.resolve(dataFolder, "avatars"));
-        }
-        if (fs.existsSync(path.resolve(dataFolder, "avatars", `${this.user.id}.png`))) {
-            return;
-        }
+        // if (!fs.existsSync(path.resolve(dataFolder, "avatars"))) {
+        //     fs.mkdirSync(path.resolve(dataFolder, "avatars"));
+        // }
+        // if (fs.existsSync(path.resolve(dataFolder, "avatars", `${this.user.id}.png`))) {
+        //     return;
+        // }
         var can = new Canvas.Canvas(128, 128);
         var con = can.getContext("2d");
         var img;
@@ -288,6 +289,10 @@ class Tag extends events.EventEmitter{
     async drawAvatar() {
         await this.cacheAvatar();
         await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
+    }
+
+    async drawMii() {
+        await this.drawImage(path.resolve(dataFolder, "miis", `${this.user.id}.png`), this.overlay.mii.x, this.overlay.mii.y, 128, 128);
     }
 
     // async savePNG(out, c) {
@@ -433,6 +438,10 @@ class Tag extends events.EventEmitter{
         // avatar
         if (this.user.useavatar == "true") {
             this.drawAvatar();
+        }
+
+        if (this.user.usemii == "true") {
+            this.drawMii();
         }
 
         this.pngStream = this.canvas.createPNGStream();
