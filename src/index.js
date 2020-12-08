@@ -186,18 +186,21 @@ class Tag extends events.EventEmitter{
         }
     }
 
-    getFont(type)
-    {
-        if (type == "username" && this.overlay.username.font_family != "RodinNTLG") {
-            return this.overlay.username.font_family;
-        } else if (type == "friend_code" && this.overlay.friend_code.font_family != "RodinNTLG") {
-            return this.overlay.friend_code.font_family;
-        } else if (type == "coin_count" && this.overlay.coin_count.font_family != "RodinNTLG") {
-            return this.overlay.coin_count.font_family;
-        } else if (this.user.font) {
-            return this.user.font;
+    getFont(type) {
+        const defaultFont = "RodinNTLG";
+
+        if (this.overlay[type].font_family) {
+            if (this.user.font == "default") {
+                return this.overlay[type].font_family;
+            } else {
+                return this.user.font;
+            }
         } else {
-            return "RodinNTLG";
+            if (this.user.font == "default") {
+                return defaultFont;
+            } else {
+                return this.user.font;
+            }
         }
     }
 
