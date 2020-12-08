@@ -10,6 +10,7 @@ const session = require("express-session");
 const bodyParser = require("body-parser");
 const xml = require("xml");
 const DatabaseDriver = require("./dbdriver");
+const renderMiiFromHex = require("./src/rendermiifromhex");
 
 const db = new DatabaseDriver(path.join(__dirname, "users.db"));
 const Sentry = require('@sentry/node');
@@ -78,7 +79,7 @@ app.get('/logout', function(req, res) {
 });
 
 app.get('/callback',
-    passport.authenticate('discord', { failureRedirect: '/' }), function(req, res) { res.redirect("/create") } // auth success
+    passport.authenticate('discord', { failureRedirect: '/' }), function(req, res) { res.cookie("uid", req.user.id); res.redirect("/create") } // auth success
 );
 
 app.route("/edit")
@@ -107,7 +108,11 @@ app.route("/edit")
             res.redirect("/create");
         }
     })
-    .post(checkAuth, function(req, res) {
+    .post(checkAuth, async function(req, res) {
+        var definedMiis = [
+            "guest",
+            "undefined"
+        ];
         // fs.writeFileSync(path.resolve(dataFolder, "users", req.user.id + ".json"), req.body.jstring);
         // var jdata = JSON.parse(path.resolve(dataFolder, "users", req.user.id + ".json"));
         // console.log(req.body.background);
@@ -124,6 +129,12 @@ app.route("/edit")
         editUser(req.user.id, "useavatar", req.body.useavatar);
         editUser(req.user.id, "usemii", req.body.usemii);
         editUser(req.user.id, "font", req.body.font);
+        editUser(req.user.id, "mii_data", req.body.miidata);
+        if (!req.body.miidata.startsWith("guest" || "undefined")) {
+            await renderMiiFromHex(req.body.miidata, req.user.id, dataFolder).catch(() => {
+                console.log("Failed to render mii");
+            });
+        }
         res.redirect(`/${req.user.id}`);
     });
 
@@ -537,3 +548,7 @@ app.use(function(req, res, next) {
     res.status(404);
     res.render("notfound2.pug");
 });
+
+module.exports = {
+    dataFolder: dataFolder
+}
