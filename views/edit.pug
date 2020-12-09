@@ -8,6 +8,7 @@ mixin miiUploadBox()
 block content
     - var soverlay
     - var guests = {"a": "Guest A","b": "Guest B","c": "Guest C","d": "Guest D","e": "Guest E","f": "Guest F"}
+    - var guestList = Object.keys(guests);
     div.big-space-top
         form(method="POST" action="/edit")
             .container
@@ -183,13 +184,16 @@ block content
                                                         b.alert-danger#mii-error-text No error has occurred. Please contact bendevnull#1417 if you see this message.
                                                     div.alert.alert-success#mii-success(role="alert" style="display: none;")
                                                         b.alert-success Your Mii has successfully been uploaded!
+                                                    h5.mb-0 Mii Preview
+                                                    - var miiImg
+                                                    - if (guestList.includes(jdata.mii_data)) { miiImg = `/miis/guests/${jdata.mii_data}.png` } else { miiImg = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${jdata.mii_data}` }
+                                                    img(src=miiImg width="25%" id="mii-img" alt="Mii Preview").no-shadow
                                                     h5.mb-0 Select a Mii
                                                     select.big-space-top.space-bottom#mii-select
-                                                        option(value="undefined" selected=(jdata.miidata == "undefined")) No Mii
                                                         each k,v in guests
-                                                            option(value=v selected=(jdata.miidata == v))= k
+                                                            option(value=v selected=(jdata.mii_data == v))= k
                                                         - var guestList = Array.from(Object.keys(guests));
-                                                        - var customSelected = jdata.miidata != "undefined" && !guestList.includes(jdata.miidata)
+                                                        - var customSelected = jdata.mii_data != "undefined" && !guestList.includes(jdata.mii_data)
                                                         option(value="custom" selected=(customSelected)) Upload Your Own Mii
                                                     if customSelected
                                                         div#mii-box(style="")
@@ -197,7 +201,7 @@ block content
                                                     else
                                                         div#mii-box(style="display: none;")
                                                             +miiUploadBox
-                                                    input#mii-data(type="text" name="miidata" style="display: none;")
+                                                    input#mii-data(type="text" name="miidata" style="display: none;" value=jdata.mii_data)
                 .row
                     .col-md-12
                         .card.big-space-bottom

@@ -2,6 +2,9 @@ var uidRegex = /uid=([0-9]*);?/;
 var uid = uidRegex.exec(document.cookie)[1];
 var user = getUser();
 
+const guests = {"a": "Guest A","b": "Guest B","c": "Guest C","d": "Guest D","e": "Guest E","f": "Guest F"};
+const guestList = Object.keys(guests);
+
 function showPassword(inputBoxID, inputButtonID) {
     var x = document.getElementById(inputBoxID);
     var y = document.getElementById(inputButtonID);
@@ -89,12 +92,20 @@ sel6.onchange = function () {
 }
 
 sel7.onchange = function () {
+    miiImg = document.getElementById("mii-img");
+
     if (this.value == "custom") {
         unhideMiiUpload();
-        document.getElementById("mii-data").value = this.value;
+        document.getElementById("mii-data").value = user.mii_data;
     } else {
         hideMiiUpload();
+        document.getElementById("mii-data").value = this.value;
+    }
 
+    if (guestList.includes(this.value)) {
+        miiImg.src = `/miis/guests/${this.value}.png`;
+    } else { 
+        miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${user.mii_data}`;
     }
 }
 
@@ -152,6 +163,7 @@ document.getElementById('mii-file').onchange = function () {
             return ("0" + (byte & 0xFF).toString(16)).slice(-2);
         }).join('');
         document.getElementById("mii-data").value = hexString;
+        miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${hexString}`;
         showMiiSuccess();
         console.log("Set data to " + hexString);
     }

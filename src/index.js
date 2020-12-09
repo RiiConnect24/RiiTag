@@ -12,6 +12,10 @@ const path = require("path");
 const dataFolder = path.resolve(__dirname, "..", "data");
 // const outpath = path.resolve(__dirname, "banner.png"); // debug variable
 
+const guests = {"a": "Guest A","b": "Guest B","c": "Guest C","d": "Guest D","e": "Guest E","f": "Guest F"};
+const guestList = Object.keys(guests);
+guestList.push("undefined");
+
 const defaultDrawOrder = [
     "overlay",
     "covers",
@@ -74,6 +78,16 @@ class Tag extends events.EventEmitter{
         var obj = this;
         console.log(source);
         obj.ctx.drawImage(source, x, y, shrinkx, shrinky);
+    }
+
+    async getAndDrawImageShrink(source, x=0, y=0, shrinkx=0, shrinky=0) {
+        var obj = this;
+        getImage(source).then(function(img) {
+            console.log(img);
+            obj.ctx.drawImage(img, x, y, shrinkx, shrinky);
+        }).catch(function(err) {
+            console.error(err);
+        });
     }
 
     getGameRegion(game) { // determine the game's region by its ID
@@ -250,12 +264,12 @@ class Tag extends events.EventEmitter{
         // if (fs.existsSync(path.resolve(dataFolder, "avatars", `${this.user.id}.png`))) {
         //     return;
         // }
-        var can = new Canvas.Canvas(128, 128);
+        var can = new Canvas.Canvas(512, 512);
         var con = can.getContext("2d");
         var img;
         try {
-            img = await getImage(`https://cdn.discordapp.com/avatars/${this.user.id}/${this.user.avatar}.jpg?size=128`);
-            con.drawImage(img, 0, 0, 128, 128);
+            img = await getImage(`https://cdn.discordapp.com/avatars/${this.user.id}/${this.user.avatar}.jpg?size=512`);
+            con.drawImage(img, 0, 0, 512, 512);
             await savePNG(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), can);
         } catch(e) {
             console.error(e);
@@ -287,12 +301,20 @@ class Tag extends events.EventEmitter{
     }
 
     async drawAvatar() {
-        await this.cacheAvatar();
-        await this.drawImage(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y);
+        if (this.overlay.avatar) {
+            await this.cacheAvatar();
+            await this.getAndDrawImageShrink(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), this.overlay.avatar.x, this.overlay.avatar.y, this.overlay.avatar.size, this.overlay.avatar.size);
+        }
     }
 
     async drawMii() {
-        await this.drawImage(path.resolve(dataFolder, "miis", `${this.user.id}.png`), this.overlay.mii.x, this.overlay.mii.y, 128, 128);
+        if (this.overlay.mii) {
+            if (guestList.includes(this.user.mii_data)) {
+                await this.getAndDrawImageShrink(path.resolve(dataFolder, "miis", "guests", `${this.user.mii_data}.png`), this.overlay.mii.x, this.overlay.mii.y, this.overlay.mii.size, this.overlay.mii.size);
+            } else {
+                await this.getAndDrawImageShrink(path.resolve(dataFolder, "miis", `${this.user.id}.png`), this.overlay.mii.x, this.overlay.mii.y, this.overlay.mii.size, this.overlay.mii.size);
+            }
+        }
     }
 
     // async savePNG(out, c) {
@@ -437,11 +459,11 @@ class Tag extends events.EventEmitter{
 
         // avatar
         if (this.user.useavatar == "true") {
-            this.drawAvatar();
+            await this.drawAvatar();
         }
 
         if (this.user.usemii == "true") {
-            this.drawMii();
+            await this.drawMii();
         }
 
         this.pngStream = this.canvas.createPNGStream();

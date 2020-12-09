@@ -18,6 +18,10 @@ const express = require("express");
 // const { render } = require("pug");
 const app = express();
 
+const guests = {"a": "Guest A","b": "Guest B","c": "Guest C","d": "Guest D","e": "Guest E","f": "Guest F"};
+const guestList = Object.keys(guests);
+guestList.push("undefined");
+
 Sentry.init({ dsn: config.sentryURL });
 
 app.use(Sentry.Handlers.requestHandler());
@@ -37,7 +41,7 @@ var scopes = ['identify'];
 passport.use(new DiscordStrategy({
     clientID: config.clientID,
     clientSecret: config.clientSecret,
-    callbackURL: config.callbackURL
+    callbackURL: config.hostURL + "callback"
 }, function(accessToken, refreshToken, profile, done) {
     return done(null, profile);
 }));
@@ -130,7 +134,7 @@ app.route("/edit")
         editUser(req.user.id, "usemii", req.body.usemii);
         editUser(req.user.id, "font", req.body.font);
         editUser(req.user.id, "mii_data", req.body.miidata);
-        if (!req.body.miidata.startsWith("guest" || "undefined")) {
+        if (!guestList.includes(req.body.miidata)) {
             await renderMiiFromHex(req.body.miidata, req.user.id, dataFolder).catch(() => {
                 console.log("Failed to render mii");
             });
