@@ -22,6 +22,8 @@ const guests = {"a": "Guest A","b": "Guest B","c": "Guest C","d": "Guest D","e":
 const guestList = Object.keys(guests);
 guestList.push("undefined");
 
+const port = config.port || 3000;
+
 Sentry.init({ dsn: config.sentryURL });
 
 app.use(Sentry.Handlers.requestHandler());
@@ -41,7 +43,7 @@ var scopes = ['identify'];
 passport.use(new DiscordStrategy({
     clientID: config.clientID,
     clientSecret: config.clientSecret,
-    callbackURL: config.hostURL + "callback"
+    callbackURL: config.hostURL.replace("{{port}}", port) + "callback"
 }, function(accessToken, refreshToken, profile, done) {
     return done(null, profile);
 }));
@@ -117,10 +119,6 @@ app.route("/edit")
             "guest",
             "undefined"
         ];
-        // fs.writeFileSync(path.resolve(dataFolder, "users", req.user.id + ".json"), req.body.jstring);
-        // var jdata = JSON.parse(path.resolve(dataFolder, "users", req.user.id + ".json"));
-        // console.log(req.body.background);
-        // jdata.bg = `/img/1200x450/${req.body.background}`;
         editUser(req.user.id, "bg", req.body.background);
         editUser(req.user.id, "overlay", req.body.overlay);
         editUser(req.user.id, "region", req.body.flag);
@@ -165,31 +163,6 @@ app.get("/create", checkAuth, function(req, res) {
     res.redirect(`/${req.user.id}`);
 });
 
-// app.get("/img/flags/:flag.png", function(req, res) {
-//     try {
-//         var file = path.resolve(dataFolder, "flags", req.params.flag + ".png");
-//         var s = fs.createReadStream(file);
-//         s.on('open', function() {
-//             res.set('Content-Type', 'image/png');
-//             s.pipe(res);
-//         });
-//     } catch(e) {
-//         res.status(404).render("notfound.pug", {err: e});
-//     }
-// });
-
-// app.get("/img/:size/:background.png", function(req, res) {
-//     try {
-//         var file = path.resolve(dataFolder, "img", req.params.size, req.params.background + ".png");
-//         var s = fs.createReadStream(file);
-//         s.on('open', function() {
-//             res.set('Content-Type', 'image/png');
-//             s.pipe(res);
-//         });
-//     } catch(e) {
-//         res.status(404).render("notfound.pug", {err: e});
-//     }
-// });
 function getTag(id, limitSize) {
     return new Promise(function(resolve, reject) {
         try {
@@ -200,8 +173,6 @@ function getTag(id, limitSize) {
             });
         } catch(e) {
             console.log(e);
-            // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
-            // res.status(404).render("notfound.pug", {err: e});
             reject(e);
         }
     })
@@ -325,11 +296,6 @@ app.get("^/:id([0-9]+)", function(req, res, next) {
                               });
 });
 
-// app.get("/edit/:id", function(req, res) {
-//     // display a page with the user's jstring and allow them to edit it manually.
-//     // this is super dangerous lmao
-// });
-
 app.get("^/:id([0-9]+)/json", function(req, res) {
     var userData = getUserData(req.params.id);
     res.type("application/json");
@@ -368,12 +334,12 @@ app.get("^/:id([0-9]+)/json", function(req, res) {
     }));
 });
 
-app.listen(3000, async function() {
+app.listen(port, async function() {
     // cleanCache();
     // console.log("Cleaned cache");
     await db.create("users", ["id INTEGER PRIMARY KEY", "snowflake TEXT", "key TEXT"]);
     // db.insert("users", ["snowflake", "key"], ["test_sf", "test_key"]);
-    console.log("RiiTag Server listening on port 3000");
+    console.log("RiiTag Server listening on port " + port);
 });
 
 function checkAuth(req, res, next) {
