@@ -115,10 +115,6 @@ app.route("/edit")
         }
     })
     .post(checkAuth, async function(req, res) {
-        var definedMiis = [
-            "guest",
-            "undefined"
-        ];
         editUser(req.user.id, "bg", req.body.background);
         editUser(req.user.id, "overlay", req.body.overlay);
         editUser(req.user.id, "region", req.body.flag);
@@ -138,36 +134,31 @@ app.route("/edit")
             });
         }
         res.redirect(`/${req.user.id}`);
+        var banner = await getTag(req.user.id).catch(function () {
+            res.status(404).render("notfound.pug");
+            return
+        });
     });
 
-app.route("/editmii")
-    .get(checkAuth, async function(req, res) {
-        var jstring;
-        try {
-            jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.user.id + ".json")).toString();
-            res.render("edit.pug", {jstring: jstring,
-                                    user: req.user
-                                });
-        } catch(e) {
-            console.log(e);
-            res.redirect("/create");
-        }
-    })
-    .post(checkAuth, async function(req, res) {
 
-    });
-
-app.get("/create", checkAuth, function(req, res) {
+app.get("/create", checkAuth, async function(req, res) {
+    if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
+        fs.mkdirSync(path.resolve(dataFolder, "tag"));
+    }
     createUser(req.user);
     editUser(req.user.id, "avatar", req.user.avatar);
+    var banner = await getTag(req.user.id).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
     res.redirect(`/${req.user.id}`);
 });
 
-function getTag(id, limitSize) {
+function getTag(id) {
     return new Promise(function(resolve, reject) {
         try {
             var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
-            var banner = new Banner(jstring, limitSize);
+            var banner = new Banner(jstring);
             banner.once("done", function() {
                 resolve(banner);
             });
@@ -180,19 +171,41 @@ function getTag(id, limitSize) {
 
 
 app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
-    var banner = await getTag(req.params.id, true).catch(function() {
-        res.status(404).render("notfound.pug");
-	return
-    });
-    banner.pngStream.pipe(res);
+    try {
+        if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
+            fs.mkdirSync(path.resolve(dataFolder, "tag"));
+        }
+        if (!fs.existsSync(path.resolve(dataFolder, "users", `${req.params.id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `${req.params.id}.png`))) {
+            res.status(404).render("notfound.pug");
+        }
+        var file = path.resolve(dataFolder, "tag", req.params.id + ".png");
+        var s = fs.createReadStream(file);
+        s.on('open', function () {
+            res.set('Content-Type', 'image/png');
+            s.pipe(res);
+        });
+    } catch (e) {
+        res.status(404).render("notfound.pug", { err: e });
+    }
 });
 
 app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
-    var banner = await getTag(req.params.id, false).catch(function() {
-        res.status(404).render("notfound.pug");
-	return
-    });
-    banner.pngStream.pipe(res);
+    try {
+        if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
+            fs.mkdirSync(path.resolve(dataFolder, "tag"));
+        }
+        if (!fs.existsSync(path.resolve(dataFolder, "users", `${req.params.id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `${req.params.id}.max.png`))) {
+            res.status(404).render("notfound.pug");
+        }
+        var file = path.resolve(dataFolder, "tag", req.params.id + ".max.png");
+        var s = fs.createReadStream(file);
+        s.on('open', function() {
+            res.set('Content-Type', 'image/png');
+            s.pipe(res);
+        });
+     } catch(e) {
+         res.status(404).render("notfound.pug", {err: e});
+     }
 });
 
 app.get("/wii", async function(req, res) {
@@ -224,6 +237,11 @@ app.get("/wii", async function(req, res) {
     setUserAttrib(userID, "games", newGames);
     setUserAttrib(userID, "lastplayed", ["wii-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
+
+    var banner = await getTag(userID).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
 });
 
 app.get("/wiiu", async function(req, res) {
@@ -257,6 +275,11 @@ app.get("/wiiu", async function(req, res) {
     setUserAttrib(userID, "games", newGames);
     setUserAttrib(userID, "lastplayed", ["wiiu-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
+
+    var banner = await getTag(userID).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
 });
 
 app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
@@ -496,7 +519,7 @@ function updateGameArray(games, game) {
 function loadConfig() {
     const configFile = "config.json";
     if (!fs.existsSync(configFile)) {
-        fs.copyFileSync("config.example.json", configFile);
+        fs.copyFileSync("config.json.example", configFile);
         console.log("'config.json' has been created. Please edit the values in 'config.json' and restart the server.")
         process.exit(0);
     }
