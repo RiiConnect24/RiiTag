@@ -33,6 +33,8 @@ class Tag extends events.EventEmitter{
 
         this.user = this.loadUser(user);
         this.overlay = this.loadOverlay(this.user.overlay);
+        this.savePNG = savePNG;
+        this.getImage = getImage;
 
         if (doMake) this.makeBanner();
     }
