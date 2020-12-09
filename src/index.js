@@ -297,11 +297,17 @@ class Tag extends events.EventEmitter{
     }
 
     async drawMii() {
+        if (!this.user.mii_data || this.user.mii_data == "") {
+            this.user.mii_data = "undefined";
+        }
         if (this.overlay.mii) {
             if (guestList.includes(this.user.mii_data)) {
                 await this.getAndDrawImageShrink(path.resolve(dataFolder, "miis", "guests", `${this.user.mii_data}.png`), this.overlay.mii.x, this.overlay.mii.y, this.overlay.mii.size, this.overlay.mii.size);
             } else {
-                await this.getAndDrawImageShrink(path.resolve(dataFolder, "miis", `${this.user.id}.png`), this.overlay.mii.x, this.overlay.mii.y, this.overlay.mii.size, this.overlay.mii.size);
+                await this.getAndDrawImageShrink(path.resolve(dataFolder, "miis", `${this.user.id}.png`), this.overlay.mii.x, this.overlay.mii.y, this.overlay.mii.size, this.overlay.mii.size).catch(async function(e) {
+                    console.error("Couldn't render Mii for " + user.id + ". Falling back to undefined.");
+                    await this.getAndDrawImageShrink(path.resolve(dataFolder, "miis", "guests", `undefined.png`), this.overlay.mii.x, this.overlay.mii.y, this.overlay.mii.size, this.overlay.mii.size);
+                });
             }
         }
     }

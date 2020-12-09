@@ -446,7 +446,8 @@ async function createUser(user) {
             region: "rc24",
             overlay: "overlay1.json",
             bg: "img/1200x450/riiconnect241.png",
-            sort: "" 
+            sort: "",
+            font: "default"
         };
     
         fs.writeFileSync(path.resolve(dataFolder, "users", user.id + ".json"), JSON.stringify(ujson, null, 4));
