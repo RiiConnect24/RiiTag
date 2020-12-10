@@ -42,6 +42,7 @@
     "font_size": 48,
     "font_style": "normal",
     "font_color": "#9A9A9A",
+    "force_font": "true",
     "x": 355,
     "y": 290
   },

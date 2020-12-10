@@ -185,7 +185,7 @@ app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
             s.pipe(res);
         });
     } catch (e) {
-        res.status(404).render("notfound.pug", { err: e });
+        res.status(404).render("notfound.pug");
     }
 });
 
@@ -204,7 +204,7 @@ app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
             s.pipe(res);
         });
      } catch(e) {
-         res.status(404).render("notfound.pug", {err: e});
+         res.status(404).render("notfound.pug");
      }
 });
 
@@ -446,7 +446,8 @@ async function createUser(user) {
             region: "rc24",
             overlay: "overlay1.json",
             bg: "img/1200x450/riiconnect241.png",
-            sort: "" 
+            sort: "",
+            font: "default"
         };
     
         fs.writeFileSync(path.resolve(dataFolder, "users", user.id + ".json"), JSON.stringify(ujson, null, 4));
@@ -539,7 +540,7 @@ app.use(function(req, res, next) {
         }
     }
     res.status(404);
-    res.render("notfound2.pug");
+    res.render("notfound.pug");
 });
 
 module.exports = {
