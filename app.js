@@ -185,7 +185,7 @@ app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
             s.pipe(res);
         });
     } catch (e) {
-        res.status(404).render("notfound.pug", { err: e });
+        res.status(404).render("notfound.pug");
     }
 });
 
@@ -204,7 +204,7 @@ app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
             s.pipe(res);
         });
      } catch(e) {
-         res.status(404).render("notfound.pug", {err: e});
+         res.status(404).render("notfound.pug");
      }
 });
 
@@ -540,7 +540,7 @@ app.use(function(req, res, next) {
         }
     }
     res.status(404);
-    res.render("notfound2.pug");
+    res.render("notfound.pug");
 });
 
 module.exports = {
