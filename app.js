@@ -10,12 +10,19 @@ const session = require("express-session");
 const bodyParser = require("body-parser");
 const xml = require("xml");
 const DatabaseDriver = require("./dbdriver");
+const renderMiiFromHex = require("./src/rendermiifromhex");
 
 const db = new DatabaseDriver(path.join(__dirname, "users.db"));
 const Sentry = require('@sentry/node');
 const express = require("express");
 // const { render } = require("pug");
 const app = express();
+
+const guests = {"a": "Guest A","b": "Guest B","c": "Guest C","d": "Guest D","e": "Guest E","f": "Guest F"};
+const guestList = Object.keys(guests);
+guestList.push("undefined");
+
+const port = config.port || 3000;
 
 Sentry.init({ dsn: config.sentryURL });
 
@@ -36,7 +43,7 @@ var scopes = ['identify'];
 passport.use(new DiscordStrategy({
     clientID: config.clientID,
     clientSecret: config.clientSecret,
-    callbackURL: config.callbackURL
+    callbackURL: config.hostURL.replace("{{port}}", port) + "callback"
 }, function(accessToken, refreshToken, profile, done) {
     return done(null, profile);
 }));
@@ -78,7 +85,7 @@ app.get('/logout', function(req, res) {
 });
 
 app.get('/callback',
-    passport.authenticate('discord', { failureRedirect: '/' }), function(req, res) { res.redirect("/create") } // auth success
+    passport.authenticate('discord', { failureRedirect: '/' }), function(req, res) { res.cookie("uid", req.user.id); res.redirect("/create") } // auth success
 );
 
 app.route("/edit")
@@ -108,10 +115,6 @@ app.route("/edit")
         }
     })
     .post(checkAuth, async function(req, res) {
-        // fs.writeFileSync(path.resolve(dataFolder, "users", req.user.id + ".json"), req.body.jstring);
-        // var jdata = JSON.parse(path.resolve(dataFolder, "users", req.user.id + ".json"));
-        // console.log(req.body.background);
-        // jdata.bg = `/img/1200x450/${req.body.background}`;
         editUser(req.user.id, "bg", req.body.background);
         editUser(req.user.id, "overlay", req.body.overlay);
         editUser(req.user.id, "region", req.body.flag);
@@ -122,7 +125,14 @@ app.route("/edit")
         editUser(req.user.id, "covertype", req.body.covertype);
         editUser(req.user.id, "coverregion", req.body.coverregion);
         editUser(req.user.id, "useavatar", req.body.useavatar);
+        editUser(req.user.id, "usemii", req.body.usemii);
         editUser(req.user.id, "font", req.body.font);
+        editUser(req.user.id, "mii_data", req.body.miidata);
+        if (!guestList.includes(req.body.miidata)) {
+            await renderMiiFromHex(req.body.miidata, req.user.id, dataFolder).catch(() => {
+                console.log("Failed to render mii");
+            });
+        }
         res.redirect(`/${req.user.id}`);
         var banner = await getTag(req.user.id).catch(function () {
             res.status(404).render("notfound.pug");
@@ -130,7 +140,11 @@ app.route("/edit")
         });
     });
 
+
 app.get("/create", checkAuth, async function(req, res) {
+    if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
+        fs.mkdirSync(path.resolve(dataFolder, "tag"));
+    }
     createUser(req.user);
     editUser(req.user.id, "avatar", req.user.avatar);
     var banner = await getTag(req.user.id).catch(function () {
@@ -140,31 +154,6 @@ app.get("/create", checkAuth, async function(req, res) {
     res.redirect(`/${req.user.id}`);
 });
 
-// app.get("/img/flags/:flag.png", function(req, res) {
-//     try {
-//         var file = path.resolve(dataFolder, "flags", req.params.flag + ".png");
-//         var s = fs.createReadStream(file);
-//         s.on('open', function() {
-//             res.set('Content-Type', 'image/png');
-//             s.pipe(res);
-//         });
-//     } catch(e) {
-//         res.status(404).render("notfound.pug", {err: e});
-//     }
-// });
-
-// app.get("/img/:size/:background.png", function(req, res) {
-//     try {
-//         var file = path.resolve(dataFolder, "img", req.params.size, req.params.background + ".png");
-//         var s = fs.createReadStream(file);
-//         s.on('open', function() {
-//             res.set('Content-Type', 'image/png');
-//             s.pipe(res);
-//         });
-//     } catch(e) {
-//         res.status(404).render("notfound.pug", {err: e});
-//     }
-// });
 function getTag(id) {
     return new Promise(function(resolve, reject) {
         try {
@@ -175,8 +164,6 @@ function getTag(id) {
             });
         } catch(e) {
             console.log(e);
-            // res.send("That user ID does not exist.<br/>~Nick \"Larsenv\" Fibonacci - 2019<br/><br/>" + e);
-            // res.status(404).render("notfound.pug", {err: e});
             reject(e);
         }
     })
@@ -185,6 +172,9 @@ function getTag(id) {
 
 app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
     try {
+        if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
+            fs.mkdirSync(path.resolve(dataFolder, "tag"));
+        }
         if (!fs.existsSync(path.resolve(dataFolder, "users", `${req.params.id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `${req.params.id}.png`))) {
             res.status(404).render("notfound.pug");
         }
@@ -201,6 +191,9 @@ app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
 
 app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
     try {
+        if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
+            fs.mkdirSync(path.resolve(dataFolder, "tag"));
+        }
         if (!fs.existsSync(path.resolve(dataFolder, "users", `${req.params.id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `${req.params.id}.max.png`))) {
             res.status(404).render("notfound.pug");
         }
@@ -326,11 +319,6 @@ app.get("^/:id([0-9]+)", function(req, res, next) {
                               });
 });
 
-// app.get("/edit/:id", function(req, res) {
-//     // display a page with the user's jstring and allow them to edit it manually.
-//     // this is super dangerous lmao
-// });
-
 app.get("^/:id([0-9]+)/json", function(req, res) {
     var userData = getUserData(req.params.id);
     res.type("application/json");
@@ -369,12 +357,12 @@ app.get("^/:id([0-9]+)/json", function(req, res) {
     }));
 });
 
-app.listen(3000, async function() {
+app.listen(port, async function() {
     // cleanCache();
     // console.log("Cleaned cache");
     await db.create("users", ["id INTEGER PRIMARY KEY", "snowflake TEXT", "key TEXT"]);
     // db.insert("users", ["snowflake", "key"], ["test_sf", "test_key"]);
-    console.log("RiiTag Server listening on port 3000");
+    console.log("RiiTag Server listening on port " + port);
 });
 
 function checkAuth(req, res, next) {
@@ -412,7 +400,7 @@ function getCoverRegions() {
 }
 
 function getFonts() {
-    return ["RodinNTLG", "NintendoU", "Humming", "PopHappiness", "Seurat"]
+    return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "meta", "fonts.json")))
 }
 
 function editUser(id, key, value) {
@@ -531,7 +519,7 @@ function updateGameArray(games, game) {
 function loadConfig() {
     const configFile = "config.json";
     if (!fs.existsSync(configFile)) {
-        fs.copyFileSync("config.example.json", configFile);
+        fs.copyFileSync("config.json.example", configFile);
         console.log("'config.json' has been created. Please edit the values in 'config.json' and restart the server.")
         process.exit(0);
     }
@@ -553,3 +541,7 @@ app.use(function(req, res, next) {
     res.status(404);
     res.render("notfound2.pug");
 });
+
+module.exports = {
+    dataFolder: dataFolder
+}

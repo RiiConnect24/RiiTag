@@ -1,7 +1,14 @@
 extends head
 
+mixin miiUploadBox()
+    hr.big-space-top(style="border-top: 2px solid rgba(0, 0, 0, 0.1);")
+    h5.mb-0.big-space-top Upload Mii
+    input#mii-file(type="file").space-top
+
 block content
     - var soverlay
+    - var guests = {"a": "Guest A","b": "Guest B","c": "Guest C","d": "Guest D","e": "Guest E","f": "Guest F"}
+    - var guestList = Object.keys(guests);
     div.big-space-top
         form(method="POST" action="/edit")
             .container
@@ -100,21 +107,33 @@ block content
                                             .row.justify-content-center
                                                 .col-12
                                                     h5.mb-0 Use Discord Profile Picture
-                                                    select(name="useavatar" id="useavatar")
+                                                    select(name="useavatar" id="useavatar").space-top.space-bottom
                                                         option(value="true" selected=(jdata.useavatar == "true"))= "Yes"
                                                         option(value="false" selected=(jdata.useavatar == "false"))= "No"
                                                     br
                                             .row.justify-content-center
                                                 .col-12
+                                                    h5.mb-0 Use Mii
+                                                    select(name="usemii" id="usemii").space-top.space-bottom
+                                                        option(value="true" selected=(jdata.usemii == "true"))= "Yes"
+                                                        option(value="false" selected=(jdata.usemii == "false"))= "No"
+                                                    br
+                                            .row.justify-content-center
+                                                .col-12
                                                     h5.mb-0 Font
-                                                    - jdata.font = "RodinNTLG"
-                                                    select(name="font" id="font")
-                                                        each k in fonts
-                                                            option(value=k selected=(jdata.font == k))= k
+                                                    - if (!jdata.font) { jdata.font = "default"; }
+                                                    select(name="font" id="font").space-top.space-bottom
+                                                        each v,k in fonts
+                                                            option(value=k selected=(jdata.font == k))= v
                                             .row.justify-content-center
                                                 .col-12
                                                     div.text-center.big-space-top
-                                                        img(src=`/img/font/${jdata.font}.png` width="75%" id="font-img" alt="Font Preview")
+                                                        - var fimg
+                                                        if jdata.font == "default"
+                                                            - fimg = soverlay.username.font_family
+                                                        else
+                                                            - fimg = jdata.font
+                                                        img(src=`/img/font/${fimg}.png` width="75%" id="font-img" alt="Font Preview")
                     .col-md-6
                         .card.big-space-bottom
                             .card-header
@@ -126,16 +145,14 @@ block content
                                             .row.justify-content-center
                                                 .col-12
                                                     h5.mb-0 Cover Type
-                                                    select(name="covertype" id="covertype")
+                                                    select(name="covertype" id="covertype").space-top.big-space-bottom
                                                         each k in covertypes
                                                             option(value=k selected=(jdata.covertype == k))= k
                                                     br
                                                     h5.mb-0 Cover Region
-                                                    select(name="coverregion" id="coverregion")
+                                                    select(name="coverregion" id="coverregion").space-top.big-space-bottom
                                                         each k in coverregions
                                                             option(value=k selected=(jdata.coverregion == k))= k
-                .row
-                    .col-md-6
                         .card.big-space-bottom
                             .card-header
                                 h5.mb-0 Other Information
@@ -152,7 +169,41 @@ block content
                                                     h5.mb-0 Games
                                                     h6.mb-0 Game IDs should be separated by a semicolon (;). Using a USB Loader allows games to appear automagically.
                                                     input(type="text" name="games" value=jdata.games.join(";") id="games").space-top
+                .row
                     .col-md-6
+                        .card.big-space-bottom
+                            .card-header
+                                h5.mb-0 Your Mii
+                            .card-body
+                                span.text-white
+                                    div.form-group
+                                        .container
+                                            .row.text-center
+                                                .col-12
+                                                    div.alert.alert-danger#mii-error-box.space-bottom(role="alert" style="display: none;")
+                                                        b.alert-danger#mii-error-text No error has occurred. Please contact bendevnull#1417 if you see this message.
+                                                    div.alert.alert-success#mii-success(role="alert" style="display: none;")
+                                                        b.alert-success Your Mii has successfully been uploaded!
+                                                    h5.mb-0 Mii Preview
+                                                    - var miiImg
+                                                    - if (guestList.includes(jdata.mii_data)) { miiImg = `/miis/guests/${jdata.mii_data}.png` } else { miiImg = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${jdata.mii_data}` }
+                                                    img(src=miiImg width="25%" id="mii-img" alt="Mii Preview").no-shadow
+                                                    h5.mb-0 Select a Mii
+                                                    select.big-space-top.space-bottom#mii-select
+                                                        each k,v in guests
+                                                            option(value=v selected=(jdata.mii_data == v))= k
+                                                        - var guestList = Array.from(Object.keys(guests));
+                                                        - var customSelected = jdata.mii_data != "undefined" && !guestList.includes(jdata.mii_data)
+                                                        option(value="custom" selected=(customSelected)) Upload Your Own Mii
+                                                    if customSelected
+                                                        div#mii-box(style="")
+                                                            +miiUploadBox
+                                                    else
+                                                        div#mii-box(style="display: none;")
+                                                            +miiUploadBox
+                                                    input#mii-data(type="text" name="miidata" style="display: none;" value=jdata.mii_data)
+                .row
+                    .col-md-12
                         .card.big-space-bottom
                             .card-header
                                 h5.mb-0 RiiTag Private Key
