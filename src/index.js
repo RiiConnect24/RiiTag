@@ -192,7 +192,7 @@ class Tag extends events.EventEmitter{
         const defaultFont = "RodinNTLG";
 
         if (this.overlay[type].font_family) {
-            if (this.user.font == "default") {
+            if (this.user.font == "default" || this.overlay[type].force_font == "true") {
                 return this.overlay[type].font_family;
             } else {
                 return this.user.font;
