@@ -1,10 +1,10 @@
 {
-    "name": "Modern Dark",
-    "author": "dhtdht020",
-    "id": 1,
+    "name": "Flat Dark",
+    "author": "bendevnull",
+    "id": 7,
     "width": 1200,
     "height": 450,
-    "overlay_img": "img/overlay/overlay1.png",
+    "overlay_img": "img/overlay/overlay7.png",
     "max_covers": 8,
     "cover_start_x": 80,
     "cover_start_y": 110,
@@ -15,45 +15,52 @@
         "font_size": 48,
         "font_style": "normal",
         "font_color": "#ffffff",
-        "x": 48,
-        "y": 17
+        "x": 50,
+        "y": 8
     },
     "flag": {
         "x": 15,
-        "y": 10
+        "y": 2
     },
     "coin_icon": {
         "img": "mario",
-        "x": 864,
-        "y": 10
+        "x": 620,
+        "y": 2
     },
     "coin_count": {
-        "font_family": "RodinNTLG",
-        "font_size": 48,
-        "font_style": "bold",
-        "font_color": "#1d1d1d",
-        "x": 903,
-        "y": 18,
-        "padded": true,
-        "max": 9999999
+        "font_family": "NintendoU",
+        "font_size": 44,
+        "font_style": "normal",
+        "font_color": "#323232",
+        "force_font": "true",
+        "x": 644,
+        "y": 10,
+        "max": 999999
     },
     "friend_code": {
         "font_family": "RodinNTLG",
-        "font_size": 36,
+        "font_size": 40,
         "font_style": "normal",
         "font_color": "#ffffff",
-        "x": -13,
-        "y": 387
+        "force_font": "true",
+        "x": 597,
+        "y": 388
     },
     "avatar": {
-        "x": 1063,
-        "y": 250,
-        "size": 128
+        "x": 1054,
+        "y": 17,
+        "size": 128,
+        "background": "img/overlay/overlay7_holder.png",
+        "background_x": 1044,
+        "background_y": 8
     },
     "mii": {
-        "x": -25,
-        "y": 208,
-        "size": 170
+        "x": -2,
+        "y": 274,
+        "size": 170,
+        "background": "img/overlay/overlay7_holder.png",
+        "background_x": 8,
+        "background_y": 297
     },
     "draw_order": [
         "overlay",

@@ -345,6 +345,13 @@ class Tag extends events.EventEmitter{
         }
     }
 
+    getCoins() {
+        if (this.user.coins > this.overlay.coin_count.max) {
+            return this.overlay.coin_count.max;
+        }
+        return this.user.coins;
+    }
+
     loadOverlay(file) {
         var overlay = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "overlays", file)));
         
@@ -448,16 +455,28 @@ class Tag extends events.EventEmitter{
             this.overlay.coin_count.font_size,
             this.overlay.coin_count.font_style,
             this.overlay.coin_count.font_color,
-            this.user.coins,
+            this.getCoins(),
             this.overlay.coin_count.x,
             this.overlay.coin_count.y);
 
         // avatar
         if (this.user.useavatar == "true") {
+            if (this.overlay.avatar.background) {
+                await this.drawImage(path.resolve(dataFolder, this.overlay.avatar.background),
+                    this.overlay.avatar.background_x,
+                    this.overlay.avatar.background_y
+                );
+            }
             await this.drawAvatar();
         }
 
         if (this.user.usemii == "true") {
+            if (this.overlay.mii.background) {
+                await this.drawImage(path.resolve(dataFolder, this.overlay.avatar.background),
+                    this.overlay.mii.background_x,
+                    this.overlay.mii.background_y
+                );
+            }
             await this.drawMii();
         }
 
