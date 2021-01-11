@@ -1,5 +1,5 @@
 {
-	"clientID": "583346143736627213",
+    "clientID": "583346143736627213",
     "clientSecret": "kPFRYvJhoVX7mSC7byGHZ5uHnwfgufej",
     "hostURL": "http://localhost:{{port}}/",
     "port": 3000,
