@@ -93,8 +93,20 @@ img.editor {
   box-shadow: 0 0 8px #18B6ED;
 }
 
+img.no-shadow {
+  box-shadow: none;
+}
+
 .space-right {
   margin-right: 10px
+}
+
+.big-space-right {
+  margin-right: 20px
+}
+
+.space-left {
+  margin-left: 10px
 }
 
 .space-top {
@@ -103,6 +115,10 @@ img.editor {
 
 .big-space-top {
   margin-top: 20px
+}
+
+.div-space-top {
+  margin-top: 30px;
 }
 
 .space-bottom {

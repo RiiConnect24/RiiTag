@@ -42,8 +42,19 @@
     "font_size": 48,
     "font_style": "normal",
     "font_color": "#9A9A9A",
+    "force_font": "true",
     "x": 355,
     "y": 290
+  },
+  "avatar": {
+    "x": 722,
+    "y": 373,
+    "size": 64
+  },
+  "mii": {
+    "x": 396,
+    "y": 358,
+    "size": 80
   },
   "enabled": true
 }

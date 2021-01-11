@@ -6,6 +6,7 @@
     "configurations": [
         {
             "type": "node",
+            "runtimeExecutable": "/home/ubuntu/.nvm/versions/node/v14.15.1/bin/node",
             "request": "launch",
             "name": "Launch Program",
             "program": "${workspaceFolder}/app.js"
