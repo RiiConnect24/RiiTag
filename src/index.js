@@ -28,7 +28,7 @@ const defaultDrawOrder = [
 ]
 
 class Tag extends events.EventEmitter{
-    constructor(user, doMake=true) {
+    constructor(user, doMake=true, debug=false) {
         super();
 
         this.user = this.loadUser(user);
@@ -36,7 +36,7 @@ class Tag extends events.EventEmitter{
         this.savePNG = savePNG;
         this.getImage = getImage;
 
-        if (doMake) this.makeBanner();
+        if (doMake) this.makeBanner(debug);
     }
 
     loadUser(json_string) {
@@ -195,13 +195,17 @@ class Tag extends events.EventEmitter{
             if (this.user.font == "default" || this.overlay[type].force_font == "true") {
                 return this.overlay[type].font_family;
             } else {
-                return this.user.font;
+                if (this.user.font) {
+                    return this.user.font;
+                } else {
+                    return defaultFont;
+                }
             }
         } else {
             if (this.user.font == "default") {
                 return defaultFont;
             } else {
-                return this.user.font;
+                return defaultFont;
             }
         }
     }
@@ -281,10 +285,32 @@ class Tag extends events.EventEmitter{
                     inc = 80;
                 }
             }
-            await this.drawImage(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`), this.covCurX, this.covCurY + inc);
+
+            var coverPath = `${consoletype}-${covertype}-${game}-${region}.png`;
+
+            if (!fs.existsSync(path.resolve(dataFolder, "cache", coverPath))) {
+                var allRegions = ["US", "EN", "FR", "DE", "ES", "IT", "NL", "PT", "AU", "SE", "DK", "NO", "FI", "TR"];
+                
+                for (var r in allRegions) {
+                    coverPath = `${consoletype}-${covertype}-${game}-${allRegions[r]}.png`;
+
+                    if (fs.existsSync(path.resolve(dataFolder, "cache", coverPath))) {
+                        await this.drawImage(path.resolve(dataFolder, "cache", coverPath), this.covCurX, this.covCurY + inc);
+
+                        this.covCurX += this.covIncX;
+                        this.covCurY += this.covIncY;
+
+                        break;
+                    }
+                }
+            } else {
+                await this.drawImage(path.resolve(dataFolder, "cache", coverPath), this.covCurX, this.covCurY + inc);
+
+                this.covCurX += this.covIncX;
+                this.covCurY += this.covIncY;
+            }
+
             // console.log(game);
-            this.covCurX += this.covIncX;
-            this.covCurY += this.covIncY;
         }
         return cache;
     }
@@ -377,7 +403,7 @@ class Tag extends events.EventEmitter{
 
     
 
-    async makeBanner() {
+    async makeBanner(debug) {
         await this.loadFonts();
         var i = 0;
 
@@ -480,12 +506,21 @@ class Tag extends events.EventEmitter{
             await this.drawMii();
         }
 
-        await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.max.png`), this.canvas);
+        if (debug) {
+            await this.savePNG(path.resolve(dataFolder, "debug", `user1.max.png`), this.canvas);
+        } else {
+            await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.max.png`), this.canvas);
+        }
 
         this.canvas2 = new Canvas.Canvas(this.overlay.width / 3, this.overlay.height / 3);
         this.ctx = this.canvas2.getContext("2d");
         await this.drawImageShrink(this.canvas, 0, 0, this.overlay.width / 3, this.overlay.height / 3);
-        await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.png`), this.canvas2);
+        
+        if (debug) {
+            await this.savePNG(path.resolve(dataFolder, "debug", `user1.png`), this.canvas2);
+        } else {
+            await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.png`), this.canvas2);
+        }
 
         this.emit("done");
     }
@@ -496,24 +531,6 @@ module.exports = Tag;
 if (module == require.main) {
     var jstring = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
   
-    var banner = new Tag(jstring, true);
-    var maxbanner = new Tag(jstring, false);
-
-    banner.once("done", function () {
-        var out = fs.createWriteStream(path.resolve(dataFolder, "debug", "user1.png"));
-        var stream = banner.pngStream;
-
-        stream.on('data', function (chunk) {
-            out.write(chunk);
-        });
-    });
-
-    maxbanner.once("done", function () {
-        var out = fs.createWriteStream(path.resolve(dataFolder, "debug", "user1.max.png"));
-        var stream = banner.pngStream;
-
-        stream.on('data', function (chunk) {
-            out.write(chunk);
-        });
-    });
+    var banner = new Tag(jstring, true, true);
+    var maxbanner = new Tag(jstring, false, true);
 }
