@@ -1,8 +1,13 @@
 {
     "default": "Overlay Default",
     "RodinNTLG": "RodinNTLG",
-    "NintendoU": "NintendoU",
+    "NintendoLabo": "Nintendo Labo",
+    "NintendoU": "Nintendo Font U",
+    "NSMFU": "New Super Mario Font U",
     "Humming": "Humming",
     "PopHappiness": "PopHappiness",
-    "Seurat": "Seurat"
+    "Seurat": "Seurat",
+    "SMMExtended": "Super Mario Maker Extended",
+    "Splatfont": "Splatfont",
+    "Splatfont2": "Splatfont 2"
 }
