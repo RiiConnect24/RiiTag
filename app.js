@@ -24,6 +24,9 @@ guestList.push("undefined");
 
 const port = config.port || 3000;
 
+var StatsD = require('hot-shots');
+var dogstatsd = new StatsD();
+
 Sentry.init({ dsn: config.sentryURL });
 
 app.use(Sentry.Handlers.requestHandler());
