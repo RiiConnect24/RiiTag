@@ -1,10 +1,10 @@
+const tracer = require('dd-trace').init();
 const Banner = require("./src/index");
 const fs = require("fs");
 const path = require("path");
 const dataFolder = path.resolve(__dirname, "data");
 const json_string = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
 const DiscordStrategy = require("passport-discord").Strategy;
-const tracer = require('dd-trace').init();
 const passport = require("passport");
 const config = loadConfig();
 const session = require("express-session");
