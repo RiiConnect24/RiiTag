@@ -33,6 +33,15 @@ Sentry.init({ dsn: config.sentryURL });
 app.use(Sentry.Handlers.requestHandler());
 app.use(Sentry.Handlers.errorHandler());
 
+var dd_options = {
+  'response_code':true,
+  'tags': ['app:riitag']
+}
+
+var connect_datadog = require('connect-datadog')(dd_options);
+
+app.use(connect_datadog);
+
 app.set("view-engine", "pug");
 
 passport.serializeUser(function(user, done) {
