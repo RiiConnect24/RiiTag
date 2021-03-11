@@ -1,5 +1,4 @@
-const tracer = require('dd-trace').init();
-tracer.init({ runtimeMetrics: true })
+const tracer = require('dd-trace').init({ runtimeMetrics: true });
 const Banner = require("./src/index");
 const fs = require("fs");
 const path = require("path");
