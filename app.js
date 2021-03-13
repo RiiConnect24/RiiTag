@@ -141,6 +141,7 @@ app.route("/edit")
         editUser(req.user.id, "usemii", req.body.usemii);
         editUser(req.user.id, "font", req.body.font);
         editUser(req.user.id, "mii_data", req.body.miidata);
+        editUser(req.user.id, "avatar", req.user.avatar);
         if (!guestList.includes(req.body.miidata)) {
             await renderMiiFromHex(req.body.miidata, req.user.id, dataFolder).catch(() => {
                 console.log("Failed to render mii");

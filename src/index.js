@@ -261,7 +261,7 @@ class Tag extends events.EventEmitter{
         var con = can.getContext("2d");
         var img;
         try {
-            img = await getImage(`https://cdn.discordapp.com/avatars/${this.user.id}/${this.user.avatar}.jpg?size=512`);
+            img = await getImage(`https://cdn.discordapp.com/avatars/${this.user.id}/${this.user.avatar}.png?size=512`);
             con.drawImage(img, 0, 0, 512, 512);
             await savePNG(path.resolve(dataFolder, "avatars", `${this.user.id}.png`), can);
         } catch(e) {
