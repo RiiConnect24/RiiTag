@@ -287,7 +287,7 @@ app.get("/wiiu", async function(req, res) {
     var newGames = updateGameArray(games, "wiiu-" + ids[gameTID]);
     setUserAttrib(userID, "coins", c + 1);
     setUserAttrib(userID, "games", newGames);
-    setUserAttrib(userID, "lastplayed", ["wiiu-" + gameID, Math.floor(Date.now() / 1000)]);
+    setUserAttrib(userID, "lastplayed", ["wiiu-" + ids[gameTID], Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
     var banner = await getTag(userID).catch(function () {
