@@ -12,6 +12,7 @@ const bodyParser = require("body-parser");
 const xml = require("xml");
 const DatabaseDriver = require("./dbdriver");
 const renderMiiFromHex = require("./src/rendermiifromhex");
+const renderMiiFromEntryNo = require("./src/rendermiifromentryno");
 
 const db = new DatabaseDriver(path.join(__dirname, "users.db"));
 const Sentry = require('@sentry/node');
@@ -142,7 +143,12 @@ app.route("/edit")
         editUser(req.user.id, "font", req.body.font);
         editUser(req.user.id, "mii_data", req.body.miidata);
         editUser(req.user.id, "avatar", req.user.avatar);
-        if (!guestList.includes(req.body.miidata)) {
+        if (req.body.miientryno != null) {
+            await renderMiiFromEntryNo(req.body.miidata, req.user.id, dataFolder).catch(() => {
+                console.log("Failed to render mii from mii entry number");
+            });
+        }
+        else if (!guestList.includes(req.body.miidata)) {
             await renderMiiFromHex(req.body.miidata, req.user.id, dataFolder).catch(() => {
                 console.log("Failed to render mii");
             });
