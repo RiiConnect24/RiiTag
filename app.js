@@ -145,10 +145,7 @@ app.route("/edit")
         editUser(req.user.id, "mii_number", req.body.miinumber);
         editUser(req.user.id, "avatar", req.user.avatar);
         if (req.body.miinumber != null) {
-            await renderMiiFromEntryNo(req.body.miinumber, req.user.id, dataFolder).then(await getTag(req.user.id).catch(function () {
-                res.status(404).render("notfound.pug");
-                return
-            })).catch((err) => {
+            await renderMiiFromEntryNo(req.body.miinumber, req.user.id, dataFolder).catch((err) => {
                 console.log("Failed to render mii from mii entry number");
             });
         }
