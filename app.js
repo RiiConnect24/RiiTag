@@ -146,7 +146,7 @@ app.route("/edit")
         editUser(req.user.id, "avatar", req.user.avatar);
         if (req.body.miinumber != null) {
             await renderMiiFromEntryNo(req.body.miinumber, req.user.id, dataFolder).catch((err) => {
-                console.log("Failed to render mii from mii entry number: " + err);
+                console.log("Failed to render mii from mii entry number");
             });
         }
         if (req.body.miinumber == null) {
@@ -156,11 +156,11 @@ app.route("/edit")
                 });
             }
         }
-        res.redirect(`/${req.user.id}`);
         var banner = await getTag(req.user.id).catch(function () {
             res.status(404).render("notfound.pug");
             return
         });
+        res.redirect(`/${req.user.id}`);
     });
 
 app.get("/create", checkAuth, async function(req, res) {

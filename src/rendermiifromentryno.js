@@ -58,6 +58,7 @@ module.exports = async function (entrynumber, id, dataFolder) {
             }).join('');
             editUser(id, "mii_data", hexString.toString());
             renderMii(hexString, id, dataFolder);
+            return;
         } else {
             throw "Non HTTP 200 Status code returned from CMOC Mii Host!";
         }
@@ -70,7 +71,7 @@ async function renderMii(miihex, id, dataFolder) {
     await renderMiiFromHex(miihex, id, dataFolder).catch(() => {
         console.log("Failed to render mii after parsing entry number!");
     });
-
+    return;
 }
 
 function editUser(id, key, value) {
