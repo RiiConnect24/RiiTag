@@ -142,16 +142,19 @@ app.route("/edit")
         editUser(req.user.id, "usemii", req.body.usemii);
         editUser(req.user.id, "font", req.body.font);
         editUser(req.user.id, "mii_data", req.body.miidata);
+        editUser(req.user.id, "mii_number", req.body.miinumber);
         editUser(req.user.id, "avatar", req.user.avatar);
-        if (req.body.miientryno != null) {
-            await renderMiiFromEntryNo(req.body.miientryno, req.user.id, dataFolder)/*.catch(() => {
-                console.log("Failed to render mii from mii entry number");
-            })*/;
-        }
-        else if (!guestList.includes(req.body.miidata)) {
-            await renderMiiFromHex(req.body.miidata, req.user.id, dataFolder).catch(() => {
-                console.log("Failed to render mii");
+        if (req.body.miinumber != null) {
+            await renderMiiFromEntryNo(req.body.miinumber, req.user.id, dataFolder).catch((err) => {
+                console.log("Failed to render mii from mii entry number: " + err);
             });
+        }
+        if (req.body.miinumber == null) {
+            if (!guestList.includes(req.body.miidata)) {
+                await renderMiiFromHex(req.body.miidata, req.user.id, dataFolder).catch(() => {
+                    console.log("Failed to render mii");
+                });
+            }
         }
         res.redirect(`/${req.user.id}`);
         var banner = await getTag(req.user.id).catch(function () {
@@ -159,7 +162,6 @@ app.route("/edit")
             return
         });
     });
-
 
 app.get("/create", checkAuth, async function(req, res) {
     if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {

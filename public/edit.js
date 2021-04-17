@@ -163,6 +163,7 @@ document.getElementById('mii-file').onchange = function () {
             return ("0" + (byte & 0xFF).toString(16)).slice(-2);
         }).join('');
         document.getElementById("mii-data").value = hexString;
+        var miiImg = "";
         miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${hexString}`;
         showMiiSuccess();
         console.log("Set data to " + hexString);
