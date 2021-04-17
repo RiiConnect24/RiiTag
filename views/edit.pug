@@ -2,8 +2,14 @@ extends head
 
 mixin miiUploadBox()
     hr.big-space-top(style="border-top: 2px solid rgba(0, 0, 0, 0.1);")
-    h5.mb-0.big-space-top Upload Mii
+    h5.mb-0.big-space-top Upload A Mii
     input#mii-file(type="file").space-top
+
+mixin miiEntryNumberBox()
+    hr.big-space-top(style="border-top: 2px solid rgba(0, 0, 0, 0.1);")
+    h5.mb-0.big-space-top CMOC Entry Number
+    h6.mb-0.big-space-top Enter a CMOC Entry Number here! It can be entered with or without the spaces.
+    input#mii-entrynumber(type="text" name="miinumber" value=jdata.mii_number).space-top
 
 block content
     - var soverlay
@@ -191,14 +197,24 @@ block content
                                                     h5.mb-0 Select a Mii
                                                     select.big-space-top.space-bottom#mii-select
                                                         each k,v in guests
-                                                            option(value=v selected=(jdata.mii_data == v))= k
+                                                            option(value=v selected=(jdata.data == v))= k
                                                         - var guestList = Array.from(Object.keys(guests));
-                                                        - var customSelected = jdata.mii_data != "undefined" && !guestList.includes(jdata.mii_data)
-                                                        option(value="custom" selected=(customSelected)) Upload Your Own Mii
-                                                    if customSelected
+                                                        - var CMOCSelected = jdata.mii_number != "" && !guestList.includes(jdata.mii_data)
+                                                        option(value="CMOC" selected=(CMOCSelected)) Use a CMOC Entry Number
+                                                        option(value="custom" selected=(customSelected)) Upload Your Own Mii File
+                                                    if CMOCSelected
+                                                        div#mii-number(style="")
+                                                            +miiEntryNumberBox
+                                                        div#mii-box(style="display: none;")
+                                                            +miiUploadBox
+                                                    else if customSelected
+                                                        div#mii-number(style="display: none;")
+                                                            +miiEntryNumberBox
                                                         div#mii-box(style="")
                                                             +miiUploadBox
                                                     else
+                                                        div#mii-number(style="display: none;")
+                                                            +miiEntryNumberBox
                                                         div#mii-box(style="display: none;")
                                                             +miiUploadBox
                                                     input#mii-data(type="text" name="miidata" style="display: none;" value=jdata.mii_data)

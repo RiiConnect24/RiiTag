@@ -96,10 +96,19 @@ sel7.onchange = function () {
 
     if (this.value == "custom") {
         unhideMiiUpload();
+        hideMiiNumber();
         document.getElementById("mii-data").value = user.mii_data;
+        document.getElementById("mii-number").value = null;
+    } else if (this.value == "CMOC") {
+        hideMiiUpload();
+        unhideMiiNumber();
+        document.getElementById("mii-data").value = null;
+        document.getElementById("mii-number").value = user.mii_number;
     } else {
         hideMiiUpload();
+        hideMiiNumber();
         document.getElementById("mii-data").value = this.value;
+        document.getElementById("mii-number").value = null;
     }
 
     if (guestList.includes(this.value)) {
@@ -110,6 +119,7 @@ sel7.onchange = function () {
 }
 
 var miiUploadBox = document.getElementById("mii-box");
+var miiEntryNumberBox = document.getElementById("mii-number");
 var miiErrorBox = document.getElementById("mii-error-box");
 
 function unhideMiiUpload() {
@@ -118,6 +128,14 @@ function unhideMiiUpload() {
 
 function hideMiiUpload() {
     miiUploadBox.style = "display: none;";
+}
+
+function unhideMiiNumber() {
+    miiEntryNumberBox.style = "";
+}
+
+function hideMiiNumber() {
+    miiEntryNumberBox.style = "display: none;";
 }
 
 function unhideMiiError() {
