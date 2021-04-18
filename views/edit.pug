@@ -196,27 +196,31 @@ block content
                                                     img(src=miiImg width="25%" id="mii-img" alt="Mii Preview").no-shadow
                                                     h5.mb-0 Select a Mii
                                                     select.big-space-top.space-bottom#mii-select
-                                                        each k,v in guests
-                                                            option(value=v selected=(jdata.data == v))= k
-                                                        - var guestList = Array.from(Object.keys(guests));
                                                         - var CMOCSelected = jdata.mii_number != "" && !guestList.includes(jdata.mii_data)
                                                         option(value="CMOC" selected=(CMOCSelected)) Use a CMOC Entry Number
-                                                        option(value="custom" selected=(customSelected)) Upload Your Own Mii File
+                                                        option(value="Gen2" selected=(gen2Selected)) Use a 3DS/WiiU/MiiToMo QR Code
+                                                        option(value="Upload" selected=(uploadSelected)) Upload Your Own Mii File
+                                                        option(value="Guest" selected=(guestSelected)) Use a Guest Mii
                                                     if CMOCSelected
                                                         div#mii-number(style="")
                                                             +miiEntryNumberBox
                                                         div#mii-box(style="display: none;")
                                                             +miiUploadBox
-                                                    else if customSelected
+                                                    else if uploadSelected
                                                         div#mii-number(style="display: none;")
                                                             +miiEntryNumberBox
                                                         div#mii-box(style="")
                                                             +miiUploadBox
-                                                    else
-                                                        div#mii-number(style="display: none;")
-                                                            +miiEntryNumberBox
-                                                        div#mii-box(style="display: none;")
-                                                            +miiUploadBox
+                                                    else if guestSelected
+                                                        h5.mb-0 Select a Mii
+                                                        select.big-space-top.space-bottom#guest-select
+                                                            each k,v in guests
+                                                                option(value=v selected=(jdata.data == v))= k
+                                                            - var guestList = Array.from(Object.keys(guests));
+                                                            div#mii-number(style="display: none;")
+                                                                +miiEntryNumberBox
+                                                            div#mii-box(style="display: none;")
+                                                                +miiUploadBox
                                                     input#mii-data(type="text" name="miidata" style="display: none;" value=jdata.mii_data)
                 .row
                     .col-md-12

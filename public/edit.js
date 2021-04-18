@@ -47,6 +47,7 @@ var sel3 = document.getElementById('overlay');
 var sel4 = document.getElementById('coin');
 var sel6 = document.getElementById('font');
 var sel7 = document.getElementById('mii-select');
+var sel8 = document.getElementById('guest-select');
 
 var miiUploadButton = document.getElementById('mii-upload');
 
@@ -94,7 +95,7 @@ sel6.onchange = function () {
 sel7.onchange = function () {
     miiImg = document.getElementById("mii-img");
 
-    if (this.value == "custom") {
+    if (this.value == "Upload") {
         unhideMiiUpload();
         hideMiiNumber();
         document.getElementById("mii-data").value = user.mii_data;
@@ -104,6 +105,16 @@ sel7.onchange = function () {
         unhideMiiNumber();
         document.getElementById("mii-data").value = null;
         document.getElementById("mii-number").value = user.mii_number;
+    } else if (this.value == "Gen2") {
+        hideMiiUpload();
+        hideMiiNumber();
+        document.getElementById("mii-data").value = null;
+        document.getElementById("mii-number").value = null;
+    } else if (this.value == "Guest") {
+        hideMiiUpload();
+        hideMiiNumber();
+        document.getElementById("mii-data").value = this.value;
+        document.getElementById("mii-number").value = null;
     } else {
         hideMiiUpload();
         hideMiiNumber();
