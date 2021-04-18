@@ -97,6 +97,7 @@ sel7.onchange = function () {
 
     if (this.value == "Upload") {
         unhideMiiUpload();
+        hideMiiGen2();
         hideMiiNumber();
         hideGuest();
         document.getElementById("mii-data").value = user.mii_data;
@@ -104,6 +105,7 @@ sel7.onchange = function () {
         document.getElementById("mii-type").value = this.value;
     } else if (this.value == "CMOC") {
         hideMiiUpload();
+        hideMiiGen2();
         unhideMiiNumber();
         hideGuest();
         document.getElementById("mii-data").value = user.mii_data;
@@ -111,6 +113,7 @@ sel7.onchange = function () {
         document.getElementById("mii-type").value = this.value;
     } else if (this.value == "Gen2") {
         hideMiiUpload();
+        unhideMiiGen2();
         hideMiiNumber();
         hideGuest();
         document.getElementById("mii-data").value = user.mii_data;
@@ -118,11 +121,13 @@ sel7.onchange = function () {
         document.getElementById("mii-type").value = this.value;
     } else if (this.value == "Guest") {
         hideMiiUpload();
+        hideMiiGen2();
         hideMiiNumber();
         unhideGuest();
         document.getElementById("mii-type").value = this.value;
     } else {
         hideMiiUpload();
+        hideMiiGen2();
         hideMiiNumber();
         hideGuest();
         document.getElementById("mii-data").value = this.value;
@@ -164,6 +169,7 @@ sel8.onchange = function () {
 
 var miiUploadBox = document.getElementById("mii-box");
 var miiEntryNumberBox = document.getElementById("mii-number");
+var miiGen2 = document.getElementById("mii-gen2");
 var miiGuest = document.getElementById("guest-selection");
 var miiErrorBox = document.getElementById("mii-error-box");
 
@@ -191,6 +197,14 @@ function hideGuest() {
     miiGuest.style = "display: none;";
 }
 
+function unhideMiiGen2() {
+    miiGen2.style = "";
+}
+
+function hideMiiGen2() {
+    miiGen2.style = "display: none;";
+}
+
 function unhideMiiError() {
     miiErrorBox.style = "";
 }
@@ -208,6 +222,30 @@ function showMiiError(message) {
 function showMiiSuccess() {
     document.getElementById("mii-success").style = "";
     hideMiiError();
+}
+
+document.getElementById('mii-QRfile').onchange = function () {
+    var file = document.getElementById('mii-QRfile').files[0];
+    if (!file) {
+        console.log("No file");
+        showMiiError("No file has been selected.");
+        return;
+    }
+    var reader = new FileReader();
+    reader.onload = function () {
+        var buffer = reader.result;
+        var dv = new DataView(buffer, 0);
+        var byteArray = [];
+        for (var i = 0; i < buffer.byteLength; i++) {
+            byteArray.push(dv.getUint8(i));
+        }
+        var hexString = Array.from(byteArray, function (byte) {
+            return ("0" + (byte & 0xFF).toString(16)).slice(-2);
+        }).join('');
+        document.getElementById("mii-data").value = hexString;
+        console.log("Set data to " + hexString);
+    }
+    reader.readAsArrayBuffer(file);
 }
 
 document.getElementById('mii-file').onchange = function () {
