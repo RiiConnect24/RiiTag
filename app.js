@@ -146,7 +146,6 @@ app.route("/edit")
         editUser(req.user.id, "mii_data", req.body.miidata);
         editUser(req.user.id, "mii_number", req.body.miinumber);
         editUser(req.user.id, "avatar", req.user.avatar);
-        console.log(req.body.MiiType)
         if (req.body.MiiType == "CMOC") {
             await renderMiiFromEntryNo(req.body.miinumber, req.user.id, dataFolder).catch((err) => {
                 console.log("Failed to render mii from mii entry number");
@@ -159,7 +158,7 @@ app.route("/edit")
             }
         } else if (req.body.MiiType == "Gen2") {
             await renderGen2Mii(req.body.miidata, req.user.id, dataFolder).catch((err) => {
-                console.log("Failed to render mii from QR Code");
+                console.log("Failed to render mii from QR Code: " + err);
             });
         } else {
             console.log("Invalid/No Mii Type chosen.");

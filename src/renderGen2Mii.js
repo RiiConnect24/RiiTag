@@ -13,44 +13,64 @@
 
 const https = require("https");
 const crypto = require("crypto");
+const Canvas = require("canvas");
+const utils = require("./utils");
+const path = require("path");
 
-module.exports = async function (entrynumber, id, dataFolder) {
+var options = {}
+
+module.exports = async function (QRCode, id, dataFolder) {
+
     //from gen2_wiiu_3ds_miitomo import Gen2Wiiu3dsMiitomo
     //from Crypto.Cipher import AES
 
     // Detect if file is an image or not
+    // Send the QR Code to remote parser; Use as Mii Data. (Use a console.log() here to see what it returns)
+    if (QRCode.slice(0, 6) == "ffd8ff") { // Magic Bytes for JP(E)G
+        options = {
+            hostname: 'qrcode.rc24.xyz',
+            port: 443,
+            path: '/qrcode.php',
+            method: 'GET',
+            headers: {
+                'Content-Type': 'image/jpeg'
+            }
+        }
+    } else if (QRCode.slice(0, 16) == "89504e470d0a1a0a") { // Magic Bytes for PNG
+        options = {
+            hostname: 'qrcode.rc24.xyz',
+            port: 443,
+            path: '/qrcode.php',
+            method: 'GET',
+            headers: {
+                'Content-Type': 'image/png'
+            }
+        }
+    } else {
+        throw "Not a Valid Image Type";
+    }
 
     // Original allowed URL input, that will not be the case here for security and bandwidth reasons.
-
-    // Send the QR Code to remote parser; Use as Mii Data. (Use a console.log() here to see what it returns)
-    // Header is image/jpeg, needs to be image/png if a png is provided.
-    const options = {
-        hostname: 'qrcode.rc24.xyz',
-        port: 443,
-        path: '/qrcode.php',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'image/jpeg',
-            'Content-Length': data.length
-        }
-    }
+    
     /*with open(input_file, "rb") as f:
     read = f.read()
     decoded_qr = post("https://", { "image": read }).content // zbar sucks to run on a client so we use this api*/
     const req = https.request(options, res => {
-                    console.log(`statusCode: ${res.statusCode}`)
-
-                    res.on('data', d => {
-                        decoded_qr = d
-                    })
-                })
-
-    req.on('error', error => {
-        console.error(error)
+        res.on('data', d => {
+            decoded_qr = d
+        })
     })
 
-    req.write(data)
+    req.on('error', error => {
+        throw error;
+    })
+
+    req.write(QRCode)
     req.end()
+
+    freeze(10000);
+
+    console.log(decoded_qr);
 
     // Wait for request to end somehow
     nonce = decoded_qr.toString().slice(0, 8)
@@ -66,7 +86,9 @@ module.exports = async function (entrynumber, id, dataFolder) {
     // Decode the output
     const decipher = crypto.createDecipheriv("aes-256-ccm", key, nonce + "0000");
     const decrypted = Buffer.concat([decipher.update(text.content, 'base64'), decipher.final()]);
-    const result = decrypted.toString().slice(0, 12) + nonce + decrypted.toString().slice
+    const result = decrypted.toString().slice(0, 12) + nonce + decrypted.toString().slice(13)
+
+    console.log(result);
 
     /*nonce = decoded_qr[: 8]
     cipher = AES.new(key, AES.MODE_CCM, nonce + bytes([0, 0, 0, 0]))
@@ -245,4 +267,33 @@ module.exports = async function (entrynumber, id, dataFolder) {
     print("Mii Render URLs:\n")
     print("Face: " + url + "&type=face&width=512&instanceCount=1")
     */
+}
+
+// For the renderer;
+const endpoint = "https://studio.mii.nintendo.com/miis/image.png?data=";
+
+async function RenderMiiGen2(hex, id, dataFolder) {
+    var c = new Canvas.Canvas(512, 512);
+    var ctx = c.getContext("2d");
+    var img;
+    try {
+        img = await utils.getImage(`${endpoint}${hex}`);
+        ctx.drawImage(img, 0, 0, 512, 512);
+        await utils.savePNG(path.join(dataFolder, "miis", id + ".png"), c);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function editUser(id, key, value) {
+    var p = path.resolve(dataFolder, "users", id + ".json");
+    var jdata = JSON.parse(fs.readFileSync(p));
+    jdata[key] = value;
+    fs.writeFileSync(p, JSON.stringify(jdata, null, 4));
+}
+
+// Debugging Sleep Timer
+function freeze(time) {
+    const stop = new Date().getTime() + time;
+    while (new Date().getTime() < stop);
 }
