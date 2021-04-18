@@ -103,7 +103,7 @@ app.get('/callback',
 );
 
 app.route("/edit")
-    .get(checkAuth, async function(req, res) {
+    .get(checkAuth, async function (req, res) {
         var jstring;
         try {
             jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.user.id + ".json")).toString();
@@ -111,24 +111,25 @@ app.route("/edit")
             if (userKey == undefined) {
                 throw new Error("User Key is undefined");
             }
-            res.render("edit.pug", {jstring: jstring,
-                                    backgrounds: getBackgroundList(),
-                                    jdata: JSON.parse(jstring),
-                                    overlays: getOverlayList(),
-                                    flags: getFlagList(),
-                                    coins: getCoinList(),
-                                    covertypes: getCoverTypes(),
-                                    coverregions: getCoverRegions(),
-                                    fonts: getFonts(),
-                                    userKey: userKey,
-                                    user: req.user
-                                });
-        } catch(e) {
+            res.render("edit.pug", {
+                jstring: jstring,
+                backgrounds: getBackgroundList(),
+                jdata: JSON.parse(jstring),
+                overlays: getOverlayList(),
+                flags: getFlagList(),
+                coins: getCoinList(),
+                covertypes: getCoverTypes(),
+                coverregions: getCoverRegions(),
+                fonts: getFonts(),
+                userKey: userKey,
+                user: req.user
+            });
+        } catch (e) {
             console.log(e);
             res.redirect("/create");
         }
     })
-    .post(checkAuth, async function(req, res) {
+    .post(checkAuth, async function (req, res) {
         editUser(req.user.id, "bg", req.body.background);
         editUser(req.user.id, "overlay", req.body.overlay);
         editUser(req.user.id, "region", req.body.flag);
@@ -144,17 +145,21 @@ app.route("/edit")
         editUser(req.user.id, "mii_data", req.body.miidata);
         editUser(req.user.id, "mii_number", req.body.miinumber);
         editUser(req.user.id, "avatar", req.user.avatar);
-        if (req.body.miinumber != null) {
+        console.log(req.body.MiiType)
+        if (req.body.MiiType == "CMOC") {
             await renderMiiFromEntryNo(req.body.miinumber, req.user.id, dataFolder).catch((err) => {
                 console.log("Failed to render mii from mii entry number");
             });
-        }
-        if (req.body.miinumber == null) {
+        } else if (req.body.MiiType == "Upload" || req.body.MiiType == "Guest") {
             if (!guestList.includes(req.body.miidata)) {
                 await renderMiiFromHex(req.body.miidata, req.user.id, dataFolder).catch(() => {
                     console.log("Failed to render mii");
                 });
             }
+        } else if (req.body.MiiType == "Gen2") {
+
+        } else {
+            console.log("Invalid/No Mii Type chosen.");
         }
         setTimeout(() => {
             getTag(req.user.id).catch(function () {
