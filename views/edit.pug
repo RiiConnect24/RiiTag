@@ -199,7 +199,7 @@ block content
                                                         b.alert-success Your Mii has successfully been uploaded!
                                                     h5.mb-0 Mii Preview
                                                     - var miiImg
-                                                    - if (guestList.includes(jdata.mii_data)) { miiImg = `/miis/guests/${jdata.mii_data}.png` } else { miiImg = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${jdata.mii_data}` }
+                                                    - if (guestList.includes(jdata.mii_data)) { miiImg = `/miis/guests/${jdata.mii_data}.png`; } else if (jdata.mii_data == "" || jdata.mii_data == null || jdata.mii_data.length >= 100) { miiImg = `/miis/guests/undefined.png`; } else { miiImg = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${jdata.mii_data}`; }
                                                     img(src=miiImg width="25%" id="mii-img" alt="Mii Preview").no-shadow
                                                     h5.mb-0 Select a Mii
                                                     select.big-space-top.space-bottom#mii-select

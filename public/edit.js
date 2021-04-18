@@ -137,7 +137,7 @@ sel7.onchange = function () {
 
     if (guestList.includes(user.mii_data)) {
         miiImg.src = `/miis/guests/${user.mii_data}.png`;
-    } else if (user.mii_data == "" || user.mii_data == null) {
+    } else if (user.mii_data == "" || user.mii_data == null || user.mii_data.length >= 100) {
         miiImg.src = `/miis/guests/undefined.png`;
     } else { 
         miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${user.mii_data}`;
@@ -158,8 +158,8 @@ sel8.onchange = function () {
         miiImg.src = `/miis/guests/${this.value}.png`;
     } else {
         if (guestList.includes(user.mii_data)) {
-            miiImg.src = `/miis/guests/${this.value}.png`;
-        } else if (user.mii_data == "" || user.mii_data == null) {
+            miiImg.src = `/miis/guests/${user.mii_data}.png`;
+        } else if (user.mii_data == "" || user.mii_data == null || user.mii_data.length >= 100) {
             miiImg.src = `/miis/guests/undefined.png`;
         } else {
             miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${user.mii_data}`;
