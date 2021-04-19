@@ -47,6 +47,7 @@ var sel3 = document.getElementById('overlay');
 var sel4 = document.getElementById('coin');
 var sel6 = document.getElementById('font');
 var sel7 = document.getElementById('mii-select');
+var sel8 = document.getElementById('guest-select');
 
 var miiUploadButton = document.getElementById('mii-upload');
 
@@ -94,23 +95,70 @@ sel6.onchange = function () {
 sel7.onchange = function () {
     miiImg = document.getElementById("mii-img");
 
-    if (this.value == "custom") {
+    if (this.value == "Upload") {
         unhideMiiUpload();
+        hideMiiNumber();
+        hideGuest();
         document.getElementById("mii-data").value = user.mii_data;
+        document.getElementById("mii-number").value = null;
+        document.getElementById("mii-type").value = this.value;
+    } else if (this.value == "CMOC") {
+        hideMiiUpload();
+        unhideMiiNumber();
+        hideGuest();
+        document.getElementById("mii-data").value = null;
+        document.getElementById("mii-number").value = user.mii_number;
+        document.getElementById("mii-type").value = this.value;
+    } else if (this.value == "Guest") {
+        hideMiiUpload();
+        hideMiiNumber();
+        unhideGuest();
+        document.getElementById("mii-type").value = this.value;
     } else {
         hideMiiUpload();
+        hideMiiNumber();
+        hideGuest();
         document.getElementById("mii-data").value = this.value;
+        document.getElementById("mii-number").value = null;
+        document.getElementById("mii-type").value = this.value;
     }
 
-    if (guestList.includes(this.value)) {
-        miiImg.src = `/miis/guests/${this.value}.png`;
-    } else { 
+    if (guestList.includes(user.mii_data)) {
+        miiImg.src = `/miis/guests/${user.mii_data}.png`;
+    } else if (user.mii_data == "" || user.mii_data == null) {
+        miiImg.src = `/miis/guests/undefined.png`;
+    } else {
         miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${user.mii_data}`;
     }
 }
 
+sel8.onchange = function () {
+    miiImg = document.getElementById("mii-img");
+
+    if (this.value == "NoSelection") {
+        document.getElementById("mii-data").value = user.mii_data;
+        document.getElementById("mii-number").value = "";
+    }
+
+    if (guestList.includes(this.value)) {
+        document.getElementById("mii-data").value = this.value;
+        document.getElementById("mii-number").value = "";
+        miiImg.src = `/miis/guests/${this.value}.png`;
+    } else {
+        if (guestList.includes(user.mii_data)) {
+            miiImg.src = `/miis/guests/${user.mii_data}.png`;
+        } else if (user.mii_data == "" || user.mii_data == null) {
+            miiImg.src = `/miis/guests/undefined.png`;
+        } else {
+            miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${user.mii_data}`;
+        }
+    }
+}
+
 var miiUploadBox = document.getElementById("mii-box");
+var miiEntryNumberBox = document.getElementById("mii-number");
 var miiErrorBox = document.getElementById("mii-error-box");
+var miiGuest = document.getElementById("guest-selection");
 
 function unhideMiiUpload() {
     miiUploadBox.style = "";
@@ -118,6 +166,22 @@ function unhideMiiUpload() {
 
 function hideMiiUpload() {
     miiUploadBox.style = "display: none;";
+}
+
+function unhideMiiNumber() {
+    miiEntryNumberBox.style = "";
+}
+
+function hideMiiNumber() {
+    miiEntryNumberBox.style = "display: none;";
+}
+
+function unhideGuest() {
+    miiGuest.style = "";
+}
+
+function hideGuest() {
+    miiGuest.style = "display: none;";
 }
 
 function unhideMiiError() {
@@ -163,6 +227,7 @@ document.getElementById('mii-file').onchange = function () {
             return ("0" + (byte & 0xFF).toString(16)).slice(-2);
         }).join('');
         document.getElementById("mii-data").value = hexString;
+        var miiImg = "";
         miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${hexString}`;
         showMiiSuccess();
         console.log("Set data to " + hexString);

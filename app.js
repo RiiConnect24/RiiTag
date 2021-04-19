@@ -12,6 +12,7 @@ const bodyParser = require("body-parser");
 const xml = require("xml");
 const DatabaseDriver = require("./dbdriver");
 const renderMiiFromHex = require("./src/rendermiifromhex");
+const renderMiiFromEntryNo = require("./src/rendermiifromentryno");
 
 const db = new DatabaseDriver(path.join(__dirname, "users.db"));
 const Sentry = require('@sentry/node');
@@ -141,19 +142,29 @@ app.route("/edit")
         editUser(req.user.id, "usemii", req.body.usemii);
         editUser(req.user.id, "font", req.body.font);
         editUser(req.user.id, "mii_data", req.body.miidata);
+        editUser(req.user.id, "mii_number", req.body.miinumber);
         editUser(req.user.id, "avatar", req.user.avatar);
-        if (!guestList.includes(req.body.miidata)) {
-            await renderMiiFromHex(req.body.miidata, req.user.id, dataFolder).catch(() => {
-                console.log("Failed to render mii");
+        if (req.body.MiiType == "CMOC") {
+            await renderMiiFromEntryNo(req.body.miinumber, req.user.id, dataFolder).catch((err) => {
+                console.log("Failed to render mii from mii entry number");
             });
+        } else if (req.body.MiiType == "Upload" || req.body.MiiType == "Guest") {
+            if (!guestList.includes(req.body.miidata)) {
+                await renderMiiFromHex(req.body.miidata, req.user.id, dataFolder).catch(() => {
+                    console.log("Failed to render mii");
+                });
+            }
+        } else {
+            console.log("Invalid/No Mii Type chosen.");
         }
+        setTimeout(() => {
+            getTag(req.user.id).catch(function () {
+                res.status(404).render("notfound.pug");
+                return
+            })
+        }, 2000);
         res.redirect(`/${req.user.id}`);
-        var banner = await getTag(req.user.id).catch(function () {
-            res.status(404).render("notfound.pug");
-            return
-        });
     });
-
 
 app.get("/create", checkAuth, async function(req, res) {
     if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
