@@ -144,17 +144,18 @@ app.route("/edit")
         editUser(req.user.id, "mii_data", req.body.miidata);
         editUser(req.user.id, "mii_number", req.body.miinumber);
         editUser(req.user.id, "avatar", req.user.avatar);
-        if (req.body.miinumber != null) {
+        if (req.body.MiiType == "CMOC") {
             await renderMiiFromEntryNo(req.body.miinumber, req.user.id, dataFolder).catch((err) => {
                 console.log("Failed to render mii from mii entry number");
             });
-        }
-        if (req.body.miinumber == null) {
+        } else if (req.body.MiiType == "Upload" || req.body.MiiType == "Guest") {
             if (!guestList.includes(req.body.miidata)) {
                 await renderMiiFromHex(req.body.miidata, req.user.id, dataFolder).catch(() => {
                     console.log("Failed to render mii");
                 });
             }
+        } else {
+            console.log("Invalid/No Mii Type chosen.");
         }
         setTimeout(() => {
             getTag(req.user.id).catch(function () {
