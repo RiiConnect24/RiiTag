@@ -17,7 +17,7 @@ function showPassword(inputBoxID, inputButtonID) {
     }
 }
 
-function fetch(uri) {
+function httpFetch(uri) {
     var res = null;
     var x = new XMLHttpRequest();
     x.open("GET", uri, false);
@@ -29,11 +29,11 @@ function fetch(uri) {
 }
 
 function getOverlay(overlayFile) {
-    return fetch(overlayFile);
+    return httpFetch(overlayFile);
 }
 
 function getUser() {
-    var j = fetch(`/users/${uid}.json`);
+    var j = httpFetch(`/users/${uid}.json`);
     if (j) {
         return JSON.parse(j);
     } else {
@@ -225,11 +225,6 @@ function showMiiSuccess() {
 }
 
 document.getElementById('mii-QRfile').onchange = async function () {
-
-    // This is supposed to send the proper request to the Mii decoding service
-    // It doesn't work though. Wireshark shows that fetch isn't sending a proper request
-    // fetch is currently sending a "GET" request vs a "POST" request; I am unsure of why this is the case.
-    // This should be the last thing needed to be fixed to allow Gen2 Support
 
     let formData = new FormData();
     var data = document.getElementById('mii-QRfile').files[0];
