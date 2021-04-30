@@ -172,6 +172,7 @@ var miiEntryNumberBox = document.getElementById("mii-number");
 var miiGen2 = document.getElementById("mii-gen2");
 var miiGuest = document.getElementById("guest-selection");
 var miiErrorBox = document.getElementById("mii-error-box");
+var miiGuest = document.getElementById("guest-selection");
 
 function unhideMiiUpload() {
     miiUploadBox.style = "";
