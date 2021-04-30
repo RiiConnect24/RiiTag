@@ -104,7 +104,7 @@ app.get('/callback',
 );
 
 app.route("/edit")
-    .get(checkAuth, async function (req, res) {
+    .get(checkAuth, async function(req, res) {
         var jstring;
         try {
             jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.user.id + ".json")).toString();
