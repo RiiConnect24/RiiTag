@@ -224,28 +224,28 @@ function showMiiSuccess() {
     hideMiiError();
 }
 
-document.getElementById('mii-QRfile').onchange = function () {
-    var file = document.getElementById('mii-QRfile').files[0];
-    if (!file) {
-        console.log("No file");
-        showMiiError("No file has been selected.");
-        return;
+document.getElementById('mii-QRfile').onchange = async function () {
+
+    // This is supposed to send the proper request to the Mii decoding service
+    // It doesn't work though. Wireshark shows that fetch isn't sending a proper request
+    // fetch is currently sending a "GET" request vs a "POST" request; I am unsure of why this is the case.
+    // This should be the last thing needed to be fixed to allow Gen2 Support
+
+    let formData = new FormData();
+    var data = document.getElementById('mii-QRfile').files[0];
+    formData.append("platform", "gen2");
+    formData.append("data", data);
+
+    try {
+        let r = await fetch('http://miicontestp.wii.rc24.xyz/cgi-bin/studio.cgi', {method: "POST", body: formData})
+            .then(response => response.json())
+            .then(data => {
+                mii = data.mii;
+            });
+        document.getElementById("mii-data").value = mii;
+    } catch (e) {
+        console.log('Error when fetching', e);
     }
-    var reader = new FileReader();
-    reader.onload = function () {
-        var buffer = reader.result;
-        var dv = new DataView(buffer, 0);
-        var byteArray = [];
-        for (var i = 0; i < buffer.byteLength; i++) {
-            byteArray.push(dv.getUint8(i));
-        }
-        var hexString = Array.from(byteArray, function (byte) {
-            return ("0" + (byte & 0xFF).toString(16)).slice(-2);
-        }).join('');
-        document.getElementById("mii-data").value = hexString;
-        console.log("Set data to " + hexString);
-    }
-    reader.readAsArrayBuffer(file);
 }
 
 document.getElementById('mii-file').onchange = function () {
