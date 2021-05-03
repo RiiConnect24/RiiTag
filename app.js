@@ -168,7 +168,7 @@ app.route("/edit")
                 res.status(404).render("notfound.pug");
                 return
             })
-        }, 2000);
+        }, 5000);
         res.redirect(`/${req.user.id}`);
     });
 
