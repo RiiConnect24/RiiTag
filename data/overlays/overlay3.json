@@ -45,5 +45,11 @@
         "x": -25,
         "y": 380
     },
+    "avatar": {
+        "size": 0
+    },
+    "mii": {
+        "size": 0
+    },
     "enabled": true
 }
