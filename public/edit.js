@@ -94,7 +94,7 @@ sel6.onchange = function () {
 
 sel7.onchange = function () {
     miiImg = document.getElementById("mii-img");
-
+    
     if (this.value == "Upload") {
         unhideMiiUpload();
         hideMiiGen2();
@@ -139,7 +139,9 @@ sel7.onchange = function () {
         miiImg.src = `/miis/guests/${user.mii_data}.png`;
     } else if (user.mii_data == "" || user.mii_data == null || user.mii_data.length >= 100) {
         miiImg.src = `/miis/guests/undefined.png`;
-    } else { 
+    } else if (user.mii_data.length == 94){
+        miiImg.src = `https://studio.mii.nintendo.com/miis/image.png?data=${user.mii_data}&amp;type=face&amp;width=512&amp;bgColor=FFFFFF00`;
+    } else {
         miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${user.mii_data}`;
     }
 }
@@ -161,6 +163,8 @@ sel8.onchange = function () {
             miiImg.src = `/miis/guests/${user.mii_data}.png`;
         } else if (user.mii_data == "" || user.mii_data == null || user.mii_data.length >= 100) {
             miiImg.src = `/miis/guests/undefined.png`;
+        } else if (user.mii_data.length == 94){
+            miiImg.src = `https://studio.mii.nintendo.com/miis/image.png?data=${user.mii_data}&amp;type=face&amp;width=512&amp;bgColor=FFFFFF00`;
         } else {
             miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${user.mii_data}`;
         }
@@ -231,7 +235,7 @@ document.getElementById('mii-QRfile').onchange = async function () {
     var data = document.getElementById('mii-QRfile').files[0];
     formData.append("platform", "gen2");
     formData.append("data", data);
-
+    hideMiiError();
     try {
         let r = await fetch('https://miicontestp.wii.rc24.xyz/cgi-bin/studio.cgi', {method: "POST", body: formData})
             .then(response => response.json())
@@ -239,13 +243,20 @@ document.getElementById('mii-QRfile').onchange = async function () {
                 mii = data.mii;
             });
         document.getElementById("mii-data").value = mii;
+        miiImg.src = `https://studio.mii.nintendo.com/miis/image.png?data=${mii}&amp;type=face&amp;width=512&amp;bgColor=FFFFFF00`;
+        showMiiSuccess();
     } catch (e) {
-        console.log('Error when fetching', e);
+        if (e instanceof TypeError) {
+            showMiiError("Unable to use this QR code. Try again!");
+        } else {
+            console.log('Error when fetching', e);
+        }
     }
 }
 
 document.getElementById('mii-file').onchange = function () {
     var file = document.getElementById('mii-file').files[0];
+    hideMiiError();
     if (!file) {
         console.log("No file");
         showMiiError("No file has been selected.");
