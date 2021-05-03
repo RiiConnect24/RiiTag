@@ -233,7 +233,7 @@ document.getElementById('mii-QRfile').onchange = async function () {
     formData.append("data", data);
 
     try {
-        let r = await fetch('http://miicontestp.wii.rc24.xyz/cgi-bin/studio.cgi', {method: "POST", body: formData})
+        let r = await fetch('https://miicontestp.wii.rc24.xyz/cgi-bin/studio.cgi', {method: "POST", body: formData})
             .then(response => response.json())
             .then(data => {
                 mii = data.mii;
