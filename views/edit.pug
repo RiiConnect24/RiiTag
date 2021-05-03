@@ -16,7 +16,7 @@ mixin miiQRUploadBox()
 mixin miiEntryNumberBox()
     hr.big-space-top(style="border-top: 2px solid rgba(0, 0, 0, 0.1);")
     h5.mb-0.big-space-top CMOC Entry Number
-    h6.mb-0.big-space-top Enter a CMOC Entry Number here! It can be entered with or without the spaces.
+    h6.mb-0.big-space-top Enter a CMOC Entry Number here! It can be entered with or without the Dashes.
     input#mii-entrynumber(type="text" name="miinumber" value=jdata.mii_number).space-top
 
 block content
@@ -200,7 +200,7 @@ block content
                                                         b.alert-success Your Mii has successfully been uploaded!
                                                     h5.mb-0 Mii Preview
                                                     - var miiImg
-                                                    - if (guestList.includes(jdata.mii_data)) { miiImg = `/miis/guests/${jdata.mii_data}.png`; } else if (jdata.mii_data == "" || jdata.mii_data == null || jdata.mii_data.length >= 100) { miiImg = `/miis/guests/undefined.png`; } else if (jdata.mii_data.length == 94) { miiImg = `https://studio.mii.nintendo.com/miis/image.png?data=${jdata.mii_data}&amp;type=face&amp;width=512&amp;bgColor=FFFFFF00`; } else { miiImg = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${jdata.mii_data}`; }
+                                                    - if (guestList.includes(jdata.mii_data)) { miiImg = `/miis/guests/${jdata.mii_data}.png`; } else if (jdata.mii_data == "" || jdata.mii_data == null || jdata.mii_data.length >= 1000) { miiImg = `/miis/guests/undefined.png`; } else if (jdata.mii_data.length == 94) { miiImg = `https://studio.mii.nintendo.com/miis/image.png?data=${jdata.mii_data}&amp;type=face&amp;width=512&amp;bgColor=FFFFFF00`; } else { miiImg = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${jdata.mii_data}`; }
                                                     img(src=miiImg width="25%" id="mii-img" alt="Mii Preview").no-shadow
                                                     h5.mb-0 Select a Mii
                                                     select.big-space-top.space-bottom#mii-select
