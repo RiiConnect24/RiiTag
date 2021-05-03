@@ -240,7 +240,11 @@ document.getElementById('mii-QRfile').onchange = async function () {
             });
         document.getElementById("mii-data").value = mii;
     } catch (e) {
-        console.log('Error when fetching', e);
+        if (e instanceof TypeError) {
+            showMiiError("Unable to use this QR code. Try again!");
+        } else {
+            console.log('Error when fetching', e);
+        }
     }
 }
 
