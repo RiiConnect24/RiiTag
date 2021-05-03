@@ -137,7 +137,7 @@ sel7.onchange = function () {
 
     if (guestList.includes(user.mii_data)) {
         miiImg.src = `/miis/guests/${user.mii_data}.png`;
-    } else if (user.mii_data == "" || user.mii_data == null || user.mii_data.length >= 100) {
+    } else if (user.mii_data == "" || user.mii_data == null || user.mii_data.length >= 1000) {
         miiImg.src = `/miis/guests/undefined.png`;
     } else if (user.mii_data.length == 94){
         miiImg.src = `https://studio.mii.nintendo.com/miis/image.png?data=${user.mii_data}&amp;type=face&amp;width=512&amp;bgColor=FFFFFF00`;
@@ -161,7 +161,7 @@ sel8.onchange = function () {
     } else {
         if (guestList.includes(user.mii_data)) {
             miiImg.src = `/miis/guests/${user.mii_data}.png`;
-        } else if (user.mii_data == "" || user.mii_data == null || user.mii_data.length >= 100) {
+        } else if (user.mii_data == "" || user.mii_data == null || user.mii_data.length >= 1000) {
             miiImg.src = `/miis/guests/undefined.png`;
         } else if (user.mii_data.length == 94){
             miiImg.src = `https://studio.mii.nintendo.com/miis/image.png?data=${user.mii_data}&amp;type=face&amp;width=512&amp;bgColor=FFFFFF00`;
