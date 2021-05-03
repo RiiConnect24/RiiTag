@@ -17,7 +17,7 @@ function showPassword(inputBoxID, inputButtonID) {
     }
 }
 
-function fetch(uri) {
+function httpFetch(uri) {
     var res = null;
     var x = new XMLHttpRequest();
     x.open("GET", uri, false);
@@ -29,11 +29,11 @@ function fetch(uri) {
 }
 
 function getOverlay(overlayFile) {
-    return fetch(overlayFile);
+    return httpFetch(overlayFile);
 }
 
 function getUser() {
-    var j = fetch(`/users/${uid}.json`);
+    var j = httpFetch(`/users/${uid}.json`);
     if (j) {
         return JSON.parse(j);
     } else {
@@ -97,37 +97,49 @@ sel7.onchange = function () {
 
     if (this.value == "Upload") {
         unhideMiiUpload();
+        hideMiiGen2();
         hideMiiNumber();
         hideGuest();
         document.getElementById("mii-data").value = user.mii_data;
-        document.getElementById("mii-number").value = null;
+        document.getElementById("mii-number").value = "";
         document.getElementById("mii-type").value = this.value;
     } else if (this.value == "CMOC") {
         hideMiiUpload();
+        hideMiiGen2();
         unhideMiiNumber();
         hideGuest();
-        document.getElementById("mii-data").value = null;
+        document.getElementById("mii-data").value = user.mii_data;
         document.getElementById("mii-number").value = user.mii_number;
+        document.getElementById("mii-type").value = this.value;
+    } else if (this.value == "Gen2") {
+        hideMiiUpload();
+        unhideMiiGen2();
+        hideMiiNumber();
+        hideGuest();
+        document.getElementById("mii-data").value = user.mii_data;
+        document.getElementById("mii-number").value = "";
         document.getElementById("mii-type").value = this.value;
     } else if (this.value == "Guest") {
         hideMiiUpload();
+        hideMiiGen2();
         hideMiiNumber();
         unhideGuest();
         document.getElementById("mii-type").value = this.value;
     } else {
         hideMiiUpload();
+        hideMiiGen2();
         hideMiiNumber();
         hideGuest();
         document.getElementById("mii-data").value = this.value;
-        document.getElementById("mii-number").value = null;
+        document.getElementById("mii-number").value = "";
         document.getElementById("mii-type").value = this.value;
     }
 
     if (guestList.includes(user.mii_data)) {
         miiImg.src = `/miis/guests/${user.mii_data}.png`;
-    } else if (user.mii_data == "" || user.mii_data == null) {
+    } else if (user.mii_data == "" || user.mii_data == null || user.mii_data.length >= 100) {
         miiImg.src = `/miis/guests/undefined.png`;
-    } else {
+    } else { 
         miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${user.mii_data}`;
     }
 }
@@ -147,7 +159,7 @@ sel8.onchange = function () {
     } else {
         if (guestList.includes(user.mii_data)) {
             miiImg.src = `/miis/guests/${user.mii_data}.png`;
-        } else if (user.mii_data == "" || user.mii_data == null) {
+        } else if (user.mii_data == "" || user.mii_data == null || user.mii_data.length >= 100) {
             miiImg.src = `/miis/guests/undefined.png`;
         } else {
             miiImg.src = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${user.mii_data}`;
@@ -157,6 +169,8 @@ sel8.onchange = function () {
 
 var miiUploadBox = document.getElementById("mii-box");
 var miiEntryNumberBox = document.getElementById("mii-number");
+var miiGen2 = document.getElementById("mii-gen2");
+var miiGuest = document.getElementById("guest-selection");
 var miiErrorBox = document.getElementById("mii-error-box");
 var miiGuest = document.getElementById("guest-selection");
 
@@ -184,6 +198,14 @@ function hideGuest() {
     miiGuest.style = "display: none;";
 }
 
+function unhideMiiGen2() {
+    miiGen2.style = "";
+}
+
+function hideMiiGen2() {
+    miiGen2.style = "display: none;";
+}
+
 function unhideMiiError() {
     miiErrorBox.style = "";
 }
@@ -201,6 +223,25 @@ function showMiiError(message) {
 function showMiiSuccess() {
     document.getElementById("mii-success").style = "";
     hideMiiError();
+}
+
+document.getElementById('mii-QRfile').onchange = async function () {
+
+    let formData = new FormData();
+    var data = document.getElementById('mii-QRfile').files[0];
+    formData.append("platform", "gen2");
+    formData.append("data", data);
+
+    try {
+        let r = await fetch('https://miicontestp.wii.rc24.xyz/cgi-bin/studio.cgi', {method: "POST", body: formData})
+            .then(response => response.json())
+            .then(data => {
+                mii = data.mii;
+            });
+        document.getElementById("mii-data").value = mii;
+    } catch (e) {
+        console.log('Error when fetching', e);
+    }
 }
 
 document.getElementById('mii-file').onchange = function () {

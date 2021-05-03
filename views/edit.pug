@@ -5,6 +5,14 @@ mixin miiUploadBox()
     h5.mb-0.big-space-top Upload A Mii
     input#mii-file(type="file").space-top
 
+mixin miiQRUploadBox()
+    hr.big-space-top(style="border-top: 2px solid rgba(0, 0, 0, 0.1);")
+    h5.mb-0 Upload a QR Code
+    h6.mb-0 Warning: Some QR Codes may not read properly.
+    h6.mb-0 If your Mii doesn't show up, try a different upload type!
+    h6.mb-0 Accepts PNGs and JPEG/JPG Files.
+    input#mii-QRfile(type="file").space-top
+
 mixin miiEntryNumberBox()
     hr.big-space-top(style="border-top: 2px solid rgba(0, 0, 0, 0.1);")
     h5.mb-0.big-space-top CMOC Entry Number
@@ -192,13 +200,14 @@ block content
                                                         b.alert-success Your Mii has successfully been uploaded!
                                                     h5.mb-0 Mii Preview
                                                     - var miiImg
-                                                    - if (guestList.includes(jdata.mii_data)) { miiImg = `/miis/guests/${jdata.mii_data}.png`; } else if (jdata.mii_data == "" || jdata.mii_data == null) { miiImg = `/miis/guests/undefined.png`; } else { miiImg = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${jdata.mii_data}`; }
+                                                    - if (guestList.includes(jdata.mii_data)) { miiImg = `/miis/guests/${jdata.mii_data}.png`; } else if (jdata.mii_data == "" || jdata.mii_data == null || jdata.mii_data.length >= 100) { miiImg = `/miis/guests/undefined.png`; } else { miiImg = `http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=${jdata.mii_data}`; }
                                                     img(src=miiImg width="25%" id="mii-img" alt="Mii Preview").no-shadow
                                                     h5.mb-0 Select a Mii
                                                     select.big-space-top.space-bottom#mii-select
                                                         - var CMOCSelected = !guestList.includes(jdata.mii_data)
                                                         - var guestSelected = guestList.includes(jdata.mii_data)
                                                         option(value="CMOC" selected=(CMOCSelected)) Use a CMOC Entry Number
+                                                        option(value="Gen2" selected=(gen2Selected)) Use a 3DS/WiiU/Miitomo QR Code
                                                         option(value="Upload" selected=(uploadSelected)) Upload Your Own Mii File
                                                         option(value="Guest" selected=(guestSelected)) Use a Guest Mii
                                                     if CMOCSelected
@@ -213,6 +222,8 @@ block content
                                                             +miiEntryNumberBox
                                                         div#mii-box(style="display: none;")
                                                             +miiUploadBox
+                                                        div#mii-gen2(style="display: none;")
+                                                            +miiQRUploadBox
                                                     else if uploadSelected
                                                         div#guest-selection(style="display: none;")
                                                             select.big-space-top.space-bottom#guest-select
@@ -225,6 +236,8 @@ block content
                                                             +miiEntryNumberBox
                                                         div#mii-box(style="")
                                                             +miiUploadBox
+                                                        div#mii-gen2(style="display: none;")
+                                                            +miiQRUploadBox
                                                     else if guestSelected
                                                         div#guest-selection(style="")
                                                             select.big-space-top.space-bottom#guest-select
@@ -237,6 +250,22 @@ block content
                                                             +miiEntryNumberBox
                                                         div#mii-box(style="display: none;")
                                                             +miiUploadBox
+                                                        div#mii-gen2(style="display: none;")
+                                                            +miiQRUploadBox
+                                                    else if gen2Selected
+                                                        div#guest-selection(style="display: none;")
+                                                            select.big-space-top.space-bottom#guest-select
+                                                                option(value="NoSelection" selected=(noneSelected)) -----
+                                                                    each k,v in guests
+                                                                        option(value=v selected=(jdata.mii_data == v))= k
+                                                                    - var guestList = Array.from(Object.keys(guests));
+                                                                    - var noneSelected = true
+                                                        div#mii-number(style="display: none;")
+                                                            +miiEntryNumberBox
+                                                        div#mii-box(style="display: none;")
+                                                            +miiUploadBox
+                                                        div#mii-gen2(style="")
+                                                            +miiQRUploadBox
                                                     input#mii-data(type="text" name="miidata" style="display: none;" value=jdata.mii_data)
                                                     input#mii-type(type="text" name="MiiType" style="display: none;" value="")
                 .row

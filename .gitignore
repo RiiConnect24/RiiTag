@@ -10,3 +10,4 @@ config.json
 users.db
 *.rcd
 data/miis
+.vs

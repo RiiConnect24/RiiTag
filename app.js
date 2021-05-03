@@ -13,6 +13,7 @@ const xml = require("xml");
 const DatabaseDriver = require("./dbdriver");
 const renderMiiFromHex = require("./src/rendermiifromhex");
 const renderMiiFromEntryNo = require("./src/rendermiifromentryno");
+const renderGen2Mii = require("./src/renderGen2Mii");
 
 const db = new DatabaseDriver(path.join(__dirname, "users.db"));
 const Sentry = require('@sentry/node');
@@ -111,24 +112,25 @@ app.route("/edit")
             if (userKey == undefined) {
                 throw new Error("User Key is undefined");
             }
-            res.render("edit.pug", {jstring: jstring,
-                                    backgrounds: getBackgroundList(),
-                                    jdata: JSON.parse(jstring),
-                                    overlays: getOverlayList(),
-                                    flags: getFlagList(),
-                                    coins: getCoinList(),
-                                    covertypes: getCoverTypes(),
-                                    coverregions: getCoverRegions(),
-                                    fonts: getFonts(),
-                                    userKey: userKey,
-                                    user: req.user
-                                });
-        } catch(e) {
+            res.render("edit.pug", {
+                jstring: jstring,
+                backgrounds: getBackgroundList(),
+                jdata: JSON.parse(jstring),
+                overlays: getOverlayList(),
+                flags: getFlagList(),
+                coins: getCoinList(),
+                covertypes: getCoverTypes(),
+                coverregions: getCoverRegions(),
+                fonts: getFonts(),
+                userKey: userKey,
+                user: req.user
+            });
+        } catch (e) {
             console.log(e);
             res.redirect("/create");
         }
     })
-    .post(checkAuth, async function(req, res) {
+    .post(checkAuth, async function (req, res) {
         editUser(req.user.id, "bg", req.body.background);
         editUser(req.user.id, "overlay", req.body.overlay);
         editUser(req.user.id, "region", req.body.flag);
@@ -154,6 +156,10 @@ app.route("/edit")
                     console.log("Failed to render mii");
                 });
             }
+        } else if (req.body.MiiType == "Gen2") {
+            await renderGen2Mii(req.body.miidata, req.user.id, dataFolder).catch((err) => {
+                console.log("Failed to render mii from QR Code: " + err);
+            });
         } else {
             console.log("Invalid/No Mii Type chosen.");
         }
