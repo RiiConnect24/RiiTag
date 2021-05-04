@@ -163,13 +163,16 @@ app.route("/edit")
         } else {
             console.log("Invalid/No Mii Type chosen.");
         }
-        setTimeout(() => {
-            getTag(req.user.id).catch(function () {
-                res.status(404).render("notfound.pug");
-                return
+        setTimeout(function () {
+            getTag(req.user.id, res).catch((err) => {
+                if (err == "Redirect") {
+                    res.redirect(`/${id}`);
+                } else {
+                    res.status(404).render("notfound.pug");
+                    return;
+                }
             })
         }, 2000);
-        res.redirect(`/${req.user.id}`);
     });
 
 app.get("/create", checkAuth, async function(req, res) {
@@ -178,19 +181,27 @@ app.get("/create", checkAuth, async function(req, res) {
     }
     createUser(req.user);
     editUser(req.user.id, "avatar", req.user.avatar);
-    var banner = await getTag(req.user.id).catch(function () {
-        res.status(404).render("notfound.pug");
-        return
-    });
-    res.redirect(`/${req.user.id}`);
+    getTag(req.user.id, res).catch((err) => {
+        if (err == "Redirect") {
+            res.redirect(`/${id}`);
+        } else {
+            res.status(404).render("notfound.pug");
+            return;
+        }
+    })
 });
 
-function getTag(id) {
+async function getTag(id, res) {
     return new Promise(function(resolve, reject) {
         try {
             var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
             var banner = new Banner(jstring);
-            banner.once("done", function() {
+            banner.once("done", function () {
+                try {
+                    res.redirect(`/${id}`);
+                } catch (e) {
+                    reject("Redirect");
+                }
                 resolve(banner);
             });
         } catch(e) {
@@ -269,10 +280,14 @@ app.get("/wii", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["wii-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    var banner = await getTag(userID).catch(function () {
-        res.status(404).render("notfound.pug");
-        return
-    });
+    getTag(req.user.id, res).catch((err) => {
+        if (err == "Redirect") {
+            res.redirect(`/${id}`);
+        } else {
+            res.status(404).render("notfound.pug");
+            return;
+        }
+    })
 });
 
 app.get("/wiiu", async function(req, res) {
@@ -307,10 +322,14 @@ app.get("/wiiu", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["wiiu-" + ids[gameTID], Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    var banner = await getTag(userID).catch(function () {
-        res.status(404).render("notfound.pug");
-        return
-    });
+    getTag(req.user.id, res).catch((err) => {
+        if (err == "Redirect") {
+            res.redirect(`/${id}`);
+        } else {
+            res.status(404).render("notfound.pug");
+            return;
+        }
+    })
 });
 
 app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
