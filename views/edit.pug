@@ -3,7 +3,7 @@ extends head
 mixin miiUploadBox()
     hr.big-space-top(style="border-top: 2px solid rgba(0, 0, 0, 0.1);")
     h5.mb-0.big-space-top Upload A Mii
-    h5.mb-0 Uploads may take a second. Please do not save your edits until a confirmation message appears!
+    h6.mb-0 Uploads may take a second. Please do not save your edits until a confirmation message appears!
     input#mii-file(type="file").space-top
 
 mixin miiQRUploadBox()
@@ -12,7 +12,7 @@ mixin miiQRUploadBox()
     h6.mb-0 Warning: Some QR Codes may not read properly.
     h6.mb-0 If your Mii doesn't show up, try a different upload type!
     h6.mb-0 Accepts PNGs and JPEG/JPG Files.
-    h5.mb-0 Uploads may take a second. Please do not save your edits until a confirmation message appears!
+    h6.mb-0 Uploads may take a second. Please do not save your edits until a confirmation message appears!
     input#mii-QRfile(type="file").space-top
 
 mixin miiEntryNumberBox()
