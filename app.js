@@ -163,14 +163,16 @@ app.route("/edit")
         } else {
             console.log("Invalid/No Mii Type chosen.");
         }
-        getTag(req.user.id, res).catch((err) => {
-            if (err == "Redirect") {
-                res.redirect(`/${id}`);
-            } else {
-                res.status(404).render("notfound.pug");
-                return;
-            }
-        })
+        setTimeout(function () {
+            getTag(req.user.id, res).catch((err) => {
+                if (err == "Redirect") {
+                    res.redirect(`/${id}`);
+                } else {
+                    res.status(404).render("notfound.pug");
+                    return;
+                }
+            })
+        }, 2000);
     });
 
 app.get("/create", checkAuth, async function(req, res) {
@@ -195,8 +197,6 @@ async function getTag(id, res) {
             var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
             var banner = new Banner(jstring);
             banner.once("done", function () {
-                console.log("Done Rendering!");
-                console.log("Redirecting!");
                 try {
                     res.redirect(`/${id}`);
                 } catch (e) {
