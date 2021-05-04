@@ -2,7 +2,7 @@ const Canvas = require("canvas"),
       utils = require("./utils"),
       path = require("path");
 
-const endpoint = "http://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=";
+const endpoint = "https://miicontestp.wii.rc24.xyz/cgi-bin/render.cgi?data=";
 
 module.exports = async function(hex, id, dataFolder) {
     var c = new Canvas.Canvas(512, 512);
