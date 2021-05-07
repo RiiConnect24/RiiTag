@@ -280,7 +280,7 @@ app.get("/wii", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["wii-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    getTag(req.user.id, res).catch((err) => {
+    getTag(userID, res).catch((err) => {
         if (err == "Redirect") {
             res.redirect(`/${id}`);
         } else {
@@ -322,7 +322,7 @@ app.get("/wiiu", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["wiiu-" + ids[gameTID], Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    getTag(req.user.id, res).catch((err) => {
+    getTag(userID, res).catch((err) => {
         if (err == "Redirect") {
             res.redirect(`/${id}`);
         } else {
