@@ -637,59 +637,29 @@ function getGameRegion(gameName, userRegion) {
         This should hopefully create a safety net where there's always some region avalible.
         If not just return "ids[gameName][0]" to use the first entry for the game.
     */
+    for (IDs of ids[gameName]) {
+        var gameRegion = IDs.slice(-1);
+        if (userRegion == "FR" && gameRegion == "F") return IDs;
+        if (userRegion == "DE" && gameRegion == "D") return IDs;
+        if (userRegion == "ES" && gameRegion == "S") return IDs;
+        if (userRegion == "IT" && gameRegion == "I") return IDs;
+        if (userRegion == "NL" && gameRegion == "H") return IDs;
+        if (userRegion == "KO" && gameRegion == "K") return IDs;
+        if (userRegion == "TW" && gameRegion == "W") return IDs;
 
-    if (userRegion == "JP") {
-        for (IDs of ids[gameName]) {
-            if (IDs.slice(-1) == "J") {
-                return IDs;
-            }
-        }
-        userRegion = "EN"; // Fallback
-    } else if (userRegion == "EN") {
-        for (IDs of ids[gameName]) {
-            if (IDs.slice(-1) == "E") {
-                return IDs;
-            } else if (IDs.slice(-1) == "X" || IDs.slice(-1) == "Y" || IDs.slice(-1) == "Z") {
-                return IDs;
-            }
-        }
-        userRegion = "EU"; // Fallback
-    } else if (userRegion != "EU") {
-        for (IDs of ids[gameName]) {
-            if (userRegion == "FR" && IDs.slice(-1) == "F") {
-                return IDs;
-            } else if (userRegion == "DE" && IDs.slice(-1) == "D") {
-                return IDs;
-            } else if (userRegion == "ES" && IDs.slice(-1) == "S") {
-                return IDs;
-            } else if (userRegion == "IT" && IDs.slice(-1) == "I") {
-                return IDs;
-            } else if (userRegion == "NL" && IDs.slice(-1) == "H") {
-                return IDs;
-            } else if (userRegion == "KO" && IDs.slice(-1) == "K") {
-                return IDs;
-            } else if (userRegion == "TW" && IDs.slice(-1) == "W") {
-                return IDs;
-            } else {
-                userRegion == "EU";
-            }
-        }
-        userRegion = "EU"; // Fallback
-    } else if (userRegion == "EU") {
-        for (IDs of ids[gameName]) {
-            if (IDs.slice(-1) == "P") {
-                return IDs;
-            } else if (IDs.slice(-1) == "V") {
-                return IDs;
-            } else if (IDs.slice(-1) == "X" || IDs.slice(-1) == "Y" || IDs.slice(-1) == "Z") {
-                return IDs;
-            } else if (IDs.slice(-1) == "J") {
-                return IDs;
-            } 
-        }
+        if (userRegion == "JP" && gameRegion == "J") return IDs;
+        if (userRegion == "JP") userRegion = "EN"; // Fallback
+        
+        if (userRegion == "EN" && gameRegion == "E") return IDs;
+        if (userRegion == "EN" && (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z")) return IDs;
+
+        if (gameRegion == "P") return IDs;
+        if (gameRegion == "V") return IDs;
+        if (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z") return IDs;
+        if (gameRegion == "E") return IDs;
+        if (gameRegion == "J") return IDs;
     }
-
-    // Incase nothing was found, return the first ID.
+    // In case nothing was found, return the first ID.
     return ids[gameName][0];
 }
 
