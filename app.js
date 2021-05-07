@@ -332,6 +332,50 @@ app.get("/wiiu", async function(req, res) {
     })
 });
 
+app.get("/3ds", async function(req, res) {
+    var key = req.query.key || "";
+    var gameName = req.query.game || "";
+
+    if (key == "" || gameName == "") {
+        res.status(400).send();
+        return
+    }
+
+    var userID = await getUserID(key);
+    if (userID == undefined) {
+        res.status(400).send();
+        return
+    }
+
+    var userRegion = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "users", userID + ".json")).toString()).coverregion;
+
+    gameID = getGameRegion(gameName, userRegion); // Returns an ID4
+
+    if (getUserAttrib(userID, "lastplayed") !== null) {
+        if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
+            res.status(429).send(); // cooldown
+            return
+        }
+    }
+
+    var c = getUserAttrib(userID, "coins")
+    var games = getUserAttrib(userID, "games");
+    var newGames = updateGameArray(games, "3ds-" + gameID);
+    setUserAttrib(userID, "coins", c + 1);
+    setUserAttrib(userID, "games", newGames);
+    setUserAttrib(userID, "lastplayed", ["3ds-" + gameID, Math.floor(Date.now() / 1000)]);
+    res.status(200).send();
+
+    getTag(req.user.id, res).catch((err) => {
+        if (err == "Redirect") {
+            res.redirect(`/${id}`);
+        } else {
+            res.status(404).render("notfound.pug");
+            return;
+        }
+    })
+});
+
 app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
     // console.log(req.user.id);
     var userKey = await getUserKey(req.user.id);
@@ -446,7 +490,7 @@ function getCoverTypes() {
 }
 
 function getCoverRegions() {
-    return ["EN", "FR", "DE", "ES", "IT", "NL", "PT", "AU", "SE", "DK", "NO", "FI", "TR"];
+    return ["EN", "FR", "DE", "ES", "IT", "NL", "PT", "AU", "SE", "DK", "NO", "FI", "TR", "JP", "KO", "TW"];
 }
 
 function getFonts() {
@@ -575,6 +619,78 @@ function loadConfig() {
         process.exit(0);
     }
     return JSON.parse(fs.readFileSync("config.json"));
+}
+
+function getGameRegion(gameName, userRegion) {
+    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "3ds.json"))) // 16 digit TID -> 4 or 6 digit game ID
+
+    if (!ids[gameName][1]) { // Prevent pointless searching for a proper region
+        return ids[gameName][0];
+    }
+
+    /*  Regions and Fallbacks
+        Europe: P with V Fallback, then X, Y or Z, then J.
+        America: E with X, Y, or Z fallback, then P
+        Japan: J with E fallback
+        Everything else: P Fallback
+
+        This should hopefully create a safety net where there's always some region avalible.
+        If not just return "ids[gameName][0]" to use the first entry for the game.
+    */
+
+    if (userRegion == "JP") {
+        for (IDs of ids[gameName]) {
+            if (IDs.slice(-1) == "J") {
+                return IDs;
+            }
+        }
+        userRegion = "EN"; // Fallback
+    } else if (userRegion == "EN") {
+        for (IDs of ids[gameName]) {
+            if (IDs.slice(-1) == "E") {
+                return IDs;
+            } else if (IDs.slice(-1) == "X" || IDs.slice(-1) == "Y" || IDs.slice(-1) == "Z") {
+                return IDs;
+            }
+        }
+        userRegion = "EU"; // Fallback
+    } else if (userRegion == "FR") {
+        for (IDs of ids[gameName]) {
+            if (userRegion == "FR" && IDs.slice(-1) == "F") {
+                return IDs;
+            } else if (userRegion == "DE" && IDs.slice(-1) == "D") {
+                return IDs;
+            } else if (userRegion == "ES" && IDs.slice(-1) == "S") {
+                return IDs;
+            } else if (userRegion == "IT" && IDs.slice(-1) == "I") {
+                return IDs;
+            } else if (userRegion == "NL" && IDs.slice(-1) == "H") {
+                return IDs;
+            } else if (userRegion == "KO" && IDs.slice(-1) == "K") {
+                return IDs;
+            } else if (userRegion == "TW" && IDs.slice(-1) == "W") {
+                return IDs;
+            } else {
+                userRegion == "EU";
+            }
+        }
+        userRegion = "EU"; // Fallback
+    } else if (userRegion == "EU") {
+        for (IDs of ids[gameName]) {
+            if (IDs.slice(-1) == "P") {
+                return IDs;
+            } else if (IDs.slice(-1) == "V") {
+                return IDs;
+            } else if (IDs.slice(-1) == "X" || IDs.slice(-1) == "Y" || IDs.slice(-1) == "Z") {
+                return IDs;
+            } else if (IDs.slice(-1) == "J") {
+                return IDs;
+            } 
+        }
+    }
+
+    // Incase nothing was found, return the first ID.
+    return ids[gameName][0];
 }
 
 app.use(function(req, res, next) {
