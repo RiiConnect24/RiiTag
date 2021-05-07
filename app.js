@@ -621,7 +621,7 @@ function loadConfig() {
     return JSON.parse(fs.readFileSync("config.json"));
 }
 
-function getGameRegion(gameName, userRegion) {
+function getGameRegion(gameName, coverRegion) {
     var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "3ds.json"))) // 16 digit TID -> 4 or 6 digit game ID
 
     if (!ids[gameName][1]) { // Prevent pointless searching for a proper region
@@ -637,8 +637,11 @@ function getGameRegion(gameName, userRegion) {
         This should hopefully create a safety net where there's always some region avalible.
         If not just return "ids[gameName][0]" to use the first entry for the game.
     */
+
     for (IDs of ids[gameName]) {
         var gameRegion = IDs.slice(-1);
+        var userRegion = coverRegion;
+
         if (userRegion == "FR" && gameRegion == "F") return IDs;
         if (userRegion == "DE" && gameRegion == "D") return IDs;
         if (userRegion == "ES" && gameRegion == "S") return IDs;
