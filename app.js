@@ -654,7 +654,7 @@ function getGameRegion(gameName, userRegion) {
             }
         }
         userRegion = "EU"; // Fallback
-    } else if (userRegion == "FR") {
+    } else if (userRegion != "EU") {
         for (IDs of ids[gameName]) {
             if (userRegion == "FR" && IDs.slice(-1) == "F") {
                 return IDs;
