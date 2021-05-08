@@ -282,7 +282,7 @@ app.get("/wii", async function(req, res) {
 
     getTag(userID, res).catch((err) => {
         if (err == "Redirect") {
-            res.redirect(`/${id}`);
+            res.redirect(`/${userID}`);
         } else {
             res.status(404).render("notfound.pug");
             return;
@@ -324,7 +324,7 @@ app.get("/wiiu", async function(req, res) {
 
     getTag(userID, res).catch((err) => {
         if (err == "Redirect") {
-            res.redirect(`/${id}`);
+            res.redirect(`/${userID}`);
         } else {
             res.status(404).render("notfound.pug");
             return;
@@ -366,9 +366,9 @@ app.get("/3ds", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["3ds-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    getTag(req.user.id, res).catch((err) => {
+    getTag(userID, res).catch((err) => {
         if (err == "Redirect") {
-            res.redirect(`/${id}`);
+            res.redirect(`/${userID}`);
         } else {
             res.status(404).render("notfound.pug");
             return;
