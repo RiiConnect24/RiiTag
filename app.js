@@ -191,26 +191,6 @@ app.get("/create", checkAuth, async function(req, res) {
     })
 });
 
-async function getTag(id, res) {
-    return new Promise(function(resolve, reject) {
-        try {
-            var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
-            var banner = new Banner(jstring);
-            banner.once("done", function () {
-                try {
-                    res.redirect(`/${id}`);
-                } catch (e) {
-                    reject("Redirect");
-                }
-                resolve(banner);
-            });
-        } catch(e) {
-            console.log(e);
-            reject(e);
-        }
-    })
-}
-
 
 app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
     try {
@@ -280,14 +260,10 @@ app.get("/wii", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["wii-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    getTag(userID, res).catch((err) => {
-        if (err == "Redirect") {
-            res.redirect(`/${userID}`);
-        } else {
-            res.status(404).render("notfound.pug");
-            return;
-        }
-    })
+    var banner = await getTagEP(userID).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
 });
 
 app.get("/wiiu", async function(req, res) {
@@ -322,14 +298,10 @@ app.get("/wiiu", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["wiiu-" + ids[gameTID], Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    getTag(userID, res).catch((err) => {
-        if (err == "Redirect") {
-            res.redirect(`/${userID}`);
-        } else {
-            res.status(404).render("notfound.pug");
-            return;
-        }
-    })
+    var banner = await getTagEP(userID).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
 });
 
 app.get("/3ds", async function(req, res) {
@@ -366,14 +338,10 @@ app.get("/3ds", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["3ds-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    getTag(userID, res).catch((err) => {
-        if (err == "Redirect") {
-            res.redirect(`/${userID}`);
-        } else {
-            res.status(404).render("notfound.pug");
-            return;
-        }
-    })
+    var banner = await getTagEP(userID).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
 });
 
 app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
@@ -458,6 +426,41 @@ app.listen(port, async function() {
     // db.insert("users", ["snowflake", "key"], ["test_sf", "test_key"]);
     console.log("RiiTag Server listening on port " + port);
 });
+
+async function getTag(id, res) {
+    return new Promise(function(resolve, reject) {
+        try {
+            var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
+            var banner = new Banner(jstring);
+            banner.once("done", function () {
+                try {
+                    res.redirect(`/${id}`);
+                } catch (e) {
+                    reject("Redirect");
+                }
+                resolve(banner);
+            });
+        } catch(e) {
+            console.log(e);
+            reject(e);
+        }
+    })
+}
+
+async function getTagEP(id) {
+    return new Promise(function(resolve, reject) {
+        try {
+            var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
+            var banner = new Banner(jstring);
+            banner.once("done", function () {
+                resolve(banner);
+            });
+        } catch(e) {
+            console.log(e);
+            reject(e);
+        }
+    })
+}
 
 function checkAuth(req, res, next) {
     if (req.isAuthenticated()) return next();
