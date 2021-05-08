@@ -191,26 +191,6 @@ app.get("/create", checkAuth, async function(req, res) {
     })
 });
 
-async function getTag(id, res) {
-    return new Promise(function(resolve, reject) {
-        try {
-            var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
-            var banner = new Banner(jstring);
-            banner.once("done", function () {
-                try {
-                    res.redirect(`/${id}`);
-                } catch (e) {
-                    reject("Redirect");
-                }
-                resolve(banner);
-            });
-        } catch(e) {
-            console.log(e);
-            reject(e);
-        }
-    })
-}
-
 
 app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
     try {
@@ -280,14 +260,10 @@ app.get("/wii", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["wii-" + gameID, Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    getTag(req.user.id, res).catch((err) => {
-        if (err == "Redirect") {
-            res.redirect(`/${id}`);
-        } else {
-            res.status(404).render("notfound.pug");
-            return;
-        }
-    })
+    var banner = await getTagEP(userID).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
 });
 
 app.get("/wiiu", async function(req, res) {
@@ -322,14 +298,50 @@ app.get("/wiiu", async function(req, res) {
     setUserAttrib(userID, "lastplayed", ["wiiu-" + ids[gameTID], Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
-    getTag(req.user.id, res).catch((err) => {
-        if (err == "Redirect") {
-            res.redirect(`/${id}`);
-        } else {
-            res.status(404).render("notfound.pug");
-            return;
+    var banner = await getTagEP(userID).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
+});
+
+app.get("/3ds", async function(req, res) {
+    var key = req.query.key || "";
+    var gameName = req.query.game || "";
+
+    if (key == "" || gameName == "") {
+        res.status(400).send();
+        return
+    }
+
+    var userID = await getUserID(key);
+    if (userID == undefined) {
+        res.status(400).send();
+        return
+    }
+
+    var userRegion = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "users", userID + ".json")).toString()).coverregion;
+
+    gameID = getGameRegion(gameName, userRegion); // Returns an ID4
+
+    if (getUserAttrib(userID, "lastplayed") !== null) {
+        if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
+            res.status(429).send(); // cooldown
+            return
         }
-    })
+    }
+
+    var c = getUserAttrib(userID, "coins")
+    var games = getUserAttrib(userID, "games");
+    var newGames = updateGameArray(games, "3ds-" + gameID);
+    setUserAttrib(userID, "coins", c + 1);
+    setUserAttrib(userID, "games", newGames);
+    setUserAttrib(userID, "lastplayed", ["3ds-" + gameID, Math.floor(Date.now() / 1000)]);
+    res.status(200).send();
+
+    var banner = await getTagEP(userID).catch(function () {
+        res.status(404).render("notfound.pug");
+        return
+    });
 });
 
 app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
@@ -415,6 +427,41 @@ app.listen(port, async function() {
     console.log("RiiTag Server listening on port " + port);
 });
 
+async function getTag(id, res) {
+    return new Promise(function(resolve, reject) {
+        try {
+            var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
+            var banner = new Banner(jstring);
+            banner.once("done", function () {
+                try {
+                    res.redirect(`/${id}`);
+                } catch (e) {
+                    reject("Redirect");
+                }
+                resolve(banner);
+            });
+        } catch(e) {
+            console.log(e);
+            reject(e);
+        }
+    })
+}
+
+async function getTagEP(id) {
+    return new Promise(function(resolve, reject) {
+        try {
+            var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
+            var banner = new Banner(jstring);
+            banner.once("done", function () {
+                resolve(banner);
+            });
+        } catch(e) {
+            console.log(e);
+            reject(e);
+        }
+    })
+}
+
 function checkAuth(req, res, next) {
     if (req.isAuthenticated()) return next();
     res.redirect("/login");
@@ -446,7 +493,7 @@ function getCoverTypes() {
 }
 
 function getCoverRegions() {
-    return ["EN", "FR", "DE", "ES", "IT", "NL", "PT", "AU", "SE", "DK", "NO", "FI", "TR"];
+    return ["EN", "FR", "DE", "ES", "IT", "NL", "PT", "AU", "SE", "DK", "NO", "FI", "TR", "JP", "KO", "TW"];
 }
 
 function getFonts() {
@@ -575,6 +622,51 @@ function loadConfig() {
         process.exit(0);
     }
     return JSON.parse(fs.readFileSync("config.json"));
+}
+
+function getGameRegion(gameName, coverRegion) {
+    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "3ds.json"))) // 16 digit TID -> 4 or 6 digit game ID
+
+    if (!ids[gameName][1]) { // Prevent pointless searching for a proper region
+        return ids[gameName][0];
+    }
+
+    /*  Regions and Fallbacks
+        Europe: P with V Fallback, then X, Y or Z, then J.
+        America: E with X, Y, or Z fallback, then P
+        Japan: J with E fallback
+        Everything else: P Fallback
+
+        This should hopefully create a safety net where there's always some region avalible.
+        If not just return "ids[gameName][0]" to use the first entry for the game.
+    */
+
+    for (IDs of ids[gameName]) {
+        var gameRegion = IDs.slice(-1);
+        var userRegion = coverRegion;
+
+        if (userRegion == "FR" && gameRegion == "F") return IDs;
+        if (userRegion == "DE" && gameRegion == "D") return IDs;
+        if (userRegion == "ES" && gameRegion == "S") return IDs;
+        if (userRegion == "IT" && gameRegion == "I") return IDs;
+        if (userRegion == "NL" && gameRegion == "H") return IDs;
+        if (userRegion == "KO" && gameRegion == "K") return IDs;
+        if (userRegion == "TW" && gameRegion == "W") return IDs;
+
+        if (userRegion == "JP" && gameRegion == "J") return IDs;
+        if (userRegion == "JP") userRegion = "EN"; // Fallback
+        
+        if (userRegion == "EN" && gameRegion == "E") return IDs;
+        if (userRegion == "EN" && (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z")) return IDs;
+
+        if (gameRegion == "P") return IDs;
+        if (gameRegion == "V") return IDs;
+        if (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z") return IDs;
+        if (gameRegion == "E") return IDs;
+        if (gameRegion == "J") return IDs;
+    }
+    // In case nothing was found, return the first ID.
+    return ids[gameName][0];
 }
 
 app.use(function(req, res, next) {
