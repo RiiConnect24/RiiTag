@@ -210,9 +210,9 @@ block content
                                                     select.big-space-top.space-bottom#mii-select
                                                         - var CMOCSelected = !guestList.includes(jdata.mii_data)
                                                         - var guestSelected = guestList.includes(jdata.mii_data)
-                                                        option(value="CMOC" selected=(CMOCSelected)) Use a CMOC Entry Number
+                                                        option(value="CMOC" selected=(CMOCSelected)) Use a Check Mii Out Channel Entry Number
                                                         option(value="Gen2" selected=(gen2Selected)) Use a 3DS/WiiU/Miitomo QR Code
-                                                        option(value="Upload" selected=(uploadSelected)) Upload Your Own Mii File
+                                                        option(value="Upload" selected=(uploadSelected)) Upload a Mii Binary File from Wii
                                                         option(value="Guest" selected=(guestSelected)) Use a Guest Mii
                                                     if CMOCSelected
                                                         div#guest-selection(style="display: none;")
