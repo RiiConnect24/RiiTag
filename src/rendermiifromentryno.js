@@ -3,6 +3,8 @@ const request = require('request');
 const fs = require("fs");
 const path = require("path");
 const dataFolder = path.resolve(__dirname, "../data");
+const Canvas = require("canvas");
+const utils = require("./utils");
 
 module.exports = async function (entrynumber, id, dataFolder) {
 
@@ -23,55 +25,42 @@ module.exports = async function (entrynumber, id, dataFolder) {
         }
     }
 
-    // Translate Entry Number into Mii ID Number
-    entrynumber = (entrynumber >>> 0).toString(2)
-    entrynumber = parseInt(entrynumber, 2);
-    entrynumber = (entrynumber ^= 0x20070419) >>> 0;
-    entrynumber = (entrynumber ^= (entrynumber >>> 0x1D) ^ (entrynumber >>> 0x11) ^ (entrynumber >>> 0x17)) >>> 0;
-    entrynumber = (entrynumber ^= ((entrynumber & 0xF0F0F0F) >>> 0) << 4) >>> 0;
-    entrynumber = (entrynumber ^= ((entrynumber << 0x1E) ^ (entrynumber << 0x12) ^ (entrynumber << 0x18)) & 0xFFFFFFFF) >>> 0;
-    entrynumber = parseInt(entrynumber);
-
     // Setup Request Data
     var requestSettings = {
-        url: "https://miicontest.wii.rc24.xyz/render/entry-" + entrynumber.toString() + ".mii",
+        url: "https://miicontestp.wii.rc24.xyz/cgi-bin/studio.cgi",
+        headers: {
+            "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundary2bpPmOcP6IdUsMAq",
+            "Accept": "*/*"
+
+        },
+        body: "------WebKitFormBoundary2bpPmOcP6IdUsMAq\r\nContent-Disposition: form-data; name=\"platform\"\r\n\r\nwii\r\n------WebKitFormBoundary2bpPmOcP6IdUsMAq\r\nContent-Disposition: form-data; name=\"id\"\r\n\r\n" + entrynumber + "\r\n------WebKitFormBoundary2bpPmOcP6IdUsMAq--\r\n",
         encoding: null
     };
 
     // Get Mii Data from Mii ID Number -> miihex
-    request.get(requestSettings, function (error, response, body) {
+    request.post(requestSettings, async function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            var file = body;
-            var fileBuffer = Buffer.from(file)
-            var arrayBuffer = new ArrayBuffer(fileBuffer.length);
-            var typedArray = new Uint8Array(arrayBuffer);
-            for (var i = 0; i < fileBuffer.length; ++i) {
-                typedArray[i] = fileBuffer[i];
+            stringBody = body.toString();
+            retData = stringBody.replace(/ /g, "").replace(/{/g, "").replace(/}/g, "").replace(/:/g, "").replace(/m/g, "").replace(/i/g, "").replace(/\"/g, "")
+            editUser(id, "mii_data", retData);
+            
+            // Save Mii Icon, see ./rendermiifronhex.js
+            var c = new Canvas.Canvas(512, 512);
+            var ctx = c.getContext("2d");
+            var img;
+            try {
+                img = await utils.getImage("https://studio.mii.nintendo.com/miis/image.png?data=" + retData + "&type=face&width=512&instanceCount=1");
+                ctx.drawImage(img, 0, 0, 512, 512);
+                await utils.savePNG(path.join(dataFolder, "miis", id + ".png"), c);
+            } catch(e) {
+                console.error(e);
             }
-            var dv = new DataView(arrayBuffer, 0);
-            var byteArray = [];
-            for (var i = 0; i < 74; i++) {
-                byteArray.push(dv.getUint8(i));
-            }
-            var hexString = Array.from(byteArray, function (byte) {
-                return ("0" + (byte & 0xFF).toString(16)).slice(-2);
-            }).join('');
-            editUser(id, "mii_data", hexString.toString());
-            renderMii(hexString, id, dataFolder);
+
             return;
         } else {
             throw "Non HTTP 200 Status code returned from CMOC Mii Host!";
         }
     });
-}
-
-async function renderMii(miihex, id, dataFolder) {
-
-    // Render the Mii
-    await renderMiiFromHex(miihex, id, dataFolder).catch(() => {
-        console.log("Failed to render mii after parsing entry number!");
-    });
-    return;
 }
 
 function editUser(id, key, value) {
