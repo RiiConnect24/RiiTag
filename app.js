@@ -271,6 +271,8 @@ app.get("/wiiu", async function (req, res) {
     var gameTID = req.query.game || "";
     var origin = req.query.source || "";
 
+    gameTID = gameTID.replace(/%26/g, "&")
+
     if (key == "" || gameTID == "") {
         res.status(400).send();
         return
