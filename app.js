@@ -21,7 +21,7 @@ const express = require("express");
 // const { render } = require("pug");
 const app = express();
 
-const guests = {"a": "Guest A","b": "Guest B","c": "Guest C","d": "Guest D","e": "Guest E","f": "Guest F"};
+const guests = { "a": "Guest A", "b": "Guest B", "c": "Guest C", "d": "Guest D", "e": "Guest E", "f": "Guest F" };
 const guestList = Object.keys(guests);
 guestList.push("undefined");
 
@@ -36,8 +36,8 @@ app.use(Sentry.Handlers.requestHandler());
 app.use(Sentry.Handlers.errorHandler());
 
 var dd_options = {
-  'response_code':true,
-  'tags': ['app:riitag']
+    'response_code': true,
+    'tags': ['app:riitag']
 }
 
 var connect_datadog = require('connect-datadog')(dd_options);
@@ -46,10 +46,10 @@ app.use(connect_datadog);
 
 app.set("view-engine", "pug");
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
     done(null, user);
 });
-passport.deserializeUser(function(obj, done) {
+passport.deserializeUser(function (obj, done) {
     done(null, obj);
 });
 
@@ -59,7 +59,7 @@ passport.use(new DiscordStrategy({
     clientID: config.clientID,
     clientSecret: config.clientSecret,
     callbackURL: config.hostURL.replace("{{port}}", port) + "callback"
-}, function(accessToken, refreshToken, profile, done) {
+}, function (accessToken, refreshToken, profile, done) {
     return done(null, profile);
 }));
 
@@ -75,36 +75,36 @@ app.use(express.static("data/"));
 
 app.set("view engine", "pug");
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
     res.render("index.pug", { user: req.user });
 });
 
 
-app.get("/demo", async function(req, res) {
+app.get("/demo", async function (req, res) {
     var banner = await new Banner(json_string);
-    banner.once("done", function() {
+    banner.once("done", function () {
         banner.pngStream.pipe(res);
     });
 });
 
-app.get('/login', function(req, res, next) {
+app.get('/login', function (req, res, next) {
     if (req.isAuthenticated()) {
         res.redirect("/");
     }
     next()
 }, passport.authenticate('discord', { scope: scopes }));
 
-app.get('/logout', function(req, res) {
+app.get('/logout', function (req, res) {
     req.logout();
     res.redirect("/")
 });
 
 app.get('/callback',
-    passport.authenticate('discord', { failureRedirect: '/' }), function(req, res) { res.cookie("uid", req.user.id); res.redirect("/create") } // auth success
+    passport.authenticate('discord', { failureRedirect: '/' }), function (req, res) { res.cookie("uid", req.user.id); res.redirect("/create") } // auth success
 );
 
 app.route("/edit")
-    .get(checkAuth, async function(req, res) {
+    .get(checkAuth, async function (req, res) {
         var jstring;
         try {
             jstring = fs.readFileSync(path.resolve(dataFolder, "users", req.user.id + ".json")).toString();
@@ -175,7 +175,7 @@ app.route("/edit")
         }, 2000);
     });
 
-app.get("/create", checkAuth, async function(req, res) {
+app.get("/create", checkAuth, async function (req, res) {
     if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
         fs.mkdirSync(path.resolve(dataFolder, "tag"));
     }
@@ -192,7 +192,7 @@ app.get("/create", checkAuth, async function(req, res) {
 });
 
 
-app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
+app.get("^/:id([0-9]+)/tag.png", async function (req, res) {
     try {
         if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
             fs.mkdirSync(path.resolve(dataFolder, "tag"));
@@ -211,7 +211,7 @@ app.get("^/:id([0-9]+)/tag.png", async function(req, res) {
     }
 });
 
-app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
+app.get("^/:id([0-9]+)/tag.max.png", async function (req, res) {
     try {
         if (!fs.existsSync(path.resolve(dataFolder, "tag"))) {
             fs.mkdirSync(path.resolve(dataFolder, "tag"));
@@ -221,16 +221,16 @@ app.get("^/:id([0-9]+)/tag.max.png", async function(req, res) {
         }
         var file = path.resolve(dataFolder, "tag", req.params.id + ".max.png");
         var s = fs.createReadStream(file);
-        s.on('open', function() {
+        s.on('open', function () {
             res.set('Content-Type', 'image/png');
             s.pipe(res);
         });
-     } catch(e) {
-         res.status(404).render("notfound.pug");
-     }
+    } catch (e) {
+        res.status(404).render("notfound.pug");
+    }
 });
 
-app.get("/wii", async function(req, res) {
+app.get("/wii", async function (req, res) {
     var key = req.query.key || "";
     var gameID = req.query.game || "";
 
@@ -266,11 +266,12 @@ app.get("/wii", async function(req, res) {
     });
 });
 
-app.get("/wiiu", async function(req, res) {
+app.get("/wiiu", async function (req, res) {
     var key = req.query.key || "";
-    var gameTID = req.query.game.toUpperCase() || "";
+    var gameTID = req.query.game || "";
+    var origin = req.query.source || "";
 
-    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "wiiu.json"))) // 16 digit TID -> 4 or 6 digit game ID
+    gameTID = gameTID.replace(/%26/g, "&").replace(/ - /g, "\n")
 
     if (key == "" || gameTID == "") {
         res.status(400).send();
@@ -290,6 +291,18 @@ app.get("/wiiu", async function(req, res) {
         }
     }
 
+    if (origin == "Cemu") {
+        var userRegion = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "users", userID + ".json")).toString()).coverregion;
+        gameTID = getCemuGameRegion(gameTID, userRegion); // Returns a game Title ID
+        if (gameTID == 1) {
+            res.status(400).send();
+            return
+        }
+    }
+
+    gameTID = gameTID.toUpperCase();
+
+    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "wiiu.json"))) // 16 digit TID -> 4 or 6 digit game ID 
     var c = getUserAttrib(userID, "coins")
     var games = getUserAttrib(userID, "games");
     var newGames = updateGameArray(games, "wiiu-" + ids[gameTID]);
@@ -304,7 +317,7 @@ app.get("/wiiu", async function(req, res) {
     });
 });
 
-app.get("/3ds", async function(req, res) {
+app.get("/3ds", async function (req, res) {
     var key = req.query.key || "";
     var gameName = req.query.game || "";
 
@@ -319,16 +332,16 @@ app.get("/3ds", async function(req, res) {
         return
     }
 
-    var userRegion = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "users", userID + ".json")).toString()).coverregion;
-
-    gameID = getGameRegion(gameName, userRegion); // Returns an ID4
-
     if (getUserAttrib(userID, "lastplayed") !== null) {
         if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
             res.status(429).send(); // cooldown
             return
         }
     }
+
+    var userRegion = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "users", userID + ".json")).toString()).coverregion;
+
+    gameID = getCitraGameRegion(gameName, userRegion); // Returns an ID4
 
     var c = getUserAttrib(userID, "coins")
     var games = getUserAttrib(userID, "games");
@@ -344,7 +357,7 @@ app.get("/3ds", async function(req, res) {
     });
 });
 
-app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
+app.get("/Wiinnertag.xml", checkAuth, async function (req, res) {
     // console.log(req.user.id);
     var userKey = await getUserKey(req.user.id);
     var tag = {
@@ -362,37 +375,38 @@ app.get("/Wiinnertag.xml", checkAuth, async function(req, res) {
 });
 
 
-app.get("^/:id([0-9]+)", function(req, res, next) {
+app.get("^/:id([0-9]+)", function (req, res, next) {
     // var key = req.params.id;
     // console.log(key);
     var userData = getUserData(req.params.id);
-    
+
     if (!userData) {
         res.status(404).render("notfound.pug");
         return;
     };
 
-    res.render("tagpage.pug", {id: req.params.id,
-                               tuser: userData,
-                               user: req.user,
-                               flags: getFlagList(),
-                               backgrounds: getBackgroundList(),
-                               overlays: getOverlayList()
-                              });
+    res.render("tagpage.pug", {
+        id: req.params.id,
+        tuser: userData,
+        user: req.user,
+        flags: getFlagList(),
+        backgrounds: getBackgroundList(),
+        overlays: getOverlayList()
+    });
 });
 
-app.get("^/:id([0-9]+)/json", function(req, res) {
+app.get("^/:id([0-9]+)/json", function (req, res) {
     var userData = getUserData(req.params.id);
     res.type("application/json");
 
     if (!userData) {
-        res.status(404).send(JSON.stringify({error: "That user ID does not exist."}));
+        res.status(404).send(JSON.stringify({ error: "That user ID does not exist." }));
         return;
     };
 
     var lastPlayed = {};
     if (userData.lastplayed.length !== 0) {
-        var banner = new Banner(JSON.stringify(userData), doMake=false);
+        var banner = new Banner(JSON.stringify(userData), doMake = false);
         var game = userData.lastplayed[0];
         var time = userData.lastplayed[1];
         var gameid = game.split("-")[1]
@@ -413,13 +427,13 @@ app.get("^/:id([0-9]+)/json", function(req, res) {
 
     var tagUrl = `https://tag.rc24.xyz/${userData.id}/tag.png`;
     res.send(JSON.stringify({
-        user: {name: userData.name, id: userData.id},
-        tag_url: {normal: tagUrl, max: tagUrl.replace(".png", ".max.png")},
-        game_data: {last_played: lastPlayed, games: userData.games}
+        user: { name: userData.name, id: userData.id },
+        tag_url: { normal: tagUrl, max: tagUrl.replace(".png", ".max.png") },
+        game_data: { last_played: lastPlayed, games: userData.games }
     }));
 });
 
-app.listen(port, async function() {
+app.listen(port, async function () {
     // cleanCache();
     // console.log("Cleaned cache");
     await db.create("users", ["id INTEGER PRIMARY KEY", "snowflake TEXT", "key TEXT"]);
@@ -428,7 +442,7 @@ app.listen(port, async function() {
 });
 
 async function getTag(id, res) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         try {
             var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
             var banner = new Banner(jstring);
@@ -440,7 +454,7 @@ async function getTag(id, res) {
                 }
                 resolve(banner);
             });
-        } catch(e) {
+        } catch (e) {
             console.log(e);
             reject(e);
         }
@@ -448,14 +462,14 @@ async function getTag(id, res) {
 }
 
 async function getTagEP(id) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         try {
             var jstring = fs.readFileSync(path.resolve(dataFolder, "users", `${id}.json`));
             var banner = new Banner(jstring);
             banner.once("done", function () {
                 resolve(banner);
             });
-        } catch(e) {
+        } catch (e) {
             console.log(e);
             reject(e);
         }
@@ -473,7 +487,7 @@ function getBackgroundList() {
 
 function getOverlayList() {
     var overlays = [];
-    fs.readdirSync(path.resolve(dataFolder, "overlays")).forEach(function(overlayFile) {
+    fs.readdirSync(path.resolve(dataFolder, "overlays")).forEach(function (overlayFile) {
         overlays.push(JSON.parse(fs.readFileSync(path.resolve(dataFolder, "overlays", overlayFile))));
     });
     return overlays;
@@ -524,10 +538,10 @@ function getUserData(id) {
     var p = path.resolve(dataFolder, "users", id + ".json");
     try {
         var jdata = JSON.parse(fs.readFileSync(p));
-    } catch(e) {
+    } catch (e) {
         return null;
     }
-    
+
     return jdata;
 }
 
@@ -546,7 +560,7 @@ async function createUser(user) {
             sort: "",
             font: "default"
         };
-    
+
         fs.writeFileSync(path.resolve(dataFolder, "users", user.id + ".json"), JSON.stringify(ujson, null, 4));
     }
 
@@ -558,7 +572,7 @@ async function createUser(user) {
 
 function cleanCache() {
     var c = path.resolve(dataFolder, "cache");
-    fs.readdirSync(c).forEach(function(file) {
+    fs.readdirSync(c).forEach(function (file) {
         fs.unlinkSync(path.resolve(c, file));
     });
 }
@@ -581,7 +595,7 @@ function generateRandomKey(keyLength) {
     return key;
 }
 
-function respond(res, message, code=200) {
+function respond(res, message, code = 200) {
     res.status(code).send(message);
 }
 
@@ -605,7 +619,7 @@ async function getUserID(key) {
 
 function updateGameArray(games, game) {
     // console.log(games);
-    for(var i = games.length - 1; i >= 0; i--) {
+    for (var i = games.length - 1; i >= 0; i--) {
         if (games[i] == game) {
             games.splice(i, 1);
         }
@@ -624,7 +638,7 @@ function loadConfig() {
     return JSON.parse(fs.readFileSync("config.json"));
 }
 
-function getGameRegion(gameName, coverRegion) {
+function getCitraGameRegion(gameName, coverRegion) {
     var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "3ds.json"))) // 16 digit TID -> 4 or 6 digit game ID
 
     if (!ids[gameName][1]) { // Prevent pointless searching for a proper region
@@ -655,7 +669,7 @@ function getGameRegion(gameName, coverRegion) {
 
         if (userRegion == "JP" && gameRegion == "J") return IDs;
         if (userRegion == "JP") userRegion = "EN"; // Fallback
-        
+
         if (userRegion == "EN" && gameRegion == "E") return IDs;
         if (userRegion == "EN" && (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z")) return IDs;
 
@@ -669,7 +683,32 @@ function getGameRegion(gameName, coverRegion) {
     return ids[gameName][0];
 }
 
-app.use(function(req, res, next) {
+function getCemuGameRegion(gameName, coverRegion) {
+    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "cemu.json"))) // 16 digit TID -> 4 or 6 digit game ID
+
+    for (Regions of ids[gameName]) {
+        var userRegion = coverRegion;
+
+        if (userRegion == "FR" && Regions["EUR"]) return Regions["EUR"];
+        if (userRegion == "DE" && Regions["EUR"]) return Regions["EUR"];
+        if (userRegion == "ES" && Regions["EUR"]) return Regions["EUR"];
+        if (userRegion == "IT" && Regions["EUR"]) return Regions["EUR"];
+        if (userRegion == "NL" && Regions["EUR"]) return Regions["EUR"];
+        if (userRegion == "KO" && Regions["EUR"]) return Regions["EUR"];
+        if (userRegion == "TW" && Regions["EUR"]) return Regions["EUR"];
+
+        if (userRegion == "JP" && Regions["JPN"]) return Regions["JPN"];
+        if (userRegion == "JP") userRegion = "EN"; // Fallback
+
+        if (userRegion == "EN" && Regions["USA"]) return Regions["USA"];
+    }
+
+    // In case nothing was found, return the first ID.
+    // This will happen if the cover type doesn't have a corresponding region.
+    return ids[gameName][0];
+}
+
+app.use(function (req, res, next) {
     var allowed = [
         "/img",
         "/overlays",
