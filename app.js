@@ -302,13 +302,20 @@ app.get("/wiiu", async function (req, res) {
 
     gameTID = gameTID.toUpperCase();
 
-    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "wiiu.json"))) // 16 digit TID -> 4 or 6 digit game ID 
+    var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "wiiu.json"))) // 16 digit TID -> 4 or 6 digit game ID
+    var console = "wiiu-"
+    
+    if (!ids[gameTID]) {
+        var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "wiiVC.json"))) // 16 digit TID -> 4 or 6 digit game ID WiiVC Inject
+        console = "wii-"
+    }
+
     var c = getUserAttrib(userID, "coins")
     var games = getUserAttrib(userID, "games");
-    var newGames = updateGameArray(games, "wiiu-" + ids[gameTID]);
+    var newGames = updateGameArray(games, console + ids[gameTID]);
     setUserAttrib(userID, "coins", c + 1);
     setUserAttrib(userID, "games", newGames);
-    setUserAttrib(userID, "lastplayed", ["wiiu-" + ids[gameTID], Math.floor(Date.now() / 1000)]);
+    setUserAttrib(userID, "lastplayed", [console + ids[gameTID], Math.floor(Date.now() / 1000)]);
     res.status(200).send();
 
     var banner = await getTagEP(userID).catch(function () {
