@@ -230,6 +230,41 @@ app.get("^/:id([0-9]+)/tag.max.png", async function (req, res) {
     }
 });
 
+app.get("^/:id([0-9]+)/riitag.wad", async function(req, res) {
+    if (!fs.existsSync(path.resolve(dataFolder, "wads"))) {
+        return;
+    }
+    if (!fs.existsSync(path.resolve(dataFolder, "users", `${req.params.id}.json`)) || !fs.existsSync(path.resolve(dataFolder, "tag", `${req.params.id}.max.png`))) {
+        res.status(404).render("notfound.pug");
+    }
+    if (!fs.existsSync(path.resolve(dataFolder, "wads", `${req.params.id}.wad`))) {
+        const exec = require("child_process").execSync;
+
+        var unpack = exec(`sharpii WAD -u ${dataFolder}/wads/riitag.wad ${dataFolder}/wads/${req.params.id}`);
+
+        const fd = fs.openSync(path.resolve(dataFolder, "wads", `${req.params.id}`, "00000001.app"), "r+");
+        const text = `tag.rc24.xyz/${req.params.id}/tag.max.png`;
+        const position = 0x1F3A4;
+        fs.writeSync(fd, text, position, 'utf8');
+
+        var pack = exec(`sharpii WAD -p ${dataFolder}/wads/${req.params.id} ${dataFolder}/wads/${req.params.id}.wad`);
+
+        fs.rm(`${dataFolder}/wads/${req.params.id}`, { recursive: true }, (err) => {
+            if (err) {
+                // File deletion failed
+                console.error(err.message);
+                return;
+            }
+        });
+    }
+    var file = path.resolve(dataFolder, "wads", `${req.params.id}.wad`);
+    var s = fs.createReadStream(file);
+    s.on('open', function () {
+        res.set('Content-Type', 'application/octet-stream');
+        s.pipe(res);
+    });
+})
+
 app.get("/wii", async function (req, res) {
     var key = req.query.key || "";
     var gameID = req.query.game || "";
