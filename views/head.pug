@@ -6,6 +6,9 @@ head
     link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
     link(rel='stylesheet' href='/assets/css/all.css')
     link(rel='stylesheet' href='/assets/css/styles.css')
+    link(rel='stylesheet' href='/assets/css/sidebar.css')
+    script(src='assets/js/jquery.min.js')
+    script(src="/assets/js/divpages.js")
 body
     nav.navbar.navbar-light.navbar-expand-md.bg-dark
         .container-fluid
@@ -18,16 +21,24 @@ body
                 ul.nav.navbar-nav.mr-auto
                     li.nav-item(role='presentation')
                         a.nav-link.text-white-50(href='/') Home
+                    li.nav-item
+                        a.nav-link.text-white-50(href='/leaderboard/games') Leaderboard
                 ul.nav.navbar-nav
                     if !user
                         li.nav-item(role='presentation')
                             a.nav-link.text-white-50(href='/login') Login
                     else
-                        li.nav-item(role='presentation')
+                        li.nav-item.dropdown(role='presentation')
                             a.nav-link.text-white-50(href=`/${user.id}`)
                                 h6.mb-0
                                     img(src=`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.jpg?size=128` width="32px" height="32px").space-right.rounded.no-shadow
                                     =user.username
-                                
+                            ul.dropdown-menu
+                                li
+                                    a.dropdown-item(href=`/${user.id}`) Profile
+                                    a.dropdown-item(href="/logout") Logout
+                                    if user.admin == true
+                                        div.dropdown-divider
+                                        a.dropdown-item(href="/admin") Admin Panel                                
 
     block content
