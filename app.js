@@ -1,4 +1,3 @@
-const tracer = require('dd-trace').init({ runtimeMetrics: true });
 const Banner = require("./src/index");
 const fs = require("fs");
 const path = require("path");
@@ -32,9 +31,6 @@ const guestList = Object.keys(guests);
 guestList.push("undefined");
 
 const port = config.port || 3000;
-
-var StatsD = require('hot-shots');
-var dogstatsd = new StatsD();
 
 Sentry.init({ dsn: config.sentryURL });
 
