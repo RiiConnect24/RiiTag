@@ -23,7 +23,6 @@ const coinDb = new DatabaseDriver(path.join(__dirname, "coins.db"));
 var wiiTDB = {};
 const Sentry = require('@sentry/node');
 const express = require("express");
-// const { render } = require("pug");
 const app = express();
 
 const guests = { "a": "Guest A", "b": "Guest B", "c": "Guest C", "d": "Guest D", "e": "Guest E", "f": "Guest F" };
@@ -110,7 +109,7 @@ app.get('/callback',
             req.user.admin = false;
         }
         res.redirect("/create");
-    } // auth success
+    } // Auth success
 );
 
 app.route("/edit")
@@ -316,7 +315,7 @@ app.get("/wii", async function (req, res) {
 
     if (getUserAttrib(userID, "lastplayed") !== null) {
         if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
-            res.status(429).send(); // cooldown
+            res.status(429).send(); // Cooldown
             return
         }
     }
@@ -357,7 +356,7 @@ app.get("/wiiu", async function (req, res) {
 
     if (getUserAttrib(userID, "lastplayed") !== null) {
         if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
-            res.status(429).send(); // cooldown
+            res.status(429).send(); // Cooldown
             return
         }
     }
@@ -412,7 +411,7 @@ app.get("/3ds", async function (req, res) {
 
     if (getUserAttrib(userID, "lastplayed") !== null) {
         if (Math.floor(Date.now() / 1000) - getUserAttrib(userID, "lastplayed")[1] < 60) {
-            res.status(429).send(); // cooldown
+            res.status(429).send(); // Cooldown
             return
         }
     }
@@ -436,7 +435,6 @@ app.get("/3ds", async function (req, res) {
 });
 
 app.get("/Wiinnertag.xml", checkAuth, async function (req, res) {
-    // console.log(req.user.id);
     var userKey = await getUserKey(req.user.id);
     var tag = {
         Tag: {
@@ -454,8 +452,6 @@ app.get("/Wiinnertag.xml", checkAuth, async function (req, res) {
 
 
 app.get("^/:id([0-9]+)", function (req, res, next) {
-    // var key = req.params.id;
-    // console.log(key);
     var userData = getUserData(req.params.id);
     
     if (!userData) {
@@ -545,14 +541,10 @@ app.get("/cover", async function (req, res) {
 });
 
 app.listen(port, async function () {
-    // cleanCache();
-    // console.log("Cleaned cache");
     await db.create("users", ["id INTEGER PRIMARY KEY", "snowflake TEXT", "key TEXT"]);
     await gameDb.create("games", ["id INTEGER PRIMARY KEY", "console INTEGER", "gameID TEXT", "count INTEGER"]);
     await coinDb.create("coins", ["id INTEGER PRIMARY KEY", "snowflake TEXT", "count INTEGER"]);
-    // db.insert("users", ["snowflake", "key"], ["test_sf", "test_key"]);
     await cacheWiiTDB();
-    // console.log(wiiTDB);
     console.log("RiiTag Server listening on port " + port);
 });
 
@@ -744,7 +736,6 @@ function generateRandomKey(keyLength) {
     for (var i = 0; i < keyLength; i++) {
         var char = chars.charAt(Math.floor(Math.random() * chars.length));
         while (char == lastChar) {
-            // console.log("Dupe char");
             char = chars.charAt(Math.floor(Math.random() * chars.length));
         }
         key += char;
@@ -773,7 +764,6 @@ async function getUserID(key) {
 }
 
 function updateGameArray(games, game) {
-    // console.log(games);
     for (var i = games.length - 1; i >= 0; i--) {
         if (games[i] == game) {
             games.splice(i, 1);
@@ -815,7 +805,7 @@ app.use(function(req, res, next) {
     });
 });
 
-function getGameRegion(game) { // determine the game's region by its ID
+function getGameRegion(game) {
     var chars = game.split("");
     var rc = chars[3];
     if (rc == "P") {
@@ -928,10 +918,10 @@ async function cacheGameCover(game, region, covertype, consoletype, extension) {
         await downloadGameCover(game, region, covertype, consoletype, extension);
     } catch(e) {
         try {
-            await downloadGameCover(game, "EN", covertype, consoletype, extension); // cover might not exist?
+            await downloadGameCover(game, "EN", covertype, consoletype, extension); // Cover might not exist?
         } catch(e) {
             try {
-                await downloadGameCover(game, "US", covertype, consoletype, extension); // small chance it's US region
+                await downloadGameCover(game, "US", covertype, consoletype, extension); // Small chance it's US region
             } catch(e) {
                 return false;
             }
