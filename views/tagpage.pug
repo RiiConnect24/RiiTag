@@ -39,8 +39,13 @@ block content
                                         strong Overlay: 
                                         | #{overlay.name}
                                 br
-                                a(href="/edit" type="button" class="btn btn-primary space-top") Edit Your Tag
-                                br
+                                if user && tuser.id == user.id
+                                    a(href="/edit" type="button" class="btn btn-primary space-top") Edit Your Tag
+                                if user && user.admin
+                                    a(href=`/admin/refresh/${tuser.id}` type="button" class="btn btn-primary space-top space-left") Refresh User's Tag
+                                    //- if tuser.id != user.id
+                                    //-     button(type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-warning-modal") Delete Tag
+                                    br
                                 a(href=`/${id}/riitag.wad` type="button" class="btn btn-secondary space-top") Download RiiTag Channel
                                 br
                                 span.text-white 

@@ -1,0 +1,26 @@
+extends head
+
+mixin gameCard(game, i)
+    .col-md-4
+        .card.big-space-bottom
+            .card-header
+                h5.mb-0= `#${i} - ${wiiTDB[game.gameID]}`
+            .card-body
+                span.text-white
+                    .container
+                        .row.justify-content-center
+                            .col-12
+                                .text-center
+                                    h5.mb-0= `This game has been played ${game.count} time(s).`
+                                    img.big-space-top(src=`/cover?game=${game.gameID}` alt=`${wiiTDB[game.gameID]}'s Cover`).no-hover
+
+block content
+    - var i = 1
+    div.big-space-top.big-space-left.big-space-right
+        .container-fluid.justify-content-center
+            .row
+                each game in games
+                    if wiiTDB[game.gameID]
+                        +gameCard(game, i)
+                        - i++
+

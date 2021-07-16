@@ -11,3 +11,4 @@ users.db
 *.rcd
 data/miis
 .vs
+public/assets/css/.sass-cache/*

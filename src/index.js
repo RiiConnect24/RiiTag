@@ -28,7 +28,7 @@ const defaultDrawOrder = [
 ]
 
 class Tag extends events.EventEmitter{
-    constructor(user, doMake=true, debug=false) {
+    constructor(user, doMake=true) {
         super();
 
         this.user = this.loadUser(user);
@@ -36,7 +36,7 @@ class Tag extends events.EventEmitter{
         this.savePNG = savePNG;
         this.getImage = getImage;
 
-        if (doMake) this.makeBanner(debug);
+        if (doMake) this.makeBanner();
     }
 
     loadUser(json_string) {
@@ -202,11 +202,7 @@ class Tag extends events.EventEmitter{
                 }
             }
         } else {
-            if (this.user.font == "default") {
-                return defaultFont;
-            } else {
-                return defaultFont;
-            }
+            return defaultFont;
         }
     }
 
@@ -299,18 +295,18 @@ class Tag extends events.EventEmitter{
 
                         this.covCurX += this.covIncX;
                         this.covCurY += this.covIncY;
-
+            
                         break;
                     }
                 }
             } else {
-                await this.drawImage(path.resolve(dataFolder, "cache", coverPath), this.covCurX, this.covCurY + inc);
+    await this.drawImage(path.resolve(dataFolder, "cache", coverPath), this.covCurX, this.covCurY + inc);
 
-                this.covCurX += this.covIncX;
-                this.covCurY += this.covIncY;
-            }
+    this.covCurX += this.covIncX;
+    this.covCurY += this.covIncY;
+}
 
-            // console.log(game);
+// console.log(game);
         }
         return cache;
     }
@@ -371,13 +367,6 @@ class Tag extends events.EventEmitter{
         }
     }
 
-    getCoins() {
-        if (this.user.coins > this.overlay.coin_count.max) {
-            return this.overlay.coin_count.max;
-        }
-        return this.user.coins;
-    }
-
     loadOverlay(file) {
         var overlay = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "overlays", file)));
         
@@ -403,7 +392,7 @@ class Tag extends events.EventEmitter{
 
     
 
-    async makeBanner(debug) {
+    async makeBanner() {
         await this.loadFonts();
         var i = 0;
 
@@ -481,46 +470,25 @@ class Tag extends events.EventEmitter{
             this.overlay.coin_count.font_size,
             this.overlay.coin_count.font_style,
             this.overlay.coin_count.font_color,
-            this.getCoins(),
+            this.user.coins,
             this.overlay.coin_count.x,
             this.overlay.coin_count.y);
 
         // avatar
         if (this.user.useavatar == "true") {
-            if (this.overlay.avatar.background) {
-                await this.drawImage(path.resolve(dataFolder, this.overlay.avatar.background),
-                    this.overlay.avatar.background_x,
-                    this.overlay.avatar.background_y
-                );
-            }
             await this.drawAvatar();
         }
 
         if (this.user.usemii == "true") {
-            if (this.overlay.mii.background) {
-                await this.drawImage(path.resolve(dataFolder, this.overlay.avatar.background),
-                    this.overlay.mii.background_x,
-                    this.overlay.mii.background_y
-                );
-            }
             await this.drawMii();
         }
 
-        if (debug) {
-            await this.savePNG(path.resolve(dataFolder, "debug", `user1.max.png`), this.canvas);
-        } else {
-            await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.max.png`), this.canvas);
-        }
+        await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.max.png`), this.canvas);
 
         this.canvas2 = new Canvas.Canvas(this.overlay.width / 3, this.overlay.height / 3);
         this.ctx = this.canvas2.getContext("2d");
         await this.drawImageShrink(this.canvas, 0, 0, this.overlay.width / 3, this.overlay.height / 3);
-        
-        if (debug) {
-            await this.savePNG(path.resolve(dataFolder, "debug", `user1.png`), this.canvas2);
-        } else {
-            await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.png`), this.canvas2);
-        }
+        await this.savePNG(path.resolve(dataFolder, "tag", `${this.user.id}.png`), this.canvas2);
 
         this.emit("done");
     }
@@ -531,6 +499,24 @@ module.exports = Tag;
 if (module == require.main) {
     var jstring = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
   
-    var banner = new Tag(jstring, true, true);
-    var maxbanner = new Tag(jstring, false, true);
+    var banner = new Tag(jstring, true);
+    var maxbanner = new Tag(jstring, false);
+
+    banner.once("done", function () {
+        var out = fs.createWriteStream(path.resolve(dataFolder, "debug", "user1.png"));
+        var stream = banner.pngStream;
+
+        stream.on('data', function (chunk) {
+            out.write(chunk);
+        });
+    });
+
+    maxbanner.once("done", function () {
+        var out = fs.createWriteStream(path.resolve(dataFolder, "debug", "user1.max.png"));
+        var stream = banner.pngStream;
+
+        stream.on('data', function (chunk) {
+            out.write(chunk);
+        });
+    });
 }

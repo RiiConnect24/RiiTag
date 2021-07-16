@@ -3,5 +3,6 @@
     "clientSecret": "kPFRYvJhoVX7mSC7byGHZ5uHnwfgufej",
     "hostURL": "http://localhost:{{port}}/",
     "port": 3000,
-    "sentryURL": ""
+    "sentryURL": "",
+    "admins": []
 }

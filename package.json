@@ -2,11 +2,10 @@
   "name": "rc24-tag",
   "version": "0.0.1",
   "description": "Tag generation for RC24",
-  "main": "src/index.js",
+  "main": "app.js",
   "scripts": {
     "test": "node src/index.js",
-    "start": "node app.js",
-    "prerender": "node src/rendermiis.js"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -30,9 +29,6 @@
     "dd-trace": "^0.33.1",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
-    "hot-shots": "^8.3.0",
-    "kaitai-struct": "^0.9.0-SNAPSHOT.1",
-    "multer": "^1.4.2",
     "passport": "^0.4.0",
     "passport-discord": "^0.1.3",
     "pug": "^3.0.1",

@@ -109,6 +109,10 @@ img.no-shadow {
   margin-left: 10px
 }
 
+.big-space-left {
+  margin-left: 20px
+}
+
 .space-top {
   margin-top: 10px
 }
@@ -172,4 +176,18 @@ img.no-shadow {
 
 .sticky {
   position: sticky;
+}
+
+@media all and (min-width: 992px) {
+  .navbar .nav-item .dropdown-menu {
+    display: none;
+  }
+
+  .navbar .nav-item:hover .dropdown-menu {
+    display: block;
+  }
+
+  .navbar .nav-item .dropdown-menu {
+    margin-top: 0;
+  }
 }

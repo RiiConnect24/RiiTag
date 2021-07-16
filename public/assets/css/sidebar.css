@@ -1,0 +1,82 @@
+/* Original source: 
+https://github.com/StartBootstrap/startbootstrap-simple-sidebar/blob/master/css/simple-sidebar.css */
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+#wrapper {
+  overflow-x: hidden; }
+
+#sidebar-wrapper {
+  min-height: 100vh;
+  margin-left: -15rem;
+  transition: margin .25s ease-in-out;
+  animation: .25s ease-in 0s 1 slideInFromLeft;
+  background-color: #2c3136;
+  color: #8a9da0;
+  /* border-right: 1px solid #2c3136; */
+}
+
+#sidebar-wrapper .sidebar-heading {
+  padding: 0.875rem 1.25rem;
+  font-size: 1.2rem;
+  color: white;
+}
+
+#sidebar-wrapper .list-group {
+  width: 15rem;
+}
+
+#sidebar-wrapper .list-group-item {
+  background-color: rgb(52, 58, 64);
+  color: #8a9da0;
+  margin-bottom: 1px;
+}
+
+#sidebar-wrapper .list-group-item:not(:focus):hover {
+  background-color: rgb(29, 33, 36);
+}
+
+.page-content-wrapper {
+  animation: fadeIn ease 1.25s;
+  min-width: 100vw;
+  padding-top: 5px;
+  padding-left: 10px;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+  margin-left: 0;
+}
+
+@media (min-width: 768px) {
+  #sidebar-wrapper {
+    margin-left: 0;
+  }
+
+  #page-content-wrapper {
+    min-width: 0;
+    width: 100%;
+  }
+
+  #wrapper.toggled #sidebar-wrapper {
+    margin-left: -15rem;
+  }
+}
