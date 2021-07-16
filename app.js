@@ -507,7 +507,7 @@ app.get("^/:id([0-9]+)/json", function (req, res) {
 app.get("/game-leaderboard", async function (req, res) {
     var games = await gameDb.getTableSorted("games", "count", true);
     var limit = parseInt(req.query.limit);
-    if (!limit || limit > 50 || limit == "NaN") {
+    if (!limit || limit == "NaN") {
         limit = 100;
     }
     res.render("gameleaderboard.pug", {
