@@ -42,7 +42,7 @@ block content
                                 if user && tuser.id == user.id
                                     a(href="/edit" type="button" class="btn btn-primary space-top") Edit Your Tag
                                 if user && user.admin
-                                    a(href=`/admin/refresh/${tuser.id}` type="button" class="btn btn-primary space-top space-left") Refresh User's Tag
+                                    a(href=`/admin/refresh/${tuser.id}` type="button" class="btn btn-primary space-top space-left") Refresh Tag
                                     //- if tuser.id != user.id
                                     //-     button(type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-warning-modal") Delete Tag
                                     br
