@@ -1,3 +1,0 @@
-- Game names not stored in DB/Games show undefined title w/o a seperate tracking file.
-- Incorrect GameIDs show as "undefined" and create many unneeded cover caching calls on EVERY reload of the leaderboard page by any user.
-

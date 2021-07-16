@@ -20,6 +20,7 @@ block content
         .container-fluid.justify-content-center
             .row
                 each game in games
-                    +gameCard(game, i)
-                    - i++
+                    if wiiTDB[game.gameID]
+                        +gameCard(game, i)
+                        - i++
 
