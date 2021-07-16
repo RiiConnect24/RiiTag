@@ -2,7 +2,6 @@ const Banner = require("./src/index");
 const fs = require("fs");
 const path = require("path");
 const dataFolder = path.resolve(__dirname, "data");
-const json_string = fs.readFileSync(path.resolve(dataFolder, "debug", "user1.json"));
 const DiscordStrategy = require("passport-discord").Strategy;
 const passport = require("passport");
 const config = loadConfig();
@@ -78,14 +77,6 @@ app.set("view engine", "pug");
 
 app.get("/", function (req, res) {
     res.render("index.pug", { user: req.user, tags: getHomeTags() });
-});
-
-
-app.get("/demo", async function(req, res) {
-    var banner = await new Banner(json_string);
-    banner.once("done", function() {
-        banner.pngStream.pipe(res);
-    });
 });
 
 app.get('/login', function (req, res, next) {
