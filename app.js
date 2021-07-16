@@ -166,7 +166,7 @@ app.route("/edit")
         setTimeout(function () {
             getTag(req.user.id, res).catch((err) => {
                 if (err == "Redirect") {
-                    res.redirect(`/${id}`);
+                    res.redirect(`/${req.user.id}`);
                 } else {
                     res.status(404).render("notfound.pug");
                     return;
@@ -183,10 +183,14 @@ app.get("^/admin/refresh/:id([0-9]+)", checkAdmin, async function(req, res) {
     if (!req.params.id) {
         res.redirect(`/${req.user.id}`);
     }
-    await getTag(req.params.id).catch(function () {
-        res.status(404).render("notfound.pug");
-        return
-    });
+    getTag(req.user.id, res).catch((err) => {
+        if (err == "Redirect") {
+            res.redirect(`/${req.user.id}`);
+        } else {
+            res.status(404).render("notfound.pug");
+            return;
+        }
+    })
     res.redirect(`/${req.params.id}`);
 });
 
@@ -202,17 +206,12 @@ app.get("/create", checkAuth, async function (req, res) {
     }
     getTag(req.user.id, res).catch((err) => {
         if (err == "Redirect") {
-            res.redirect(`/${id}`);
+            res.redirect(`/${req.user.id}`);
         } else {
             res.status(404).render("notfound.pug");
             return;
         }
     })
-    if (!req.user.admin) {
-        res.redirect(`/${req.user.id}`);
-    } else {
-        res.redirect(`/admin`);
-    }
 });
 
 
@@ -254,7 +253,8 @@ app.get("^/:id([0-9]+)/tag.max.png", async function (req, res) {
      }
 });
 
-app.get("^/:id([0-9]+)/riitag.wad", async function(req, res) {
+app.get("^/:id([0-9]+)/riitag.wad", checkAuth, async function(req, res) {
+
     if (!fs.existsSync(path.resolve(dataFolder, "wads"))) {
         return;
     }
@@ -498,13 +498,12 @@ app.get("^/:id([0-9]+)/json", function (req, res) {
     }));
 });
 
-app.get("/leaderboard/games", async function (req, res) {
+app.get("/game-leaderboard", async function (req, res) {
     var games = await gameDb.getTableSorted("games", "count", true);
     var limit = parseInt(req.query.limit);
     if (!limit || limit > 50 || limit == "NaN") {
         limit = 10;
     }
-    console.log(limit);
     res.render("gameleaderboard.pug", {
         user: req.user,
         wiiTDB: wiiTDB,

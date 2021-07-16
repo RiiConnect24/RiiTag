@@ -46,10 +46,11 @@ block content
                                     //- if tuser.id != user.id
                                     //-     button(type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-warning-modal") Delete Tag
                                     br
-                                a(href=`/${id}/riitag.wad` type="button" class="btn btn-secondary space-top") Download RiiTag Channel
-                                br
-                                span.text-white 
-                                    small See <a href="https://wii.guide/riitag#riitag-channel">this page</a> for information about this channel.
+                                if user && tuser.id == user.id
+                                    a(href=`/${id}/riitag.wad` type="button" class="btn btn-secondary space-top") Download RiiTag Channel
+                                    br
+                                    span.text-white 
+                                        small See <a href="https://wii.guide/riitag#riitag-channel">this page</a> for information about this channel.
                                     
             .row
                 .col-md-6
