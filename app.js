@@ -508,7 +508,7 @@ app.get("/game-leaderboard", async function (req, res) {
     var games = await gameDb.getTableSorted("games", "count", true);
     var limit = parseInt(req.query.limit);
     if (!limit || limit > 50 || limit == "NaN") {
-        limit = 10;
+        limit = 100;
     }
     res.render("gameleaderboard.pug", {
         user: req.user,
