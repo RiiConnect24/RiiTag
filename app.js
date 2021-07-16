@@ -183,14 +183,16 @@ app.get("^/admin/refresh/:id([0-9]+)", checkAdmin, async function(req, res) {
     if (!req.params.id) {
         res.redirect(`/${req.user.id}`);
     }
-    getTag(req.user.id, res).catch((err) => {
-        if (err == "Redirect") {
-            res.redirect(`/${req.user.id}`);
-        } else {
-            res.status(404).render("notfound.pug");
-            return;
-        }
-    })
+    setTimeout(function () {
+        getTag(req.user.id, res).catch((err) => {
+            if (err == "Redirect") {
+                res.redirect(`/${req.user.id}`);
+            } else {
+                res.status(404).render("notfound.pug");
+                return;
+            }
+        })
+    }, 2000);
     res.redirect(`/${req.params.id}`);
 });
 
