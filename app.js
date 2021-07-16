@@ -320,8 +320,8 @@ app.get("/wii", async function (req, res) {
     setUserAttrib(userID, "games", newGames);
     setUserAttrib(userID, "lastplayed", ["wii-" + gameID, Math.floor(Date.now() / 1000)]);
 
-    await gamePlayed(gameID, 0, req.user.id);
-    res.status(200).send(gameID);
+    await gamePlayed(gameID, 0, userID);
+    res.status(200).send();
 
     var banner = await getTagEP(userID).catch(function () {
         res.status(404).render("notfound.pug");
@@ -379,6 +379,8 @@ app.get("/wiiu", async function (req, res) {
     setUserAttrib(userID, "coins", c + 1);
     setUserAttrib(userID, "games", newGames);
     setUserAttrib(userID, "lastplayed", [console + ids[gameTID], Math.floor(Date.now() / 1000)]);
+    
+    await gamePlayed(ids[gameTID], 0, userID);
     res.status(200).send();
 
     var banner = await getTagEP(userID).catch(function () {
@@ -419,6 +421,8 @@ app.get("/3ds", async function (req, res) {
     setUserAttrib(userID, "coins", c + 1);
     setUserAttrib(userID, "games", newGames);
     setUserAttrib(userID, "lastplayed", ["3ds-" + gameID, Math.floor(Date.now() / 1000)]);
+    
+    await gamePlayed(gameID, 0, userID);
     res.status(200).send();
 
     var banner = await getTagEP(userID).catch(function () {
