@@ -20,7 +20,8 @@ block content
         .container-fluid.justify-content-center
             .row
                 each game in games
-                    if wiiTDB[game.gameID]
-                        +gameCard(game, i)
-                        - i++
+                    if i <= limit
+                        if wiiTDB[game.gameID]
+                            +gameCard(game, i)
+                            - i++
 
