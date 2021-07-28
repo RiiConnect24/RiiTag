@@ -20,6 +20,8 @@ const db = new DatabaseDriver(path.join(__dirname, "users.db"));
 const gameDb = new DatabaseDriver(path.join(__dirname, "games.db"));
 const coinDb = new DatabaseDriver(path.join(__dirname, "coins.db"));
 var wiiTDB = {};
+var wiiuTDB = {};
+var tdsTDB = {};
 const Sentry = require('@sentry/node');
 const express = require("express");
 const app = express();
@@ -380,7 +382,7 @@ app.get("/wiiu", async function (req, res) {
     setUserAttrib(userID, "games", newGames);
     setUserAttrib(userID, "lastplayed", [console + ids[gameTID], Math.floor(Date.now() / 1000)]);
     
-    await gamePlayed(ids[gameTID], 0, userID);
+    await gamePlayed(ids[gameTID], 1, userID);
     res.status(200).send();
 
     var banner = await getTagEP(userID).catch(function () {
@@ -422,7 +424,7 @@ app.get("/3ds", async function (req, res) {
     setUserAttrib(userID, "games", newGames);
     setUserAttrib(userID, "lastplayed", ["3ds-" + gameID, Math.floor(Date.now() / 1000)]);
     
-    await gamePlayed(gameID, 0, userID);
+    await gamePlayed(gameID, 2, userID);
     res.status(200).send();
 
     var banner = await getTagEP(userID).catch(function () {
@@ -513,6 +515,8 @@ app.get("/game-leaderboard", async function (req, res) {
     res.render("gameleaderboard.pug", {
         user: req.user,
         wiiTDB: wiiTDB,
+        wiiuTDB: wiiuTDB,
+        tdsTDB: tdsTDB,
         games: games,
         limit: limit,
     });
@@ -520,17 +524,17 @@ app.get("/game-leaderboard", async function (req, res) {
 
 app.get("/cover", async function (req, res) {
     var game = req.query.game;
+    var console = req.query.console;
     if (!game) {
         res.status(500).send("Error 500 - No game provided.");
     }
-    var consoletype = getConsoleType(game);
-    var covertype = getCoverType(consoletype);
+    var covertype = getCoverType(console);
     game = game.replace("wii-", "").replace("wiiu-", "").replace("3ds-", "").replace("ds-", "");
     var region = getGameRegion(game);
-    var extension = getExtension(covertype, consoletype);
-    var cache = await cacheGameCover(game, region, covertype, consoletype, extension);
+    var extension = getExtension(covertype, console);
+    var cache = await cacheGameCover(game, region, covertype, console, extension);
     if (cache) {
-        res.sendFile(path.resolve(dataFolder, "cache", `${consoletype}-${covertype}-${game}-${region}.png`));
+        res.sendFile(path.resolve(dataFolder, "cache", `${console}-${covertype}-${game}-${region}.png`));
     } else {
         res.status(500).send("Error 500 - Cache was not available.");
     }
@@ -541,6 +545,8 @@ app.listen(port, async function () {
     await gameDb.create("games", ["id INTEGER PRIMARY KEY", "console INTEGER", "gameID TEXT", "count INTEGER"]);
     await coinDb.create("coins", ["id INTEGER PRIMARY KEY", "snowflake TEXT", "count INTEGER"]);
     await cacheWiiTDB();
+    await cacheWiiUTDB();
+    await cache3dsTDB();
     console.log("RiiTag Server listening on port " + port);
 });
 
@@ -694,6 +700,60 @@ async function cacheWiiTDB() {
             wiiTDB[key] = val;
         } catch(err) {
             console.log(`WiiTDB Cache: Failed on ${line}`);
+            console.log(err);
+        }
+    });
+}
+
+async function cacheWiiUTDB() {
+    const url = "http://www.gametdb.com/wiiutdb.txt?LANG=ORIG";
+    var ret = false;
+    const response = await Axios({
+        url,
+        method: "GET",
+        responseType: "text",
+    }).catch(function(err) {
+        console.log(err);
+        ret = true;
+    });
+    if (ret) {
+        return;
+    }
+    response.data.split("\r\n").forEach(function(line) {
+        try {
+            var split = line.split(" = ");
+            var key = split[0];
+            var val = split[1];
+            wiiuTDB[key] = val;
+        } catch(err) {
+            console.log(`WiiUTDB Cache: Failed on ${line}`);
+            console.log(err);
+        }
+    });
+}
+
+async function cache3dsTDB() {
+    const url = "http://www.gametdb.com/3dstdb.txt?LANG=ORIG";
+    var ret = false;
+    const response = await Axios({
+        url,
+        method: "GET",
+        responseType: "text",
+    }).catch(function(err) {
+        console.log(err);
+        ret = true;
+    });
+    if (ret) {
+        return;
+    }
+    response.data.split("\r\n").forEach(function(line) {
+        try {
+            var split = line.split(" = ");
+            var key = split[0];
+            var val = split[1];
+            tdsTDB[key] = val;
+        } catch(err) {
+            console.log(`3dsTDB Cache: Failed on ${line}`);
             console.log(err);
         }
     });

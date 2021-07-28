@@ -12,7 +12,35 @@ mixin gameCard(game, i)
                             .col-12
                                 .text-center
                                     h5.mb-0= `This game has been played ${game.count} time(s).`
-                                    img.big-space-top(src=`/cover?game=${game.gameID}` alt=`${wiiTDB[game.gameID]}'s Cover`).no-hover
+                                    img.big-space-top(src=`/cover?game=${game.gameID}&console=wii` alt=`${wiiTDB[game.gameID]}'s Cover`).no-hover
+
+mixin gameCardU(game, i)
+    .col-md-4
+        .card.big-space-bottom
+            .card-header
+                h5.mb-0= `#${i} - ${wiiuTDB[game.gameID]}`
+            .card-body
+                span.text-white
+                    .container
+                        .row.justify-content-center
+                            .col-12
+                                .text-center
+                                    h5.mb-0= `This game has been played ${game.count} time(s).`
+                                    img.big-space-top(src=`/cover?game=${game.gameID}&console=wiiu` alt=`${wiiuTDB[game.gameID]}'s Cover`).no-hover
+
+mixin gameCard3ds(game, i)
+    .col-md-4
+        .card.big-space-bottom
+            .card-header
+                h5.mb-0= `#${i} - ${tdsTDB[game.gameID]}`
+            .card-body
+                span.text-white
+                    .container
+                        .row.justify-content-center
+                            .col-12
+                                .text-center
+                                    h5.mb-0= `This game has been played ${game.count} time(s).`
+                                    img.big-space-top(src=`/cover?game=${game.gameID}&console=3ds` alt=`${tdsTDB[game.gameID]}'s Cover`).no-hover
 
 block content
     - var i = 1
@@ -20,8 +48,17 @@ block content
         .container-fluid.justify-content-center
             .row
                 each game in games
-                    if i <= limit
-                        if wiiTDB[game.gameID]
-                            +gameCard(game, i)
-                            - i++
+                    if true
+                        if game.console == 0
+                            if wiiTDB[game.gameID]
+                                +gameCard(game, i)
+                                - i++
+                        if game.console == 1
+                            if wiiuTDB[game.gameID]
+                                +gameCardU(game, i)
+                                - i++
+                        if game.console == 2
+                            if tdsTDB[game.gameID]
+                                +gameCard3ds(game, i)
+                                - i++
 
