@@ -975,46 +975,49 @@ async function getImage(source) {
 function getCitraGameRegion(gameName, coverRegion) {
     var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "3ds.json"))) // 16 digit TID -> 4 or 6 digit game ID
 
-    if (!ids[gameName][1]) { // Prevent pointless searching for a proper region
+    if ( typeof ids[gameName] !== 'undefined' && ids[gameName] )
+    {
+        if (!ids[gameName][1]) { // Prevent pointless searching for a proper region
+            return ids[gameName][0];
+        }
+
+        /*  Regions and Fallbacks
+            Europe: P with V Fallback, then X, Y or Z, then J.
+            America: E with X, Y, or Z fallback, then P
+            Japan: J with E fallback
+            Everything else: P Fallback
+
+            This should hopefully create a safety net where there's always some region avalible.
+            If not just return "ids[gameName][0]" to use the first entry for the game.
+        */
+
+        for (IDs of ids[gameName]) {
+            var gameRegion = IDs.slice(-1);
+            var userRegion = coverRegion;
+
+            if (userRegion == "FR" && gameRegion == "F") return IDs;
+            if (userRegion == "DE" && gameRegion == "D") return IDs;
+            if (userRegion == "ES" && gameRegion == "S") return IDs;
+            if (userRegion == "IT" && gameRegion == "I") return IDs;
+            if (userRegion == "NL" && gameRegion == "H") return IDs;
+            if (userRegion == "KO" && gameRegion == "K") return IDs;
+            if (userRegion == "TW" && gameRegion == "W") return IDs;
+
+            if (userRegion == "JP" && gameRegion == "J") return IDs;
+            if (userRegion == "JP") userRegion = "EN"; // Fallback
+
+            if (userRegion == "EN" && gameRegion == "E") return IDs;
+            if (userRegion == "EN" && (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z")) return IDs;
+
+            if (gameRegion == "P") return IDs;
+            if (gameRegion == "V") return IDs;
+            if (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z") return IDs;
+            if (gameRegion == "E") return IDs;
+            if (gameRegion == "J") return IDs;
+        }
+        // In case nothing was found, return the first ID.
         return ids[gameName][0];
     }
-
-    /*  Regions and Fallbacks
-        Europe: P with V Fallback, then X, Y or Z, then J.
-        America: E with X, Y, or Z fallback, then P
-        Japan: J with E fallback
-        Everything else: P Fallback
-
-        This should hopefully create a safety net where there's always some region avalible.
-        If not just return "ids[gameName][0]" to use the first entry for the game.
-    */
-
-    for (IDs of ids[gameName]) {
-        var gameRegion = IDs.slice(-1);
-        var userRegion = coverRegion;
-
-        if (userRegion == "FR" && gameRegion == "F") return IDs;
-        if (userRegion == "DE" && gameRegion == "D") return IDs;
-        if (userRegion == "ES" && gameRegion == "S") return IDs;
-        if (userRegion == "IT" && gameRegion == "I") return IDs;
-        if (userRegion == "NL" && gameRegion == "H") return IDs;
-        if (userRegion == "KO" && gameRegion == "K") return IDs;
-        if (userRegion == "TW" && gameRegion == "W") return IDs;
-
-        if (userRegion == "JP" && gameRegion == "J") return IDs;
-        if (userRegion == "JP") userRegion = "EN"; // Fallback
-
-        if (userRegion == "EN" && gameRegion == "E") return IDs;
-        if (userRegion == "EN" && (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z")) return IDs;
-
-        if (gameRegion == "P") return IDs;
-        if (gameRegion == "V") return IDs;
-        if (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z") return IDs;
-        if (gameRegion == "E") return IDs;
-        if (gameRegion == "J") return IDs;
-    }
-    // In case nothing was found, return the first ID.
-    return ids[gameName][0];
 }
 
 function getCemuGameRegion(gameName, coverRegion) {
