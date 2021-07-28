@@ -12,3 +12,5 @@ users.db
 data/miis
 .vs
 public/assets/css/.sass-cache/*
+coins.db
+games.db
