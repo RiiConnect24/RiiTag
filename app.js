@@ -298,7 +298,7 @@ app.get("/wii", async function (req, res) {
     var key = req.query.key || "";
     var gameID = req.query.game || "";
 
-    if (key == "" || gameID == "") {
+    if ( (key == "" || typeof key == 'undefined' || !key) || (gameTID == "" || typeof gameTID == 'undefined' || !gameTID) ) {
         res.status(400).send();
         return
     }
@@ -339,7 +339,7 @@ app.get("/wiiu", async function (req, res) {
 
     gameTID = gameTID.replace(/%26/g, "&").replace(/ - /g, "\n").toString()
 
-    if (key == "" || gameTID == "") {
+    if ( (key == "" || typeof key == 'undefined' || !key) || (gameTID == "" || typeof gameTID == 'undefined' || !gameTID) ) {
         res.status(400).send();
         return
     }
@@ -396,7 +396,7 @@ app.get("/3ds", async function (req, res) {
     var key = req.query.key || "";
     var gameName = req.query.game || "";
 
-    if (key == "" || gameName == "") {
+    if ( (key == "" || typeof key == 'undefined' || !key) || (gameName == "" || typeof gameName == 'undefined' || !gameName) ) {
         res.status(400).send();
         return
     }
