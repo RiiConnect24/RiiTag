@@ -1051,58 +1051,76 @@ function getCitraGameRegion(gameName, coverRegion) {
             If not just return "ids[gameName][0]" to use the first entry for the game.
         */
 
-        for (IDs of ids[gameName]) {
-            var gameRegion = IDs.slice(-1);
-            var userRegion = coverRegion;
+        try {
+            for (IDs of ids[gameName]) {
+                var gameRegion = IDs.slice(-1);
+                var userRegion = coverRegion;
 
-            if (userRegion == "FR" && gameRegion == "F") return IDs;
-            if (userRegion == "DE" && gameRegion == "D") return IDs;
-            if (userRegion == "ES" && gameRegion == "S") return IDs;
-            if (userRegion == "IT" && gameRegion == "I") return IDs;
-            if (userRegion == "NL" && gameRegion == "H") return IDs;
-            if (userRegion == "KO" && gameRegion == "K") return IDs;
-            if (userRegion == "TW" && gameRegion == "W") return IDs;
+                if (userRegion == "FR" && gameRegion == "F") return IDs;
+                if (userRegion == "DE" && gameRegion == "D") return IDs;
+                if (userRegion == "ES" && gameRegion == "S") return IDs;
+                if (userRegion == "IT" && gameRegion == "I") return IDs;
+                if (userRegion == "NL" && gameRegion == "H") return IDs;
+                if (userRegion == "KO" && gameRegion == "K") return IDs;
+                if (userRegion == "TW" && gameRegion == "W") return IDs;
 
-            if (userRegion == "JP" && gameRegion == "J") return IDs;
-            if (userRegion == "JP") userRegion = "EN"; // Fallback
+                if (userRegion == "JP" && gameRegion == "J") return IDs;
+                if (userRegion == "JP") userRegion = "EN"; // Fallback
 
-            if (userRegion == "EN" && gameRegion == "E") return IDs;
-            if (userRegion == "EN" && (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z")) return IDs;
+                if (userRegion == "EN" && gameRegion == "E") return IDs;
+                if (userRegion == "EN" && (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z")) return IDs;
 
-            if (gameRegion == "P") return IDs;
-            if (gameRegion == "V") return IDs;
-            if (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z") return IDs;
-            if (gameRegion == "E") return IDs;
-            if (gameRegion == "J") return IDs;
+                if (gameRegion == "P") return IDs;
+                if (gameRegion == "V") return IDs;
+                if (gameRegion == "X" || gameRegion == "Y" || gameRegion == "Z") return IDs;
+                if (gameRegion == "E") return IDs;
+                if (gameRegion == "J") return IDs;
+            }
+            // In case nothing was found, return the first ID.
+            return ids[gameName][0];
+
+        } catch (e) {
+            if (e instanceof TypeError) {
+                return ids[gameName][0];
+            } else {
+                throw(e)
+            }
         }
-        // In case nothing was found, return the first ID.
-        return ids[gameName][0];
     }
 }
 
 function getCemuGameRegion(gameName, coverRegion) {
     var ids = JSON.parse(fs.readFileSync(path.resolve(dataFolder, "ids", "cemu.json"))) // 16 digit TID -> 4 or 6 digit game ID
 
-    for (Regions of ids[gameName]) {
-        var userRegion = coverRegion;
+    try {
+        for (Regions of ids[gameName]) {
+            var userRegion = coverRegion;
 
-        if (userRegion == "FR" && Regions["EUR"]) return Regions["EUR"];
-        if (userRegion == "DE" && Regions["EUR"]) return Regions["EUR"];
-        if (userRegion == "ES" && Regions["EUR"]) return Regions["EUR"];
-        if (userRegion == "IT" && Regions["EUR"]) return Regions["EUR"];
-        if (userRegion == "NL" && Regions["EUR"]) return Regions["EUR"];
-        if (userRegion == "KO" && Regions["EUR"]) return Regions["EUR"];
-        if (userRegion == "TW" && Regions["EUR"]) return Regions["EUR"];
+            if (userRegion == "FR" && Regions["EUR"]) return Regions["EUR"];
+            if (userRegion == "DE" && Regions["EUR"]) return Regions["EUR"];
+            if (userRegion == "ES" && Regions["EUR"]) return Regions["EUR"];
+            if (userRegion == "IT" && Regions["EUR"]) return Regions["EUR"];
+            if (userRegion == "NL" && Regions["EUR"]) return Regions["EUR"];
+            if (userRegion == "KO" && Regions["EUR"]) return Regions["EUR"];
+            if (userRegion == "TW" && Regions["EUR"]) return Regions["EUR"];
 
-        if (userRegion == "JP" && Regions["JPN"]) return Regions["JPN"];
-        if (userRegion == "JP") userRegion = "EN"; // Fallback
+            if (userRegion == "JP" && Regions["JPN"]) return Regions["JPN"];
+            if (userRegion == "JP") userRegion = "EN"; // Fallback
 
-        if (userRegion == "EN" && Regions["USA"]) return Regions["USA"];
+            if (userRegion == "EN" && Regions["USA"]) return Regions["USA"];
+        }
+
+        // In case nothing was found, return the first ID.
+        // This will happen if the cover type doesn't have a corresponding region.
+        return ids[gameName][0];
+
+    } catch (e) {
+        if (e instanceof TypeError) {
+            return ids[gameName][0];
+        } else {
+            throw(e)
+        }
     }
-
-    // In case nothing was found, return the first ID.
-    // This will happen if the cover type doesn't have a corresponding region.
-    return ids[gameName][0];
 }
 
 app.use(function (req, res, next) {
