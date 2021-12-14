@@ -615,7 +615,6 @@ function getOverlayList() {
 }
 
 function getFlagList() {
-    console.log()
     return JSON.parse(fs.readFileSync(path.resolve(dataFolder, "meta", "flags.json")));
 }
 
