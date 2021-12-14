@@ -137,7 +137,6 @@ class DatabaseDriver {
         }
 
         return await new Promise(function(resolve, reject) {
-            console.log(`UPDATE \`${table}\` SET \`${incKey}\` = \`${incKey}\' + 1 WHERE \`${key}\` = "${value}"`);
             db.run(`UPDATE \`${table}\` SET \`${incKey}\` = \`${incKey}\` + 1 WHERE \`${key}\` = "${value}"`, function(err) {
                 if (err) {
                     reject(err);
