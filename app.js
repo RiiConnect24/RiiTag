@@ -298,7 +298,7 @@ app.get("/wii", async function (req, res) {
     var key = req.query.key || "";
     var gameID = req.query.game || "";
 
-    if ( (key == "" || typeof key == 'undefined' || !key) || (gameTID == "" || typeof gameTID == 'undefined' || !gameTID) ) {
+    if ( (key == "" || typeof key == 'undefined' || !key) || (gameID == "" || typeof gameID == 'undefined' || !gameID) ) {
         res.status(400).send();
         return
     }
